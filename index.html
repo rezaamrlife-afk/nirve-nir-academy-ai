@@ -1892,7 +1892,6 @@ body.fm .app-sidebar{display:none;}
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.63.4/dist/umd/supabase.min.js"></script>
 <script>
 /* -- CONFIG -- */
 const GROQ_KEY   = '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';
@@ -3375,7 +3374,7 @@ document.addEventListener('keydown', function(e) {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   SUPABASE AUTH + PROFILE
+   SUPABASE AUTH — Custom REST Implementation (no CDN needed)
    ═══════════════════════════════════════════════════════════════ */
 
 const SUPA_URL = 'https://jfsypzizwfxxsxvvjicf.supabase.co';
@@ -3383,178 +3382,164 @@ const SUPA_KEY = 'sb_publishable_KIROxSkPNHRr-r6DDCRaaQ_QLiXi-kU';
 var supabase = null;
 var currentUser = null;
 var authMode = 'signin';
+var _session = null;
 
-/* Init Supabase */
+/* ── CUSTOM SUPABASE CLIENT ── */
 function initSupabase() {
-  try {
-    // Support both CDN formats
-    var createClient = (window.supabase && window.supabase.createClient)
-      ? window.supabase.createClient
-      : (typeof createClient !== 'undefined' ? createClient : null);
-
-    if (!createClient) {
-      setTimeout(initSupabase, 150);
-      return;
-    }
-    supabase = createClient(SUPA_URL, SUPA_KEY, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true
-      }
-    });
-    /* Listen to auth state changes */
-    console.log('[NIRVE] Supabase connected successfully');
-    supabase.auth.onAuthStateChange(function(event, session) {
-      console.log('[NIRVE] Auth state change:', event, session ? 'has session' : 'no session');
-      if (session && session.user) {
-        currentUser = session.user;
-        onUserLoggedIn(session.user);
-      } else {
-        currentUser = null;
+  supabase = {
+    _url: SUPA_URL,
+    _key: SUPA_KEY,
+    _headers: function() {
+      var h = {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + (_session ? _session.access_token : SUPA_KEY)
+      };
+      return h;
+    },
+    auth: {
+      signUp: async function(opts) {
+        try {
+          var r = await fetch(SUPA_URL + '/auth/v1/signup', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','apikey':SUPA_KEY},
+            body: JSON.stringify({email: opts.email, password: opts.password, data: opts.options && opts.options.data ? opts.options.data : {}})
+          });
+          var d = await r.json();
+          if (d.error || d.msg) return {data: null, error: {message: d.error_description || d.msg || d.error || 'Signup failed'}};
+          if (d.access_token) { _session = d; currentUser = d.user; localStorage.setItem('nirve_session', JSON.stringify(d)); onUserLoggedIn(d.user); }
+          return {data: d, error: null};
+        } catch(e) { return {data: null, error: {message: e.message}}; }
+      },
+      signInWithPassword: async function(opts) {
+        try {
+          var r = await fetch(SUPA_URL + '/auth/v1/token?grant_type=password', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','apikey':SUPA_KEY},
+            body: JSON.stringify({email: opts.email, password: opts.password})
+          });
+          var d = await r.json();
+          if (d.error || d.error_description) return {data: null, error: {message: d.error_description || d.error || 'Login failed'}};
+          if (d.access_token) { _session = d; currentUser = d.user; localStorage.setItem('nirve_session', JSON.stringify(d)); onUserLoggedIn(d.user); }
+          return {data: d, error: null};
+        } catch(e) { return {data: null, error: {message: e.message}}; }
+      },
+      signOut: async function() {
+        try {
+          await fetch(SUPA_URL + '/auth/v1/logout', {method:'POST', headers: supabase._headers()});
+        } catch(e) {}
+        _session = null; currentUser = null;
+        localStorage.removeItem('nirve_session');
         onUserLoggedOut();
-      }
-    });
-    /* Check existing session */
-    supabase.auth.getSession().then(function(res) {
-      if (res.data && res.data.session) {
-        currentUser = res.data.session.user;
-        onUserLoggedIn(res.data.session.user);
-      }
-    });
-  } catch(e) {
-    console.error('Supabase init failed:', e);
+      },
+      signInWithOAuth: async function(opts) {
+        var redirectTo = opts.options && opts.options.redirectTo ? opts.options.redirectTo : window.location.href;
+        var url = SUPA_URL + '/auth/v1/authorize?provider=' + opts.provider + '&redirect_to=' + encodeURIComponent(redirectTo);
+        window.location.href = url;
+        return {data: null, error: null};
+      },
+      getSession: function() {
+        var saved = localStorage.getItem('nirve_session');
+        if (saved) {
+          try {
+            var sess = JSON.parse(saved);
+            // Check if token expired
+            if (sess.expires_at && Date.now() / 1000 > sess.expires_at) {
+              localStorage.removeItem('nirve_session');
+              return Promise.resolve({data: {session: null}, error: null});
+            }
+            _session = sess; currentUser = sess.user;
+            return Promise.resolve({data: {session: sess}, error: null});
+          } catch(e) {}
+        }
+        return Promise.resolve({data: {session: null}, error: null});
+      },
+      onAuthStateChange: function(cb) { /* handled manually */ }
+    },
+    from: function(table) {
+      return {
+        _table: table,
+        _filters: [],
+        _order: null,
+        _limit: null,
+        select: function(cols) { this._cols = cols || '*'; return this; },
+        eq: function(col, val) { this._filters.push(col + '=eq.' + val); return this; },
+        order: function(col, opts) { this._order = col + '.' + (opts && opts.ascending === false ? 'desc' : 'asc'); return this; },
+        limit: function(n) { this._limit = n; return this; },
+        single: function() { this._single = true; return this._execute(); },
+        _execute: async function() {
+          try {
+            var url = SUPA_URL + '/rest/v1/' + this._table + '?select=' + (this._cols || '*');
+            if (this._filters.length) url += '&' + this._filters.join('&');
+            if (this._order) url += '&order=' + this._order;
+            if (this._limit) url += '&limit=' + this._limit;
+            if (this._single) url += '&limit=1';
+            var r = await fetch(url, {headers: supabase._headers()});
+            var d = await r.json();
+            if (this._single) return {data: Array.isArray(d) ? d[0] || null : d, error: null};
+            return {data: Array.isArray(d) ? d : [], error: null};
+          } catch(e) { return {data: null, error: {message: e.message}}; }
+        },
+        insert: async function(obj) {
+          try {
+            var r = await fetch(SUPA_URL + '/rest/v1/' + this._table, {
+              method: 'POST',
+              headers: Object.assign({}, supabase._headers(), {'Prefer': 'return=minimal'}),
+              body: JSON.stringify(obj)
+            });
+            if (!r.ok) { var e = await r.json(); return {data: null, error: {message: e.message || 'Insert failed'}}; }
+            return {data: null, error: null};
+          } catch(e) { return {data: null, error: {message: e.message}}; }
+        },
+        update: async function(obj) {
+          try {
+            var url = SUPA_URL + '/rest/v1/' + this._table + '?';
+            if (this._filters.length) url += this._filters.join('&');
+            var r = await fetch(url, {
+              method: 'PATCH',
+              headers: Object.assign({}, supabase._headers(), {'Prefer': 'return=minimal'}),
+              body: JSON.stringify(obj)
+            });
+            if (!r.ok) { var e = await r.json(); return {data: null, error: {message: e.message || 'Update failed'}}; }
+            return {data: null, error: null};
+          } catch(e) { return {data: null, error: {message: e.message}}; }
+        }
+      };
+    }
+  };
+
+  console.log('[NIRVE] Custom Supabase client ready');
+
+  // Check existing session
+  supabase.auth.getSession().then(function(res) {
+    if (res.data && res.data.session) {
+      currentUser = res.data.session.user;
+      onUserLoggedIn(res.data.session.user);
+    }
+  });
+
+  // Handle OAuth callback (Google login redirect)
+  var hash = window.location.hash;
+  if (hash && hash.includes('access_token')) {
+    var params = new URLSearchParams(hash.substring(1));
+    var accessToken = params.get('access_token');
+    var refreshToken = params.get('refresh_token');
+    var expiresIn = params.get('expires_in');
+    if (accessToken) {
+      // Get user info
+      fetch(SUPA_URL + '/auth/v1/user', {
+        headers: {'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + accessToken}
+      }).then(function(r) { return r.json(); }).then(function(user) {
+        _session = {access_token: accessToken, refresh_token: refreshToken, user: user, expires_at: Date.now()/1000 + parseInt(expiresIn||3600)};
+        currentUser = user;
+        localStorage.setItem('nirve_session', JSON.stringify(_session));
+        window.location.hash = '';
+        onUserLoggedIn(user);
+      }).catch(function(e) { console.error('OAuth callback failed:', e); });
+    }
   }
 }
 
-/* ── AUTH UI ── */
-function openAuth() {
-  document.getElementById('authOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  setTimeout(function() { document.getElementById('auth-email').focus(); }, 300);
-}
-
-function closeAuth() {
-  document.getElementById('authOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-  clearAuthMessages();
-}
-
-function authTab(mode) {
-  authMode = mode;
-  document.getElementById('tab-signin').classList.toggle('active', mode === 'signin');
-  document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
-  document.getElementById('signup-name-field').style.display = mode === 'signup' ? '' : 'none';
-  document.getElementById('auth-submit-btn').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
-  clearAuthMessages();
-}
-
-function showAuthError(msg) {
-  var el = document.getElementById('auth-error');
-  el.textContent = msg; el.style.display = '';
-  document.getElementById('auth-success').style.display = 'none';
-}
-function showAuthSuccess(msg) {
-  var el = document.getElementById('auth-success');
-  el.textContent = msg; el.style.display = '';
-  document.getElementById('auth-error').style.display = 'none';
-}
-function clearAuthMessages() {
-  document.getElementById('auth-error').style.display = 'none';
-  document.getElementById('auth-success').style.display = 'none';
-}
-
-/* ── GOOGLE SIGN IN ── */
-async function signInWithGoogle() {
-  if (!supabase) return;
-  try {
-    var res = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.href }
-    });
-    if (res.error) showAuthError(res.error.message);
-  } catch(e) { showAuthError(e.message); }
-}
-
-/* ── EMAIL AUTH ── */
-async function handleAuthSubmit() {
-  if (!supabase) return;
-  var email = document.getElementById('auth-email').value.trim();
-  var password = document.getElementById('auth-password').value;
-  var btn = document.getElementById('auth-submit-btn');
-
-  if (!email || !password) { showAuthError('Please enter your email and password.'); return; }
-
-  btn.disabled = true;
-  btn.textContent = authMode === 'signin' ? 'Signing in...' : 'Creating account...';
-  clearAuthMessages();
-
-  try {
-    if (authMode === 'signin') {
-      var res = await supabase.auth.signInWithPassword({ email: email, password: password });
-      if (res.error) { showAuthError(res.error.message); }
-      else { closeAuth(); }
-    } else {
-      var name = document.getElementById('auth-name').value.trim();
-      var res = await supabase.auth.signUp({
-        email: email, password: password,
-        options: { data: { full_name: name || email.split('@')[0] } }
-      });
-      if (res.error) { showAuthError(res.error.message); }
-      else {
-        showAuthSuccess('Account created! Please check your email to confirm your account.');
-      }
-    }
-  } catch(e) { console.error('[NIRVE] Auth error:', e); showAuthError(e.message); }
-
-  btn.disabled = false;
-  btn.textContent = authMode === 'signin' ? 'Sign In' : 'Create Account';
-}
-
-/* ── SIGN OUT ── */
-async function signOut() {
-  if (!supabase) return;
-  await supabase.auth.signOut();
-  showLanding();
-}
-
-/* ── ON LOGIN ── */
-function onUserLoggedIn(user) {
-  currentUser = user;
-  updateNavForUser(user);
-}
-
-function onUserLoggedOut() {
-  currentUser = null;
-  updateNavForGuest();
-}
-
-function updateNavForUser(user) {
-  var name = user.user_metadata && user.user_metadata.full_name
-    ? user.user_metadata.full_name.split(' ')[0]
-    : user.email.split('@')[0];
-  var avatarUrl = user.user_metadata && user.user_metadata.avatar_url
-    ? user.user_metadata.avatar_url : null;
-  var initials = name.charAt(0).toUpperCase();
-  var userChip =
-    '<div class="nav-user" onclick="showProfile()">' +
-    '<div class="nav-avatar">' + (avatarUrl ? '<img src="' + avatarUrl + '">' : initials) + '</div>' +
-    '<span class="nav-user-name">' + name + '</span>' +
-    '</div>';
-  var actions = document.getElementById('navActions');
-  if (actions) actions.innerHTML = userChip;
-  var appNav = document.getElementById('appNavUser');
-  if (appNav) appNav.innerHTML = userChip;
-}
-
-function updateNavForGuest() {
-  var guestHtml =
-    '<button class="btn-ghost" onclick="openAuth()" style="flex-shrink:0">Sign in</button>';
-  var actions = document.getElementById('navActions');
-  if (actions) actions.innerHTML = guestHtml + '<button class="btn-nav-cta" onclick="showApp()">Start Writing &rarr;</button>';
-  var appNav = document.getElementById('appNavUser');
-  if (appNav) appNav.innerHTML = '<button class="btn-ghost" onclick="openAuth()" style="flex-shrink:0;padding:5px 12px;font-size:12px">Sign in</button>';
-}
 
 /* ── PROFILE VIEW ── */
 async function showProfile() {
@@ -3711,6 +3696,181 @@ async function saveDNAToSupabase(dna) {
       });
     }
   } catch(e) { console.error('Save DNA failed:', e); }
+}
+
+/* -- AUTH UI FUNCTIONS -- */
+function openAuth() {
+  var overlay = document.getElementById('authOverlay');
+  if (overlay) { overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  setTimeout(function() { var e = document.getElementById('auth-email'); if(e) e.focus(); }, 300);
+}
+
+function closeAuth() {
+  var overlay = document.getElementById('authOverlay');
+  if (overlay) overlay.classList.remove('open');
+  document.body.style.overflow = '';
+  clearAuthMessages();
+}
+
+function authTab(mode) {
+  authMode = mode;
+  var si = document.getElementById('tab-signin');
+  var su = document.getElementById('tab-signup');
+  var nf = document.getElementById('signup-name-field');
+  var btn = document.getElementById('auth-submit-btn');
+  if (si) si.classList.toggle('active', mode === 'signin');
+  if (su) su.classList.toggle('active', mode === 'signup');
+  if (nf) nf.style.display = mode === 'signup' ? '' : 'none';
+  if (btn) btn.textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+  clearAuthMessages();
+}
+
+function showAuthError(msg) {
+  var el = document.getElementById('auth-error');
+  if (el) { el.textContent = msg; el.style.display = ''; }
+  var s = document.getElementById('auth-success');
+  if (s) s.style.display = 'none';
+}
+
+function showAuthSuccess(msg) {
+  var el = document.getElementById('auth-success');
+  if (el) { el.textContent = msg; el.style.display = ''; }
+  var e = document.getElementById('auth-error');
+  if (e) e.style.display = 'none';
+}
+
+function clearAuthMessages() {
+  var e = document.getElementById('auth-error');
+  var s = document.getElementById('auth-success');
+  if (e) e.style.display = 'none';
+  if (s) s.style.display = 'none';
+}
+
+async function signInWithGoogle() {
+  if (!supabase) { showAuthError('Auth not ready. Please try again.'); return; }
+  await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
+}
+
+async function handleAuthSubmit() {
+  if (!supabase) { showAuthError('Auth not ready. Please try again in a moment.'); return; }
+  var email = document.getElementById('auth-email').value.trim();
+  var password = document.getElementById('auth-password').value;
+  var btn = document.getElementById('auth-submit-btn');
+  if (!email || !password) { showAuthError('Please enter your email and password.'); return; }
+  btn.disabled = true;
+  btn.textContent = authMode === 'signin' ? 'Signing in...' : 'Creating account...';
+  clearAuthMessages();
+  try {
+    if (authMode === 'signin') {
+      var res = await supabase.auth.signInWithPassword({ email: email, password: password });
+      if (res.error) { showAuthError(res.error.message); }
+      else { closeAuth(); }
+    } else {
+      var name = document.getElementById('auth-name') ? document.getElementById('auth-name').value.trim() : '';
+      var res = await supabase.auth.signUp({ email: email, password: password, options: { data: { full_name: name || email.split('@')[0] } } });
+      if (res.error) { showAuthError(res.error.message); }
+      else { showAuthSuccess('Account created! You are now signed in.'); setTimeout(function(){ closeAuth(); }, 1500); }
+    }
+  } catch(e) { showAuthError(e.message); }
+  btn.disabled = false;
+  btn.textContent = authMode === 'signin' ? 'Sign In' : 'Create Account';
+}
+
+async function signOut() {
+  if (supabase) await supabase.auth.signOut();
+  showLanding();
+}
+
+function onUserLoggedIn(user) {
+  currentUser = user;
+  updateNavForUser(user);
+  closeAuth();
+}
+
+function onUserLoggedOut() {
+  currentUser = null;
+  updateNavForGuest();
+}
+
+function updateNavForUser(user) {
+  var name = (user.user_metadata && user.user_metadata.full_name)
+    ? user.user_metadata.full_name.split(' ')[0] : user.email.split('@')[0];
+  var avatarUrl = user.user_metadata && user.user_metadata.avatar_url ? user.user_metadata.avatar_url : null;
+  var initials = name.charAt(0).toUpperCase();
+  var chip = '<div class="nav-user" onclick="showProfile()">' +
+    '<div class="nav-avatar">' + (avatarUrl ? '<img src="' + avatarUrl + '">' : initials) + '</div>' +
+    '<span class="nav-user-name">' + name + '</span></div>';
+  var a = document.getElementById('navActions');
+  if (a) a.innerHTML = chip;
+  var b = document.getElementById('appNavUser');
+  if (b) b.innerHTML = chip;
+}
+
+function updateNavForGuest() {
+  var a = document.getElementById('navActions');
+  if (a) a.innerHTML = '<button class="btn-ghost" onclick="openAuth()">Sign in</button><button class="btn-nav-cta" onclick="showApp()">Start Writing &rarr;</button>';
+  var b = document.getElementById('appNavUser');
+  if (b) b.innerHTML = '<button class="btn-ghost" onclick="openAuth()" style="flex-shrink:0;padding:5px 12px;font-size:12px">Sign in</button>';
+}
+
+async function showProfile() {
+  if (!currentUser) { openAuth(); return; }
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('app-view').style.display = 'none';
+  document.getElementById('profile-view').style.display = 'block';
+  document.getElementById('mainNav').style.display = 'flex';
+  await loadProfileData();
+}
+
+async function loadProfileData() {
+  if (!supabase || !currentUser) return;
+  var user = currentUser;
+  var name = (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name : user.email.split('@')[0];
+  var avatarUrl = user.user_metadata && user.user_metadata.avatar_url ? user.user_metadata.avatar_url : null;
+  var initials = name.charAt(0).toUpperCase();
+  var pn = document.getElementById('profileName'); if(pn) pn.textContent = name;
+  var pe = document.getElementById('profileEmail'); if(pe) pe.textContent = user.email;
+  var ps = document.getElementById('profileSince'); if(ps) ps.textContent = 'Member since ' + new Date(user.created_at).toLocaleDateString('en-GB', {month:'long',year:'numeric'});
+  var av = document.getElementById('profileAvatar'); if(av) av.innerHTML = avatarUrl ? '<img src="' + avatarUrl + '">' : initials;
+
+  var sesRes = await supabase.from('sessions').select('*').eq('user_id', user.id).order('created_at', {ascending: false}).limit(20)._execute();
+  var sessions = sesRes.data || [];
+  if (sessions.length > 0) {
+    var bands = sessions.filter(function(s){return s.band;}).map(function(s){return s.band;});
+    var sc = document.getElementById('statCurrent'); if(sc) sc.textContent = bands[0] ? parseFloat(bands[0]).toFixed(1) : '—';
+    var sb = document.getElementById('statBest'); if(sb) sb.textContent = bands.length ? Math.max.apply(null,bands).toFixed(1) : '—';
+    var ss = document.getElementById('statSessions'); if(ss) ss.textContent = sessions.length;
+    var weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+    var sw = document.getElementById('statStreak'); if(sw) sw.textContent = sessions.filter(function(s){return new Date(s.created_at) > weekAgo;}).length;
+    var ctxLabels = {ielts_t2:'IELTS Task 2',ielts_t1:'IELTS Task 1',toefl:'TOEFL',academic:'Academic Essay',research:'Research Abstract',report:'Report',article:'Article',free:'Free Writing'};
+    var histEl = document.getElementById('profileHistory');
+    if (histEl) histEl.innerHTML = sessions.slice(0,8).map(function(s) {
+      return '<div class="session-item"><div class="session-band">' + (s.band||'—') + '</div><div class="session-info"><div class="session-ctx">' + (ctxLabels[s.ctx]||s.ctx) + '</div><div class="session-meta">' + new Date(s.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + (s.word_count?' &middot; '+s.word_count+' words':'') + '</div></div><div class="session-scores">' + (s.writing_score?'<div class="session-score-row">W '+s.writing_score+'</div>':'') + (s.thinking_score?'<div class="session-score-row">T '+s.thinking_score+'</div>':'') + '</div></div>';
+    }).join('');
+  }
+
+  var dnaRes = await supabase.from('dna_profiles').select('*').eq('user_id', user.id).single();
+  var dna = dnaRes.data;
+  if (dna) {
+    var dnaEl = document.getElementById('profileDNA');
+    if (dnaEl) {
+      var dims = [['Analytical','analytical'],['Academic','academic'],['Persuasive','persuasive'],['Structural','structural'],['Evidence','evidence'],['Vocabulary','vocabulary']];
+      dnaEl.innerHTML = dims.map(function(d) {
+        var val = dna[d[1]] || 0;
+        var col = val >= 75 ? 'var(--green)' : val >= 50 ? 'var(--teal)' : val >= 30 ? 'var(--amber)' : 'var(--red)';
+        return '<div class="profile-dna-row"><div class="profile-dna-label">'+d[0]+'</div><div class="profile-dna-track"><div class="profile-dna-fill" style="width:'+val+'%;background:'+col+'"></div></div><div class="profile-dna-val">'+val+'%</div></div>';
+      }).join('');
+    }
+  }
+
+  var weakRes = await supabase.from('weaknesses').select('*').eq('user_id', user.id).order('count', {ascending: false}).limit(5)._execute();
+  var weaks = weakRes.data || [];
+  if (weaks.length > 0) {
+    var wEl = document.getElementById('profileWeaknesses');
+    if (wEl) wEl.innerHTML = weaks.map(function(w,i) {
+      return '<div class="profile-weakness"><div class="pweak-num">#'+(i+1)+'</div><div class="pweak-label">'+w.label+'</div><div class="pweak-count">'+w.count+'x</div></div>';
+    }).join('');
+  }
 }
 
 /* Close auth on backdrop click + Enter key — run after DOM ready */
