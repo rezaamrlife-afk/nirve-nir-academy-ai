@@ -810,6 +810,251 @@ body.fm .app-sidebar{display:none;}
 /* SIDEBAR SECTION DIVIDERS */
 .sidebar-section-title{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.12em;text-transform:uppercase;padding:14px 10px 6px;border-top:0.5px solid var(--border);margin-top:8px;}
 .sidebar-section-title:first-child{border-top:none;margin-top:0;padding-top:4px;}
+
+/* ═══════════════════════════ CRITICAL THINKING COACH ═══════════════════════ */
+
+/* Trigger button — appears after analysis */
+.ct-trigger {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(26,155,138,0.1) 0%, rgba(26,155,138,0.05) 100%);
+  border: 0.5px solid var(--border2);
+  border-radius: var(--r); cursor: pointer;
+  transition: all 0.25s; margin-top: 4px;
+  text-align: left;
+}
+.ct-trigger:hover {
+  background: linear-gradient(135deg, rgba(26,155,138,0.18) 0%, rgba(26,155,138,0.08) 100%);
+  border-color: var(--border3);
+  box-shadow: 0 0 24px rgba(26,155,138,0.1);
+}
+.ct-trigger-icon {
+  width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
+  background: rgba(26,155,138,0.15); border: 0.5px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.ct-trigger-text {}
+.ct-trigger-title {
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  color: var(--teal2); letter-spacing: 0.1em; margin-bottom: 2px;
+}
+.ct-trigger-sub { font-size: 12px; color: var(--t2); line-height: 1.4; }
+.ct-trigger-arrow {
+  margin-left: auto; font-size: 16px; color: var(--teal3); flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.ct-trigger:hover .ct-trigger-arrow { transform: translateX(3px); }
+
+/* Coach container */
+.ct-coach {
+  display: flex; flex-direction: column;
+  height: 100%; overflow: hidden;
+  animation: riseUp 0.4s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* Coach header */
+.ct-hdr {
+  padding: 14px 16px 12px; border-bottom: 0.5px solid var(--border);
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  background: rgba(26,155,138,0.04);
+}
+.ct-hdr-icon {
+  width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+  background: rgba(26,155,138,0.15); border: 0.5px solid var(--border2);
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.ct-hdr-title {
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  color: var(--teal2); letter-spacing: 0.1em;
+}
+.ct-hdr-sub { font-size: 11px; color: var(--t2); margin-top: 1px; }
+.ct-back {
+  margin-left: auto; padding: 5px 12px; border-radius: var(--r2);
+  border: 0.5px solid var(--border); background: transparent;
+  color: var(--t2); font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.07em; cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.ct-back:hover { border-color: var(--border2); color: var(--t1); }
+
+/* Mode tabs */
+.ct-tabs {
+  display: flex; border-bottom: 0.5px solid var(--border); flex-shrink: 0;
+}
+.ct-tab {
+  flex: 1; padding: 10px 8px; text-align: center;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+  color: var(--t2); cursor: pointer; transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+.ct-tab:hover { color: var(--t1); background: rgba(255,255,255,0.02); }
+.ct-tab.active { color: var(--teal2); border-bottom-color: var(--teal); }
+
+/* Coach body */
+.ct-body {
+  flex: 1; overflow-y: auto; padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+/* Diagnose mode */
+.ct-gap-item {
+  background: var(--bg2); border: 0.5px solid var(--border);
+  border-radius: var(--r2); padding: 12px 14px;
+  border-left: 2px solid var(--amber);
+  animation: riseUp 0.4s cubic-bezier(0.22,1,0.36,1) both;
+}
+.ct-gap-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.ct-gap-num {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  color: var(--amber); background: rgba(212,160,23,0.12);
+  padding: 2px 7px; border-radius: 3px; flex-shrink: 0;
+}
+.ct-gap-type { font-family: var(--mono); font-size: 10px; color: var(--t2); letter-spacing: 0.07em; }
+.ct-gap-desc { font-size: 13px; color: var(--t1); line-height: 1.6; margin-bottom: 8px; }
+.ct-gap-quote {
+  font-size: 12px; color: var(--t2); font-style: italic;
+  padding: 7px 10px; background: rgba(0,0,0,0.2);
+  border-radius: var(--r2); border-left: 2px solid var(--t3); line-height: 1.6;
+}
+.ct-severity {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 8px; font-family: var(--mono); font-size: 10px;
+}
+.ct-sev-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.ct-sev-high { background: var(--red); }
+.ct-sev-mid { background: var(--amber); }
+.ct-sev-low { background: var(--teal); }
+
+/* Train mode */
+.ct-exercise {
+  background: var(--bg2); border: 0.5px solid var(--border2);
+  border-radius: var(--r); padding: 14px; flex-shrink: 0;
+}
+.ct-ex-label {
+  font-family: var(--mono); font-size: 9px; color: var(--teal);
+  letter-spacing: 0.12em; margin-bottom: 8px; font-weight: 600;
+}
+.ct-ex-question { font-size: 14px; color: var(--t0); line-height: 1.7; margin-bottom: 4px; }
+.ct-ex-hint { font-size: 12px; color: var(--t2); line-height: 1.55; margin-top: 6px; font-style: italic; }
+.ct-ex-context {
+  font-size: 12px; color: var(--t2); font-style: italic;
+  padding: 8px 10px; background: rgba(0,0,0,0.2);
+  border-radius: var(--r2); margin-top: 8px; line-height: 1.6;
+  border-left: 2px solid var(--t3);
+}
+
+.ct-input-area {
+  position: relative; flex-shrink: 0;
+}
+.ct-input {
+  width: 100%; min-height: 90px; padding: 12px 14px;
+  background: var(--bg2); border: 0.5px solid var(--border2);
+  border-radius: var(--r); color: var(--t0);
+  font-family: Georgia, serif; font-size: 15px; line-height: 1.75;
+  resize: none; outline: none; transition: border-color 0.2s;
+}
+.ct-input:focus { border-color: var(--border3); }
+.ct-input::placeholder { color: var(--t2); font-style: italic; }
+.ct-submit {
+  width: 100%; padding: 12px; border-radius: var(--r2);
+  background: var(--teal); border: none; color: #000;
+  font-family: var(--mono); font-size: 12px; font-weight: 700;
+  letter-spacing: 0.09em; cursor: pointer; transition: all 0.22s;
+  margin-top: 8px;
+}
+.ct-submit:hover { background: var(--teal2); box-shadow: 0 0 24px var(--teal-g); }
+.ct-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Feedback on answer */
+.ct-feedback {
+  background: var(--bg2); border: 0.5px solid var(--border);
+  border-radius: var(--r); padding: 14px; overflow: hidden;
+  animation: riseUp 0.45s cubic-bezier(0.22,1,0.36,1) both;
+}
+.ct-fb-score {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.ct-fb-score-num {
+  font-family: var(--mono); font-size: 32px; font-weight: 700; line-height: 1;
+}
+.ct-fb-score-label { font-size: 12px; color: var(--t2); margin-top: 2px; }
+.ct-fb-verdict { font-size: 14px; color: var(--t0); line-height: 1.7; margin-bottom: 10px; font-weight: 500; }
+.ct-fb-points { display: flex; flex-direction: column; gap: 7px; }
+.ct-fb-point {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 13px; color: var(--t1); line-height: 1.55;
+}
+.ct-fb-point-icon { flex-shrink: 0; margin-top: 1px; font-size: 11px; }
+.ct-fb-model {
+  margin-top: 12px; padding: 12px; background: rgba(26,155,138,0.06);
+  border: 0.5px solid var(--border2); border-radius: var(--r2);
+}
+.ct-fb-model-label {
+  font-family: var(--mono); font-size: 9px; color: var(--teal);
+  letter-spacing: 0.12em; margin-bottom: 6px; font-weight: 600;
+}
+.ct-fb-model-text { font-size: 13px; color: var(--t1); line-height: 1.7; font-style: italic; font-family: Georgia, serif; }
+.ct-next {
+  width: 100%; padding: 11px; border-radius: var(--r2);
+  background: transparent; border: 0.5px solid var(--border2);
+  color: var(--teal2); font-family: var(--mono); font-size: 11px;
+  font-weight: 600; letter-spacing: 0.09em; cursor: pointer;
+  transition: all 0.22s; margin-top: 8px;
+}
+.ct-next:hover { background: rgba(26,155,138,0.08); border-color: var(--border3); }
+
+/* Progress bar in coach */
+.ct-progress {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-bottom: 0.5px solid var(--border); flex-shrink: 0;
+}
+.ct-prog-label { font-family: var(--mono); font-size: 10px; color: var(--t2); flex-shrink: 0; }
+.ct-prog-track { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.ct-prog-fill { height: 100%; background: var(--teal); border-radius: 2px; transition: width 0.5s ease; }
+.ct-prog-count { font-family: var(--mono); font-size: 10px; color: var(--t2); flex-shrink: 0; }
+
+/* Compare mode */
+.ct-compare-card {
+  background: var(--bg2); border: 0.5px solid var(--border);
+  border-radius: var(--r); padding: 14px; margin-bottom: 8px;
+}
+.ct-compare-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em;
+  margin-bottom: 8px; font-weight: 600;
+}
+.ct-compare-before { color: var(--red); }
+.ct-compare-after { color: var(--green); }
+.ct-compare-text { font-size: 13px; color: var(--t1); line-height: 1.7; font-family: Georgia, serif; }
+.ct-compare-improvement {
+  display: flex; align-items: center; gap: 8px; margin-top: 10px;
+  padding: 8px 10px; background: rgba(46,204,138,0.07);
+  border-radius: var(--r2); border: 0.5px solid rgba(46,204,138,0.15);
+}
+.ct-compare-delta { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--green); }
+.ct-compare-delta-label { font-size: 12px; color: var(--t2); }
+
+/* Empty state */
+.ct-empty {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 12px; padding: 32px 16px; text-align: center;
+}
+.ct-empty-icon { font-size: 28px; color: var(--teal3); }
+.ct-empty-title { font-family: var(--mono); font-size: 12px; color: var(--teal2); letter-spacing: 0.1em; }
+.ct-empty-sub { font-size: 13px; color: var(--t2); line-height: 1.65; max-width: 200px; }
+
+/* Loading */
+.ct-loading {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 20px; font-family: var(--mono);
+  font-size: 11px; color: var(--teal2); letter-spacing: 0.08em;
+}
+.ct-loading-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--teal);
+  animation: ctDot 1.2s ease-in-out infinite;
+}
+.ct-loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.ct-loading-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes ctDot { 0%,100%{opacity:0.2;transform:scale(0.8)} 50%{opacity:1;transform:scale(1)} }
 </style>
 </head>
 <body>
@@ -1585,6 +1830,427 @@ function dnaRender() {
   }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   CRITICAL THINKING COACH
+   Three modes: DIAGNOSE → TRAIN → COMPARE
+   Works on the current essay in context
+   ═══════════════════════════════════════════════════════════════ */
+
+var CT = {
+  active: false,
+  mode: 'diagnose',        // diagnose | train | compare
+  essay: '',
+  ctx: '',
+  gaps: [],                // from AI analysis
+  exercises: [],           // generated training exercises
+  exIdx: 0,                // current exercise index
+  answers: [],             // user answers with feedback
+  originalAnalysis: null,  // saved before training
+  score: 0,                // training score
+  totalEx: 0,
+};
+
+/* ── Entry point: called from showResults trigger button ── */
+function ctOpen() {
+  CT.active = true;
+  CT.mode = 'diagnose';
+  CT.essay = getText();
+  CT.ctx = currentCtx;
+  CT.exIdx = 0;
+  CT.answers = [];
+  CT.score = 0;
+  renderCTCoach();
+}
+
+function ctClose() {
+  CT.active = false;
+  CT.mode = 'diagnose';
+  // Restore original results panel
+  if (CT.originalAnalysis) {
+    showResults(CT.originalAnalysis.result, CT.originalAnalysis.wc, CT.originalAnalysis.evolution);
+  } else {
+    resetPanel();
+  }
+}
+
+function ctSetMode(mode) {
+  CT.mode = mode;
+  renderCTCoach();
+}
+
+/* ── Main render dispatcher ── */
+function renderCTCoach() {
+  var body = document.getElementById('apBody');
+  if (!body) return;
+
+  var html = '<div class="ct-coach">';
+
+  // Header
+  html += '<div class="ct-hdr">';
+  html += '<div class="ct-hdr-icon">&#9670;</div>';
+  html += '<div><div class="ct-hdr-title">CRITICAL THINKING COACH</div>';
+  html += '<div class="ct-hdr-sub">Reasoning & Argument Intelligence</div></div>';
+  html += '<button class="ct-back" onclick="ctClose()">&#8592; Results</button>';
+  html += '</div>';
+
+  // Tabs
+  html += '<div class="ct-tabs">';
+  html += '<div class="ct-tab' + (CT.mode === 'diagnose' ? ' active' : '') + '" onclick="ctSetMode(\'diagnose\')">DIAGNOSE</div>';
+  html += '<div class="ct-tab' + (CT.mode === 'train' ? ' active' : '') + '" onclick="' + (CT.exercises.length > 0 ? "ctSetMode('train')" : "ctStartTraining()") + '">TRAIN</div>';
+  html += '<div class="ct-tab' + (CT.mode === 'compare' ? ' active' : '') + '" onclick="ctSetMode(\'compare\')">COMPARE</div>';
+  html += '</div>';
+
+  // Progress bar (show during train)
+  if (CT.mode === 'train' && CT.exercises.length > 0) {
+    var prog = CT.exIdx / CT.exercises.length * 100;
+    html += '<div class="ct-progress">';
+    html += '<div class="ct-prog-label">EXERCISE</div>';
+    html += '<div class="ct-prog-track"><div class="ct-prog-fill" style="width:' + prog.toFixed(0) + '%"></div></div>';
+    html += '<div class="ct-prog-count">' + Math.min(CT.exIdx + 1, CT.exercises.length) + ' / ' + CT.exercises.length + '</div>';
+    html += '</div>';
+  }
+
+  // Body
+  html += '<div class="ct-body" id="ctBody">';
+  if (CT.mode === 'diagnose') {
+    html += ctRenderDiagnose();
+  } else if (CT.mode === 'train') {
+    html += ctRenderTrain();
+  } else if (CT.mode === 'compare') {
+    html += ctRenderCompare();
+  }
+  html += '</div></div>';
+
+  body.innerHTML = html;
+}
+
+/* ── DIAGNOSE MODE ── */
+function ctRenderDiagnose() {
+  if (!CT.gaps || CT.gaps.length === 0) {
+    return '<div class="ct-empty">' +
+      '<div class="ct-empty-icon">&#9670;</div>' +
+      '<div class="ct-empty-title">NO GAPS DETECTED</div>' +
+      '<div class="ct-empty-sub">Your critical thinking in this essay is strong. Start training to go further.</div>' +
+      '<button class="ct-submit" style="margin-top:12px" onclick="ctStartTraining()">START TRAINING &#8594;</button>' +
+      '</div>';
+  }
+
+  var severities = ['HIGH', 'MEDIUM', 'LOW'];
+  var sevColors = { HIGH: 'ct-sev-high', MEDIUM: 'ct-sev-mid', LOW: 'ct-sev-low' };
+  var sevText = { HIGH: 'Critical gap', MEDIUM: 'Moderate gap', LOW: 'Minor gap' };
+
+  var html = '';
+  CT.gaps.forEach(function(gap, i) {
+    var delay = i * 0.08;
+    var sev = i === 0 ? 'HIGH' : i === 1 ? 'MEDIUM' : 'LOW';
+    html += '<div class="ct-gap-item" style="animation-delay:' + delay + 's;border-left-color:' + (sev === 'HIGH' ? 'var(--red)' : sev === 'MEDIUM' ? 'var(--amber)' : 'var(--teal)') + '">';
+    html += '<div class="ct-gap-hdr">';
+    html += '<div class="ct-gap-num">GAP ' + (i+1) + '</div>';
+    html += '<div class="ct-gap-type">' + ctClassifyGap(gap) + '</div>';
+    html += '</div>';
+    html += '<div class="ct-gap-desc">' + gap + '</div>';
+    html += '<div class="ct-severity"><div class="ct-sev-dot ' + sevColors[sev] + '"></div><span style="color:var(--t2);font-family:var(--mono);font-size:10px">' + sevText[sev] + '</span></div>';
+    html += '</div>';
+  });
+
+  html += '<button class="ct-submit" onclick="ctStartTraining()">START TRAINING &#8594;</button>';
+  return html;
+}
+
+function ctClassifyGap(gap) {
+  gap = gap.toLowerCase();
+  if (gap.indexOf('evidence') > -1 || gap.indexOf('support') > -1) return 'MISSING EVIDENCE';
+  if (gap.indexOf('counter') > -1 || gap.indexOf('opposing') > -1) return 'MISSING COUNTERARGUMENT';
+  if (gap.indexOf('logic') > -1 || gap.indexOf('logical') > -1) return 'LOGICAL GAP';
+  if (gap.indexOf('general') > -1 || gap.indexOf('vague') > -1) return 'OVERGENERALISATION';
+  if (gap.indexOf('conclusion') > -1) return 'WEAK CONCLUSION';
+  if (gap.indexOf('claim') > -1 || gap.indexOf('assertion') > -1) return 'UNSUPPORTED CLAIM';
+  if (gap.indexOf('example') > -1) return 'MISSING EXAMPLE';
+  return 'REASONING GAP';
+}
+
+/* ── START TRAINING: generate exercises via Groq ── */
+async function ctStartTraining() {
+  CT.mode = 'train';
+  CT.exIdx = 0;
+  CT.answers = [];
+  CT.exercises = [];
+  renderCTCoach();
+
+  // Show loading in body
+  var body = document.getElementById('ctBody');
+  if (body) {
+    body.innerHTML = '<div class="ct-loading"><div class="ct-loading-dot"></div><div class="ct-loading-dot"></div><div class="ct-loading-dot"></div>Building exercises</div>';
+  }
+
+  var gapSummary = CT.gaps.length > 0 ? CT.gaps.join('; ') : 'general critical thinking weaknesses';
+  var prompt = [
+    'You are a Critical Thinking Coach for academic writing.',
+    'A student wrote this essay:',
+    '---',
+    CT.essay,
+    '---',
+    'Detected thinking gaps: ' + gapSummary,
+    '',
+    'Create exactly 3 targeted exercises to train the student on these specific gaps.',
+    'Each exercise must use content from THEIR essay as context.',
+    '',
+    'Return ONLY valid JSON:',
+    '{',
+    '  "exercises": [',
+    '    {',
+    '      "type": "<EVIDENCE_CHALLENGE | COUNTERARGUMENT | LOGIC_CHECK | DEPTH_PROBE | EXAMPLE_BUILD>",',
+    '      "gap_addressed": "<which gap this targets>",',
+    '      "context": "<quote the specific weak sentence or claim from their essay>",',
+    '      "question": "<a direct challenging question the student must answer>",',
+    '      "hint": "<a one-sentence hint to guide their thinking>",',
+    '      "model_answer": "<what a strong answer looks like>"',
+    '    }',
+    '  ]',
+    '}'
+  ].join('\n');
+
+  try {
+    var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY},
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [{role: 'user', content: prompt}],
+        temperature: 0.4,
+        max_tokens: 1400,
+        response_format: {type: 'json_object'}
+      })
+    });
+    if (!resp.ok) throw new Error('API error ' + resp.status);
+    var data = await resp.json();
+    var parsed = JSON.parse(data.choices[0].message.content);
+    CT.exercises = parsed.exercises || [];
+    CT.totalEx = CT.exercises.length;
+    renderCTCoach();
+  } catch(e) {
+    var b = document.getElementById('ctBody');
+    if (b) b.innerHTML = '<div class="ct-empty"><div class="ct-empty-icon">!</div><div class="ct-empty-title">FAILED TO LOAD</div><div class="ct-empty-sub">' + e.message + '</div><button class="ct-submit" onclick="ctStartTraining()">RETRY</button></div>';
+  }
+}
+
+/* ── TRAIN MODE ── */
+function ctRenderTrain() {
+  if (CT.exercises.length === 0) {
+    return '<div class="ct-empty"><div class="ct-empty-icon">&#9670;</div><div class="ct-empty-title">LOADING EXERCISES</div></div>';
+  }
+
+  // All done
+  if (CT.exIdx >= CT.exercises.length) {
+    return ctRenderTrainComplete();
+  }
+
+  var ex = CT.exercises[CT.exIdx];
+  var answered = CT.answers[CT.exIdx];
+  var html = '';
+
+  // Exercise card
+  html += '<div class="ct-exercise">';
+  html += '<div class="ct-ex-label">' + (ex.type || 'EXERCISE') + ' &nbsp;&#8212;&nbsp; ' + (ex.gap_addressed || '') + '</div>';
+  html += '<div class="ct-ex-question">' + ex.question + '</div>';
+  if (ex.context) {
+    html += '<div class="ct-ex-context">"' + ex.context + '"</div>';
+  }
+  if (ex.hint) {
+    html += '<div class="ct-ex-hint">&#9670; Hint: ' + ex.hint + '</div>';
+  }
+  html += '</div>';
+
+  if (!answered) {
+    // Input area
+    html += '<div class="ct-input-area">';
+    html += '<textarea class="ct-input" id="ctAnswer" placeholder="Write your answer here — think carefully before responding..." rows="4"></textarea>';
+    html += '<button class="ct-submit" id="ctSubmitBtn" onclick="ctSubmitAnswer()">EVALUATE MY ANSWER &#8594;</button>';
+    html += '</div>';
+  } else {
+    // Show feedback
+    html += ctRenderAnswerFeedback(answered, ex);
+    html += '<button class="ct-next" onclick="ctNextExercise()">' + (CT.exIdx < CT.exercises.length - 1 ? 'NEXT EXERCISE &#8594;' : 'VIEW RESULTS &#8594;') + '</button>';
+  }
+
+  return html;
+}
+
+function ctRenderTrainComplete() {
+  var avgScore = CT.answers.length > 0 ? (CT.answers.reduce(function(s,a){return s+(a.score||0);},0) / CT.answers.length) : 0;
+  var grade = avgScore >= 8 ? 'EXCELLENT' : avgScore >= 6 ? 'GOOD' : avgScore >= 4 ? 'DEVELOPING' : 'NEEDS WORK';
+  var gradeColor = avgScore >= 8 ? 'var(--green)' : avgScore >= 6 ? 'var(--teal2)' : avgScore >= 4 ? 'var(--amber)' : 'var(--red)';
+
+  var html = '<div class="ct-exercise" style="text-align:center;padding:20px">';
+  html += '<div style="font-family:var(--mono);font-size:10px;color:var(--t2);letter-spacing:0.12em;margin-bottom:8px">TRAINING COMPLETE</div>';
+  html += '<div style="font-family:var(--mono);font-size:48px;font-weight:700;color:' + gradeColor + ';line-height:1">' + avgScore.toFixed(1) + '</div>';
+  html += '<div style="font-family:var(--mono);font-size:11px;color:' + gradeColor + ';letter-spacing:0.1em;margin-top:4px">' + grade + '</div>';
+  html += '<div style="font-size:13px;color:var(--t2);margin-top:10px;line-height:1.6">' + CT.answers.length + ' exercises completed</div>';
+  html += '</div>';
+
+  CT.answers.forEach(function(a, i) {
+    var ex = CT.exercises[i];
+    if (!ex) return;
+    var sc = a.score || 0;
+    var scColor = sc >= 8 ? 'var(--green)' : sc >= 5 ? 'var(--amber)' : 'var(--red)';
+    html += '<div class="ct-gap-item" style="border-left-color:' + scColor + '">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
+    html += '<div class="ct-gap-type">' + (ex.type || 'EXERCISE ' + (i+1)) + '</div>';
+    html += '<div style="font-family:var(--mono);font-size:16px;font-weight:700;color:' + scColor + '">' + sc + '/10</div>';
+    html += '</div>';
+    html += '<div style="font-size:12px;color:var(--t2);line-height:1.5">' + (a.verdict || '') + '</div>';
+    html += '</div>';
+  });
+
+  html += '<button class="ct-submit" onclick="ctSetMode(\'compare\')">VIEW COMPARISON &#8594;</button>';
+  return html;
+}
+
+function ctRenderAnswerFeedback(answered, ex) {
+  var sc = answered.score || 0;
+  var scColor = sc >= 8 ? 'var(--green)' : sc >= 6 ? 'var(--teal2)' : sc >= 4 ? 'var(--amber)' : 'var(--red)';
+
+  var html = '<div class="ct-feedback">';
+  html += '<div class="ct-fb-score">';
+  html += '<div class="ct-fb-score-num" style="color:' + scColor + '">' + sc + '</div>';
+  html += '<div><div style="font-family:var(--mono);font-size:10px;color:var(--t2);letter-spacing:0.08em">/ 10</div><div class="ct-fb-score-label">' + (sc >= 8 ? 'Strong' : sc >= 6 ? 'Good' : sc >= 4 ? 'Developing' : 'Needs work') + '</div></div>';
+  html += '</div>';
+  html += '<div class="ct-fb-verdict">' + (answered.verdict || '') + '</div>';
+  if (answered.points && answered.points.length) {
+    html += '<div class="ct-fb-points">';
+    answered.points.forEach(function(p) {
+      var isPos = p.indexOf('+') === 0 || p.toLowerCase().indexOf('good') > -1 || p.toLowerCase().indexOf('strong') > -1 || p.toLowerCase().indexOf('well') > -1;
+      html += '<div class="ct-fb-point"><span class="ct-fb-point-icon" style="color:' + (isPos ? 'var(--green)' : 'var(--amber)') + '">' + (isPos ? '&#10003;' : '&#9654;') + '</span>' + p + '</div>';
+    });
+    html += '</div>';
+  }
+  if (ex && ex.model_answer) {
+    html += '<div class="ct-fb-model"><div class="ct-fb-model-label">MODEL ANSWER</div><div class="ct-fb-model-text">' + ex.model_answer + '</div></div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+/* ── SUBMIT ANSWER ── */
+async function ctSubmitAnswer() {
+  var answerEl = document.getElementById('ctAnswer');
+  if (!answerEl || !answerEl.value.trim()) return;
+  var answer = answerEl.value.trim();
+  var ex = CT.exercises[CT.exIdx];
+  if (!ex) return;
+
+  var btn = document.getElementById('ctSubmitBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'EVALUATING...'; }
+
+  var prompt = [
+    'You are evaluating a student response to a Critical Thinking exercise.',
+    '',
+    'Exercise type: ' + (ex.type || 'reasoning'),
+    'Gap being addressed: ' + (ex.gap_addressed || ''),
+    'Question asked: ' + ex.question,
+    'Context from essay: ' + (ex.context || ''),
+    '',
+    'Student answer:',
+    answer,
+    '',
+    'Evaluate the quality of critical thinking in this answer.',
+    'IMPORTANT: Reference the student exact words in your feedback. Do not give generic praise or criticism. Point to specific phrases they wrote and explain exactly what is missing or strong. If they wrote vaguely, quote their vague phrase and show what specific thinking is absent.',
+    'Return ONLY valid JSON:',
+    '{',
+    '  "score": <integer 1-10>,',
+    '  "verdict": "<one sentence overall judgment>",',
+    '  "points": ["<specific observation 1>", "<specific observation 2>", "<specific observation 3>"]',
+    '}'
+  ].join('\n');
+
+  try {
+    var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY},
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [{role: 'user', content: prompt}],
+        temperature: 0.3,
+        max_tokens: 400,
+        response_format: {type: 'json_object'}
+      })
+    });
+    if (!resp.ok) throw new Error('API error');
+    var data = await resp.json();
+    var feedback = JSON.parse(data.choices[0].message.content);
+    CT.answers[CT.exIdx] = {
+      answer: answer,
+      score: feedback.score || 5,
+      verdict: feedback.verdict || '',
+      points: feedback.points || []
+    };
+    CT.score += feedback.score || 0;
+    renderCTCoach();
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'EVALUATE MY ANSWER \u2192'; }
+  }
+}
+
+function ctNextExercise() {
+  CT.exIdx += 1;
+  renderCTCoach();
+  var body = document.getElementById('ctBody');
+  if (body) body.scrollTop = 0;
+}
+
+/* ── COMPARE MODE ── */
+function ctRenderCompare() {
+  if (CT.answers.length === 0) {
+    return '<div class="ct-empty"><div class="ct-empty-icon">&#9670;</div><div class="ct-empty-title">COMPLETE TRAINING FIRST</div><div class="ct-empty-sub">Complete the training exercises to see your comparison.</div><button class="ct-submit" style="margin-top:12px" onclick="ctStartTraining()">START TRAINING &#8594;</button></div>';
+  }
+
+  var avgScore = CT.answers.reduce(function(s,a){return s+(a.score||0);},0) / CT.answers.length;
+  var originalGaps = CT.gaps.length;
+  var improvement = Math.round(avgScore * 8);
+
+  var html = '';
+
+  // Summary card
+  html += '<div class="ct-compare-card">';
+  html += '<div class="ct-compare-label" style="color:var(--teal2);font-family:var(--mono);font-size:10px;letter-spacing:0.12em;margin-bottom:10px">TRAINING SUMMARY</div>';
+  html += '<div class="ct-compare-improvement">';
+  html += '<div class="ct-compare-delta">+' + improvement + '%</div>';
+  html += '<div class="ct-compare-delta-label">Critical Thinking Score improvement in this session</div>';
+  html += '</div></div>';
+
+  // Before — gaps
+  html += '<div class="ct-compare-card">';
+  html += '<div class="ct-compare-label ct-compare-before">BEFORE — ' + originalGaps + ' gaps detected</div>';
+  CT.gaps.forEach(function(g, i) {
+    html += '<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px;color:var(--t2)">';
+    html += '<span style="color:var(--red);flex-shrink:0;margin-top:1px">&#9650;</span>' + g;
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // After — answers
+  html += '<div class="ct-compare-card">';
+  html += '<div class="ct-compare-label ct-compare-after">AFTER — trained on ' + CT.answers.length + ' exercises</div>';
+  CT.answers.forEach(function(a, i) {
+    var ex = CT.exercises[i];
+    var sc = a.score || 0;
+    var scColor = sc >= 7 ? 'var(--green)' : sc >= 5 ? 'var(--amber)' : 'var(--red)';
+    html += '<div style="padding:7px 0;border-bottom:0.5px solid var(--border)">';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">';
+    html += '<span style="font-family:var(--mono);font-size:12px;font-weight:700;color:' + scColor + '">' + sc + '/10</span>';
+    html += '<span style="font-size:11px;color:var(--t2);font-family:var(--mono)">' + (ex ? ex.type : 'EX ' + (i+1)) + '</span>';
+    html += '</div>';
+    html += '<div style="font-size:12px;color:var(--t1);line-height:1.5">' + (a.verdict || '') + '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // Recommend next step
+  html += '<button class="ct-submit" onclick="ctClose()">APPLY LEARNING — REWRITE &#8594;</button>';
+  return html;
+}
+
 const CTXS = {
   ielts_t2: {label:'IELTS Task 2',color:'#1A9B8A',minW:250,type:'band',dims:['TR','CC','LR','GA'],
     brief:'Some people believe universities should focus on academic knowledge. Others think universities should prepare students for employment. Discuss both views and give your own opinion. Write at least 250 words.'},
@@ -2102,6 +2768,18 @@ function showResults(r, wc, evolution) {
     html += '</div></div>';
   }
 
+  // Critical Thinking Coach trigger
+  var ctColor = CT.gaps && CT.gaps.length > 0 ? 'var(--amber)' : 'var(--teal)';
+  var ctGapText = CT.gaps && CT.gaps.length > 0 ? CT.gaps.length + ' thinking gap' + (CT.gaps.length > 1 ? 's' : '') + ' detected' : 'Train your critical thinking';
+  html += '<button class="ct-trigger" onclick="ctOpen()">';
+  html += '<div class="ct-trigger-icon">&#9670;</div>';
+  html += '<div class="ct-trigger-text">';
+  html += '<div class="ct-trigger-title" style="color:' + ctColor + '">CRITICAL THINKING COACH</div>';
+  html += '<div class="ct-trigger-sub">' + ctGapText + ' &mdash; Train now</div>';
+  html += '</div>';
+  html += '<div class="ct-trigger-arrow">&#8594;</div>';
+  html += '</button>';
+
   html += '</div>';
 
   document.getElementById('apBody').innerHTML = html;
@@ -2136,6 +2814,12 @@ function showResults(r, wc, evolution) {
       document.getElementById('evo')?.classList.add('vis');
     }, 900);
   });
+
+  // Save to CT state for Critical Thinking Coach
+  CT.gaps = r.thinking_gaps || [];
+  CT.essay = document.getElementById('editor').innerText.trim();
+  CT.ctx = currentCtx;
+  CT.originalAnalysis = {result: r, wc: wc, evolution: evolution};
 
   setStatus('done', 'COMPLETE');
   busy = false; updateWC();
