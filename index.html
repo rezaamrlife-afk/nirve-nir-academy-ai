@@ -226,12 +226,12 @@ footer{padding:48px 52px;border-top:0.5px solid var(--border);position:relative;
 .btn-back{padding:7px 14px;border-radius:var(--r2);border:0.5px solid var(--border);background:transparent;color:var(--t2);font-family:var(--mono);font-size:11px;letter-spacing:0.07em;cursor:pointer;transition:all 0.2s;}
 .btn-back:hover{color:var(--t0);border-color:var(--border2);}
 
-.app-main{display:grid;grid-template-columns:200px 1fr 350px;flex:1;min-height:0;overflow:hidden;}
+.app-main{display:grid;grid-template-columns:240px 1fr 350px;flex:1;min-height:0;overflow:hidden;}
 
 /* SIDEBAR */
-.app-sidebar{border-right:0.5px solid var(--border);padding:16px 12px 24px;display:flex;flex-direction:column;gap:3px;background:rgba(7,9,11,0.4);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;}
+.app-sidebar{border-right:0.5px solid var(--border);padding:16px 14px 24px;display:flex;flex-direction:column;gap:3px;background:rgba(7,9,11,0.4);overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}
 .as-section{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.14em;text-transform:uppercase;padding:8px 10px 4px;}
-.as-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--r3);font-size:14px;color:var(--t2);cursor:pointer;transition:all 0.15s;border:0.5px solid transparent;}
+.as-item{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:var(--r3);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t2);cursor:pointer;transition:all 0.15s;border:0.5px solid transparent;}
 .as-item:hover{color:var(--t1);background:rgba(255,255,255,0.03);}
 .as-item.active{color:var(--teal2);background:rgba(26,155,138,0.09);border-color:rgba(26,155,138,0.15);}
 .as-dot{width:5px;height:5px;border-radius:50%;background:var(--teal);flex-shrink:0;opacity:0.3;}
@@ -459,7 +459,7 @@ body.fm .app-sidebar{display:none;}
 /* WEAKNESS MEMORY ENGINE */
 .wme-panel{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--r);padding:14px;margin-bottom:12px;animation:riseUp 0.5s cubic-bezier(0.22,1,0.36,1) both;}
 .wme-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.wme-title{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--teal2);letter-spacing:0.12em;}
+.wme-title{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--teal2);letter-spacing:0.1em;white-space:nowrap;}
 .wme-meta{font-family:var(--mono);font-size:10px;color:var(--t2);}
 .wme-trend{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(0,0,0,0.2);border-radius:var(--r2);margin-bottom:10px;}
 .wme-trend-label{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.08em;flex:1;}
@@ -467,13 +467,13 @@ body.fm .app-sidebar{display:none;}
 .wme-trend-avg{font-family:var(--mono);font-size:10px;color:var(--t2);}
 .wme-section-lbl{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.1em;margin-bottom:8px;}
 .wme-weaknesses{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
-.wme-weakness{padding:7px 10px;border-radius:var(--r2);border:0.5px solid;}
+.wme-weakness{padding:6px 10px;border-radius:var(--r2);border:0.5px solid;}
 .wme-high{background:rgba(217,79,79,0.07);border-color:rgba(217,79,79,0.2);}
 .wme-mid{background:rgba(212,160,23,0.07);border-color:rgba(212,160,23,0.2);}
 .wme-low{background:rgba(26,155,138,0.05);border-color:rgba(26,155,138,0.15);}
 .wme-w-hdr{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
 .wme-w-num{font-family:var(--mono);font-size:9px;color:var(--t2);flex-shrink:0;}
-.wme-w-label{font-size:12px;color:var(--t1);flex:1;line-height:1.4;}
+.wme-w-label{font-size:11px;color:var(--t1);flex:1;line-height:1.4;}
 .wme-w-count{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--amber);flex-shrink:0;}
 .wme-high .wme-w-count{color:var(--red);}
 .wme-w-bar{height:2px;background:var(--border);border-radius:1px;overflow:hidden;}
@@ -808,7 +808,7 @@ body.fm .app-sidebar{display:none;}
 .dna-dim-desc{font-size:10px;color:var(--t2);}
 
 /* SIDEBAR SECTION DIVIDERS */
-.sidebar-section-title{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.12em;text-transform:uppercase;padding:14px 10px 6px;border-top:0.5px solid var(--border);margin-top:8px;}
+.sidebar-section-title{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.1em;text-transform:uppercase;padding:12px 10px 5px;border-top:0.5px solid var(--border);margin-top:6px;white-space:nowrap;}
 .sidebar-section-title:first-child{border-top:none;margin-top:0;padding-top:4px;}
 
 /* ═══════════════════════════ CRITICAL THINKING COACH ═══════════════════════ */
