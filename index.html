@@ -455,6 +455,35 @@ body.fm .app-sidebar{display:none;}
 .evo-level-badge{font-family:var(--mono);font-size:10px;font-weight:700;padding:3px 10px;border-radius:4px;border:0.5px solid;flex-shrink:0;letter-spacing:0.06em;}
 .evo-level-change{font-size:11px;color:var(--t1);line-height:1.5;margin-top:2px;}
 .evo-level-text{font-size:13px;color:var(--t1);line-height:1.7;font-family:Georgia,serif;padding:10px 12px;}
+
+/* WEAKNESS MEMORY ENGINE */
+.wme-panel{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--r);padding:14px;margin-bottom:12px;animation:riseUp 0.5s cubic-bezier(0.22,1,0.36,1) both;}
+.wme-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.wme-title{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--teal2);letter-spacing:0.12em;}
+.wme-meta{font-family:var(--mono);font-size:10px;color:var(--t2);}
+.wme-trend{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(0,0,0,0.2);border-radius:var(--r2);margin-bottom:10px;}
+.wme-trend-label{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.08em;flex:1;}
+.wme-trend-val{font-family:var(--mono);font-size:16px;font-weight:600;}
+.wme-trend-avg{font-family:var(--mono);font-size:10px;color:var(--t2);}
+.wme-section-lbl{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.1em;margin-bottom:8px;}
+.wme-weaknesses{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+.wme-weakness{padding:7px 10px;border-radius:var(--r2);border:0.5px solid;}
+.wme-high{background:rgba(217,79,79,0.07);border-color:rgba(217,79,79,0.2);}
+.wme-mid{background:rgba(212,160,23,0.07);border-color:rgba(212,160,23,0.2);}
+.wme-low{background:rgba(26,155,138,0.05);border-color:rgba(26,155,138,0.15);}
+.wme-w-hdr{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+.wme-w-num{font-family:var(--mono);font-size:9px;color:var(--t2);flex-shrink:0;}
+.wme-w-label{font-size:12px;color:var(--t1);flex:1;line-height:1.4;}
+.wme-w-count{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--amber);flex-shrink:0;}
+.wme-high .wme-w-count{color:var(--red);}
+.wme-w-bar{height:2px;background:var(--border);border-radius:1px;overflow:hidden;}
+.wme-w-fill{height:100%;background:var(--amber);border-radius:1px;transition:width 0.8s cubic-bezier(0.22,1,0.36,1);}
+.wme-high .wme-w-fill{background:var(--red);}
+.wme-low .wme-w-fill{background:var(--teal);}
+.wme-insight{margin-bottom:10px;}
+.wme-insight-text{font-size:12px;color:var(--t1);line-height:1.6;font-style:italic;padding:8px 10px;background:rgba(26,155,138,0.05);border-radius:var(--r2);border-left:2px solid var(--teal3);}
+.wme-reset{width:100%;padding:6px;border-radius:var(--r2);border:0.5px solid var(--border);background:transparent;color:var(--t2);font-family:var(--mono);font-size:10px;letter-spacing:0.07em;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+.wme-reset:hover{border-color:var(--red);color:var(--red);}
 </style>
 </head>
 <body>
@@ -809,6 +838,147 @@ const GROQ_KEY   = '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';
 const GROQ_MODEL = 'llama-3.1-8b-instant';
 const GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions';
 
+
+/* ═══════════════════════════════════════════════════════
+   WEAKNESS MEMORY ENGINE
+   Stores weakness patterns across sessions in localStorage
+   ═══════════════════════════════════════════════════════ */
+
+const WME_KEY = 'nirve_memory_v1';
+
+function wmeLoad() {
+  try {
+    const raw = localStorage.getItem(WME_KEY);
+    return raw ? JSON.parse(raw) : { sessions: 0, weaknesses: {}, insights: [], bands: [], created: Date.now() };
+  } catch(e) { return { sessions: 0, weaknesses: {}, insights: [], bands: [], created: Date.now() }; }
+}
+
+function wmeSave(data) {
+  try { localStorage.setItem(WME_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function wmeReset() {
+  localStorage.removeItem(WME_KEY);
+  document.getElementById('wme-panel')?.remove();
+  renderWMEPanel();
+}
+
+function wmeRecord(result, ctxId) {
+  const mem = wmeLoad();
+  mem.sessions += 1;
+  mem.bands.push({ band: result.band, ctx: ctxId, ts: Date.now() });
+  if (mem.bands.length > 50) mem.bands = mem.bands.slice(-50);
+
+  // Record thinking gaps as weakness events
+  if (result.thinking_gaps) {
+    result.thinking_gaps.forEach(function(gap) {
+      const key = wmeNormalise(gap);
+      if (!mem.weaknesses[key]) {
+        mem.weaknesses[key] = { label: gap, count: 0, first: Date.now(), last: Date.now(), ctx: [] };
+      }
+      mem.weaknesses[key].count += 1;
+      mem.weaknesses[key].last = Date.now();
+      if (!mem.weaknesses[key].ctx.includes(ctxId)) mem.weaknesses[key].ctx.push(ctxId);
+    });
+  }
+
+  // Record examiner/teacher weaknesses
+  if (result.examiner && result.examiner.weakness) {
+    const key = wmeNormalise(result.examiner.weakness);
+    if (!mem.weaknesses[key]) {
+      mem.weaknesses[key] = { label: result.examiner.weakness, count: 0, first: Date.now(), last: Date.now(), ctx: [] };
+    }
+    mem.weaknesses[key].count += 1;
+    mem.weaknesses[key].last = Date.now();
+  }
+
+  // Record insight
+  if (result.insight) {
+    mem.insights.push({ text: result.insight, ts: Date.now(), ctx: ctxId });
+    if (mem.insights.length > 20) mem.insights = mem.insights.slice(-20);
+  }
+
+  wmeSave(mem);
+  renderWMEPanel();
+}
+
+function wmeNormalise(str) {
+  return str.toLowerCase()
+    .replace(/[^a-z0-9 ]/g, '')
+    .replace(/\s+/g, '_')
+    .substring(0, 60);
+}
+
+function wmeGetTopWeaknesses(mem, n) {
+  return Object.values(mem.weaknesses)
+    .filter(function(w) { return w.count > 0; })
+    .sort(function(a, b) { return b.count - a.count; })
+    .slice(0, n);
+}
+
+function wmeGetBandTrend(bands) {
+  if (bands.length < 2) return null;
+  const recent = bands.slice(-5).map(function(b) { return b.band; });
+  const avg = recent.reduce(function(a, b) { return a + b; }, 0) / recent.length;
+  const first = bands.slice(0, Math.min(3, bands.length)).map(function(b) { return b.band; });
+  const firstAvg = first.reduce(function(a, b) { return a + b; }, 0) / first.length;
+  return { current: avg.toFixed(1), delta: (avg - firstAvg).toFixed(1), direction: avg > firstAvg ? 'up' : avg < firstAvg ? 'down' : 'stable' };
+}
+
+function renderWMEPanel() {
+  const mem = wmeLoad();
+  const existing = document.getElementById('wme-panel');
+  if (existing) existing.remove();
+
+  if (mem.sessions < 1) return;
+
+  const top = wmeGetTopWeaknesses(mem, 5);
+  const trend = wmeGetBandTrend(mem.bands);
+
+  let html = '<div class="wme-panel" id="wme-panel">';
+  html += '<div class="wme-hdr"><div class="wme-title">WEAKNESS MEMORY</div><div class="wme-meta">' + mem.sessions + ' session' + (mem.sessions !== 1 ? 's' : '') + '</div></div>';
+
+  // Band trend
+  if (trend) {
+    const trendColor = trend.direction === 'up' ? 'var(--green)' : trend.direction === 'down' ? 'var(--red)' : 'var(--t2)';
+    const trendIcon = trend.direction === 'up' ? '&#8593;' : trend.direction === 'down' ? '&#8595;' : '&#8212;';
+    html += '<div class="wme-trend"><div class="wme-trend-label">BAND TREND</div><div class="wme-trend-val" style="color:' + trendColor + '">' + trendIcon + ' ' + (trend.delta > 0 ? '+' : '') + trend.delta + '</div><div class="wme-trend-avg">avg ' + trend.current + '</div></div>';
+  }
+
+  // Recurring weaknesses
+  if (top.length > 0) {
+    html += '<div class="wme-weaknesses">';
+    html += '<div class="wme-section-lbl">RECURRING WEAKNESSES</div>';
+    top.forEach(function(w, i) {
+      const maxCount = top[0].count;
+      const pct = (w.count / maxCount * 100).toFixed(0);
+      const severity = w.count >= 5 ? 'wme-high' : w.count >= 3 ? 'wme-mid' : 'wme-low';
+      html += '<div class="wme-weakness ' + severity + '">';
+      html += '<div class="wme-w-hdr"><span class="wme-w-num">#' + (i+1) + '</span><span class="wme-w-label">' + w.label + '</span><span class="wme-w-count">' + w.count + 'x</span></div>';
+      html += '<div class="wme-w-bar"><div class="wme-w-fill" style="width:' + pct + '%"></div></div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Latest insight
+  if (mem.insights.length > 0) {
+    const last = mem.insights[mem.insights.length - 1];
+    html += '<div class="wme-insight"><div class="wme-section-lbl">LATEST INSIGHT</div><div class="wme-insight-text">' + last.text + '</div></div>';
+  }
+
+  // Reset
+  html += '<button class="wme-reset" onclick="wmeReset()">Clear Memory</button>';
+  html += '</div>';
+
+  // Insert into sidebar above founder card
+  const founder = document.querySelector('.as-founder');
+  if (founder) {
+    founder.insertAdjacentHTML('beforebegin', html);
+  }
+}
+
+
 const CTXS = {
   ielts_t2: {label:'IELTS Task 2',color:'#1A9B8A',minW:250,type:'band',dims:['TR','CC','LR','GA'],
     brief:'Some people believe universities should focus on academic knowledge. Others think universities should prepare students for employment. Discuss both views and give your own opinion. Write at least 250 words.'},
@@ -850,6 +1020,7 @@ function showApp() {
   document.getElementById('mainNav').style.display = 'none';
   buildTplList();
   setCtx('ielts_t2');
+  setTimeout(renderWMEPanel, 200);
 }
 
 function goTo(id) {
@@ -1096,6 +1267,7 @@ async function doAnalyze() {
       }
     } catch(evoErr) { evolution = null; }
 
+    wmeRecord(result, currentCtx);
     showResults(result, wc, evolution);
   } catch(e) {
     document.getElementById('apBody').innerHTML = `
