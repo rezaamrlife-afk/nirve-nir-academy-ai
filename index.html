@@ -1778,7 +1778,7 @@ body.fm .app-sidebar{display:none;}
 </div>
 </div><!-- /app-view -->
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.63.4/dist/umd/supabase.min.js"></script>
 <script>
 /* -- CONFIG -- */
 const GROQ_KEY   = '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';
@@ -3273,13 +3273,26 @@ var authMode = 'signin';
 /* Init Supabase */
 function initSupabase() {
   try {
-    if (!window.supabase || !window.supabase.createClient) {
-      setTimeout(initSupabase, 100);
+    // Support both CDN formats
+    var createClient = (window.supabase && window.supabase.createClient)
+      ? window.supabase.createClient
+      : (typeof createClient !== 'undefined' ? createClient : null);
+
+    if (!createClient) {
+      setTimeout(initSupabase, 150);
       return;
     }
-    supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+    supabase = createClient(SUPA_URL, SUPA_KEY, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      }
+    });
     /* Listen to auth state changes */
+    console.log('[NIRVE] Supabase connected successfully');
     supabase.auth.onAuthStateChange(function(event, session) {
+      console.log('[NIRVE] Auth state change:', event, session ? 'has session' : 'no session');
       if (session && session.user) {
         currentUser = session.user;
         onUserLoggedIn(session.user);
@@ -3378,7 +3391,7 @@ async function handleAuthSubmit() {
         showAuthSuccess('Account created! Please check your email to confirm your account.');
       }
     }
-  } catch(e) { showAuthError(e.message); }
+  } catch(e) { console.error('[NIRVE] Auth error:', e); showAuthError(e.message); }
 
   btn.disabled = false;
   btn.textContent = authMode === 'signin' ? 'Sign In' : 'Create Account';
