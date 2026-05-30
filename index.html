@@ -1687,6 +1687,9 @@ function toggleFM() {
   document.body.classList.toggle('fm', fm);
   document.getElementById('fmBtn').textContent = fm ? 'EXIT' : 'FOCUS';
   document.getElementById('appSidebar').style.display = fm ? 'none' : '';
+  document.getElementById('appPanel').style.display = fm ? 'none' : '';
+  var main = document.querySelector('.app-main');
+  if (main) main.style.gridTemplateColumns = fm ? '1fr' : '200px 1fr 350px';
 }
 
 /* -- STATUS -- */
