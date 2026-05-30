@@ -3667,11 +3667,11 @@ function initSupabase() {
         try {
           var r = await fetch(SUPA_URL + '/auth/v1/signup', {
             method: 'POST',
-            headers: {'Content-Type':'application/json','apikey':SUPA_KEY},
+            headers: {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer ' + SUPA_KEY},
             body: JSON.stringify({email: opts.email, password: opts.password, data: opts.options && opts.options.data ? opts.options.data : {}})
           });
           var d = await r.json();
-          if (d.error || d.msg) return {data: null, error: {message: d.error_description || d.msg || d.error || 'Signup failed'}};
+          if (!r.ok || d.error || d.msg) { console.error('[NIRVE] Signup error:', d); return {data: null, error: {message: d.error_description || d.msg || d.error || 'Signup failed (status ' + r.status + ')'}}; }
           if (d.access_token) { _session = d; currentUser = d.user; localStorage.setItem('nirve_session', JSON.stringify(d)); onUserLoggedIn(d.user); }
           return {data: d, error: null};
         } catch(e) { return {data: null, error: {message: e.message}}; }
@@ -3680,11 +3680,11 @@ function initSupabase() {
         try {
           var r = await fetch(SUPA_URL + '/auth/v1/token?grant_type=password', {
             method: 'POST',
-            headers: {'Content-Type':'application/json','apikey':SUPA_KEY},
+            headers: {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer ' + SUPA_KEY},
             body: JSON.stringify({email: opts.email, password: opts.password})
           });
           var d = await r.json();
-          if (d.error || d.error_description) return {data: null, error: {message: d.error_description || d.error || 'Login failed'}};
+          if (!r.ok || d.error || d.error_description) { console.error('[NIRVE] Login error:', d); return {data: null, error: {message: d.error_description || d.error || 'Login failed (status ' + r.status + ')'}}; }
           if (d.access_token) { _session = d; currentUser = d.user; localStorage.setItem('nirve_session', JSON.stringify(d)); onUserLoggedIn(d.user); }
           return {data: d, error: null};
         } catch(e) { return {data: null, error: {message: e.message}}; }
@@ -4072,9 +4072,6 @@ function updateNavForGuest() {
   var b = document.getElementById('appNavUser');
   if (b) b.innerHTML = '<button class="btn-ghost" onclick="openAuth()" style="flex-shrink:0;padding:5px 12px;font-size:12px">Sign in</button>';
 }
-
-async 
-
 
 
 /* Close auth on backdrop click + Enter key — run after DOM ready */
