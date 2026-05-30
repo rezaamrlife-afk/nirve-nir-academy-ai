@@ -296,12 +296,12 @@ footer{padding:48px 52px;border-top:0.5px solid var(--border);position:relative;
 .proc-step.done .proc-dot{background:var(--green);border-color:var(--green);box-shadow:0 0 6px var(--green);}
 
 /* RESULT CARDS */
-.r-band{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--r);padding:16px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden;opacity:0;transform:translateY(12px);transition:all 0.55s cubic-bezier(0.22,1,0.36,1);}
+.r-band{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--r);padding:18px 16px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:visible;opacity:0;transform:translateY(12px);transition:all 0.55s cubic-bezier(0.22,1,0.36,1);}
 .r-band::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--teal2),transparent);opacity:0.6;}
 .r-band::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 0% 50%,rgba(26,155,138,0.06) 0%,transparent 70%);pointer-events:none;}
 .r-band.vis{opacity:1;transform:translateY(0);}
 .r-blbl{font-family:var(--mono);font-size:9px;letter-spacing:0.14em;color:var(--t2);margin-bottom:5px;}
-.r-bnum{font-family:var(--mono);font-size:54px;font-weight:600;color:var(--teal2);line-height:1;text-shadow:0 0 48px rgba(26,155,138,0.35);}
+.r-bnum{font-family:var(--mono);font-size:64px;font-weight:600;color:var(--teal2);line-height:1.1;text-shadow:0 0 60px rgba(26,155,138,0.45);letter-spacing:-0.02em;}
 .r-bdesc{font-size:13px;color:var(--t1);margin-top:4px;}
 .r-bdelta{font-size:11px;color:var(--green);margin-top:3px;font-family:var(--mono);}
 .r-dims{display:grid;grid-template-columns:1fr 1fr;gap:7px;opacity:0;transform:translateY(10px);transition:all 0.5s 0.15s cubic-bezier(0.22,1,0.36,1);}
@@ -371,11 +371,11 @@ body.fm .app-sidebar{display:none;}
 /* DUAL SCORE */
 .dual-score{display:grid;grid-template-columns:1fr 1fr;gap:8px;opacity:0;transform:translateY(10px);transition:all 0.5s 0.18s cubic-bezier(0.22,1,0.36,1);}
 .dual-score.vis{opacity:1;transform:translateY(0);}
-.dscore-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r2);padding:12px 14px;}
-.dscore-label{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.12em;margin-bottom:5px;}
-.dscore-num{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--t0);margin-bottom:3px;}
-.dscore-sub{font-size:11px;color:var(--t2);margin-bottom:8px;}
-.dscore-bar{height:2px;background:var(--border);border-radius:1px;overflow:hidden;}
+.dscore-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--r);padding:16px 18px;}
+.dscore-label{font-family:var(--mono);font-size:10px;color:var(--teal2);letter-spacing:0.12em;margin-bottom:6px;font-weight:600;}
+.dscore-num{font-family:var(--mono);font-size:32px;font-weight:600;color:var(--t0);margin-bottom:5px;letter-spacing:-0.01em;}
+.dscore-sub{font-size:12px;color:var(--t1);margin-bottom:10px;}
+.dscore-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:6px;}
 .dscore-fill{height:100%;border-radius:1px;width:0;transition:width 0.9s cubic-bezier(0.22,1,0.36,1);}
 
 /* PERSPECTIVES */
@@ -408,9 +408,9 @@ body.fm .app-sidebar{display:none;}
 .persp-tip-icon{color:var(--teal);margin-right:6px;}
 
 /* THINKING GAPS */
-.gaps-block{background:rgba(212,160,23,0.06);border:0.5px solid rgba(212,160,23,0.2);border-radius:var(--r2);padding:12px 14px;}
-.gaps-label{font-family:var(--mono);font-size:9px;color:var(--amber);letter-spacing:0.12em;margin-bottom:10px;}
-.gap-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--t1);line-height:1.55;padding:4px 0;border-bottom:0.5px solid rgba(212,160,23,0.1);}
+.gaps-block{background:rgba(212,160,23,0.07);border:0.5px solid rgba(212,160,23,0.25);border-radius:var(--r);padding:14px 16px;}
+.gaps-label{font-family:var(--mono);font-size:10px;color:var(--amber);letter-spacing:0.12em;margin-bottom:10px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.gap-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--t0);line-height:1.6;padding:7px 0;border-bottom:0.5px solid rgba(212,160,23,0.12);}
 .gap-item:last-child{border-bottom:none;}
 .gap-icon{color:var(--amber);font-size:8px;flex-shrink:0;margin-top:4px;}
 </style>
@@ -901,7 +901,22 @@ function buildPrompt(text, ctxId) {
   const dimStr = c.dims.length > 0 ? c.dims.map(d => '"' + d + '": <score 0-9>').join(', ') : '"overall": <0-10>';
   const maxScore = c.type === 'band' ? '9.0 in 0.5 steps e.g. 6.0, 6.5, 7.0' : '10';
   return [
-    'You are NIRVE — a multi-perspective writing intelligence system.',
+    'You are NIRVE — a Writing Intelligence Platform with a unique focus on THINKING QUALITY, not just language.',
+    'Your most important task is to detect gaps in the student REASONING and ARGUMENTATION.',
+    '',
+    'For THINKING SCORE evaluation, look for:',
+    '  - Claims made without supporting evidence',
+    '  - Logical leaps between ideas',
+    '  - Missing counterarguments',
+    '  - Overgeneralisations',
+    '  - Unsupported assumptions',
+    '  - Weak or absent conclusion',
+    '  - Ideas that are mentioned but not developed',
+    '',
+    'WRITING SCORE = language quality (grammar, vocabulary, cohesion)',
+    'THINKING SCORE = reasoning quality (logic, evidence, argument depth)',
+    'These two scores must be INDEPENDENT. A student can have excellent language but poor thinking, or vice versa.',
+    '',
     'You analyse student writing from THREE distinct perspectives simultaneously.',
     '',
     'Context: ' + c.label,
@@ -940,7 +955,7 @@ function buildPrompt(text, ctxId) {
     '    "action": "<a concrete task to do before the next essay>",',
     '    "prediction": "<what band they could reach with this one change>"',
     '  },',
-    '  "thinking_gaps": [',
+    '  "thinking_gaps": [  // 2-4 specific reasoning gaps found in THIS essay',
     '    "<specific gap in reasoning e.g. claim without evidence>",',
     '    "<another gap e.g. missing counterargument>"',
     '  ],',
@@ -1133,7 +1148,7 @@ function showResults(r, wc) {
   /* THINKING GAPS */
   if (r.thinking_gaps && r.thinking_gaps.length) {
     html += `<div class="gaps-block">
-      <div class="gaps-label">THINKING GAPS DETECTED</div>`;
+      <div class="gaps-label">THINKING GAPS DETECTED <span style="background:var(--amber);color:#000;font-size:9px;padding:2px 7px;border-radius:10px;font-weight:700">${r.thinking_gaps.length}</span></div>`;
     r.thinking_gaps.forEach(g => {
       html += `<div class="gap-item"><span class="gap-icon">&#9650;</span>${g}</div>`;
     });
