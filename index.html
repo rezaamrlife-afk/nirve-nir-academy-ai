@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1A9B8A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NIRVE">
 <title>NIRVE — Writing Intelligence System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -229,7 +234,7 @@ footer{padding:48px 52px;border-top:0.5px solid var(--border);position:relative;
 .app-main{display:grid;grid-template-columns:240px 1fr 350px;flex:1;min-height:0;overflow:hidden;}
 
 /* SIDEBAR */
-.app-sidebar{border-right:0.5px solid var(--border);padding:16px 14px 24px;display:flex;flex-direction:column;gap:3px;background:rgba(7,9,11,0.4);overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}
+.app-sidebar{border-right:0.5px solid var(--border);padding:16px 14px 24px;display:flex;flex-direction:column;gap:3px;background:rgba(7,9,11,0.4);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(26,155,138,0.3) transparent;}
 .as-section{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.14em;text-transform:uppercase;padding:8px 10px 4px;}
 .as-item{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:var(--r3);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t2);cursor:pointer;transition:all 0.15s;border:0.5px solid transparent;}
 .as-item:hover{color:var(--t1);background:rgba(255,255,255,0.03);}
@@ -356,9 +361,13 @@ body.fm .app-sidebar{display:none;}
 .reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s cubic-bezier(0.22,1,0.36,1),transform 0.7s cubic-bezier(0.22,1,0.36,1);}
 .reveal.visible{opacity:1;transform:translateY(0);}
 
-::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+::-webkit-scrollbar-thumb{background:rgba(26,155,138,0.25);border-radius:4px;transition:background 0.2s;}
+::-webkit-scrollbar-thumb:hover{background:rgba(26,155,138,0.55);}
+::-webkit-scrollbar-corner{background:transparent;}
+* { scrollbar-width:thin; scrollbar-color: rgba(26,155,138,0.25) transparent; }
+*:hover { scrollbar-color: rgba(26,155,138,0.45) transparent; }
 
 @keyframes riseUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
 
@@ -1630,7 +1639,6 @@ body.fm .app-sidebar{display:none;}
   <div class="nav-links" id="navLinks">
     <span class="nav-link" onclick="goTo('features')">Features</span>
     <span class="nav-link" onclick="goTo('scoring')">Scoring</span>
-    <span class="nav-link" onclick="goTo('testimonials')">Results</span>
     <a class="nav-link" href="https://niracademy.com" target="_blank">NIR Academy</a>
   </div>
   <div class="nav-actions" id="navActions">
@@ -1658,7 +1666,6 @@ body.fm .app-sidebar{display:none;}
     <div class="mm-section">Explore</div>
     <a class="mm-link" onclick="navigate('landing');setTimeout(function(){goTo('features');},100);toggleMenu()"><span class="mm-icon">&#9670;</span>Features</a>
     <a class="mm-link" onclick="goTo('scoring');toggleMenu()"><span class="mm-icon">&#9670;</span>Scoring</a>
-    <a class="mm-link" onclick="goTo('testimonials');toggleMenu()"><span class="mm-icon">&#9670;</span>Results</a>
     <a class="mm-link" href="https://niracademy.com" target="_blank"><span class="mm-icon">&#9670;</span>NIR Academy</a>
   </div>
   <div class="mm-footer">
@@ -3576,13 +3583,15 @@ function arcAnim(cid, tid, pct, circ) {
   const c = document.getElementById(cid), t = document.getElementById(tid);
   if (!c || !t) return;
   const start = performance.now(), dur = 1000;
-  (function step(now) {
+  function step(now) {
     const p = Math.min((now - start) / dur, 1);
-    const e = 1 - Math.pow(1 - p, 3);
-    c.setAttribute('stroke-dasharray', (pct / 100 * circ * e).toFixed(1) + ' ' + circ);
-    t.textContent = Math.round(pct * e) + '%';
+    const ease = 1 - Math.pow(1 - p, 3);
+    const off = circ - circ * ease * pct;
+    c.style.strokeDashoffset = off;
+    t.textContent = Math.round(ease * pct * 100) + '%';
     if (p < 1) requestAnimationFrame(step);
-  })(performance.now());
+  }
+  requestAnimationFrame(step);
 }
 
 /* -- SCROLL REVEAL -- */
@@ -4064,65 +4073,9 @@ function updateNavForGuest() {
   if (b) b.innerHTML = '<button class="btn-ghost" onclick="openAuth()" style="flex-shrink:0;padding:5px 12px;font-size:12px">Sign in</button>';
 }
 
-async function showProfile() {
-  if (!currentUser) { openAuth(); return; }
-  document.getElementById('landing').style.display = 'none';
-  document.getElementById('app-view').style.display = 'none';
-  document.getElementById('profile-view').style.display = 'block';
-  document.getElementById('mainNav').style.display = 'flex';
-  await loadProfileData();
-}
+async 
 
-async function loadProfileData() {
-  if (!supabase || !currentUser) return;
-  var user = currentUser;
-  var name = (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name : user.email.split('@')[0];
-  var avatarUrl = user.user_metadata && user.user_metadata.avatar_url ? user.user_metadata.avatar_url : null;
-  var initials = name.charAt(0).toUpperCase();
-  var pn = document.getElementById('profileName'); if(pn) pn.textContent = name;
-  var pe = document.getElementById('profileEmail'); if(pe) pe.textContent = user.email;
-  var ps = document.getElementById('profileSince'); if(ps) ps.textContent = 'Member since ' + new Date(user.created_at).toLocaleDateString('en-GB', {month:'long',year:'numeric'});
-  var av = document.getElementById('profileAvatar'); if(av) av.innerHTML = avatarUrl ? '<img src="' + avatarUrl + '">' : initials;
 
-  var sesRes = await supabase.from('sessions').select('*').eq('user_id', user.id).order('created_at', {ascending: false}).limit(20)._execute();
-  var sessions = sesRes.data || [];
-  if (sessions.length > 0) {
-    var bands = sessions.filter(function(s){return s.band;}).map(function(s){return s.band;});
-    var sc = document.getElementById('statCurrent'); if(sc) sc.textContent = bands[0] ? parseFloat(bands[0]).toFixed(1) : '—';
-    var sb = document.getElementById('statBest'); if(sb) sb.textContent = bands.length ? Math.max.apply(null,bands).toFixed(1) : '—';
-    var ss = document.getElementById('statSessions'); if(ss) ss.textContent = sessions.length;
-    var weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
-    var sw = document.getElementById('statStreak'); if(sw) sw.textContent = sessions.filter(function(s){return new Date(s.created_at) > weekAgo;}).length;
-    var ctxLabels = {ielts_t2:'IELTS Task 2',ielts_t1:'IELTS Task 1',toefl:'TOEFL',academic:'Academic Essay',research:'Research Abstract',report:'Report',article:'Article',free:'Free Writing'};
-    var histEl = document.getElementById('profileHistory');
-    if (histEl) histEl.innerHTML = sessions.slice(0,8).map(function(s) {
-      return '<div class="session-item"><div class="session-band">' + (s.band||'—') + '</div><div class="session-info"><div class="session-ctx">' + (ctxLabels[s.ctx]||s.ctx) + '</div><div class="session-meta">' + new Date(s.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + (s.word_count?' &middot; '+s.word_count+' words':'') + '</div></div><div class="session-scores">' + (s.writing_score?'<div class="session-score-row">W '+s.writing_score+'</div>':'') + (s.thinking_score?'<div class="session-score-row">T '+s.thinking_score+'</div>':'') + '</div></div>';
-    }).join('');
-  }
-
-  var dnaRes = await supabase.from('dna_profiles').select('*').eq('user_id', user.id).single();
-  var dna = dnaRes.data;
-  if (dna) {
-    var dnaEl = document.getElementById('profileDNA');
-    if (dnaEl) {
-      var dims = [['Analytical','analytical'],['Academic','academic'],['Persuasive','persuasive'],['Structural','structural'],['Evidence','evidence'],['Vocabulary','vocabulary']];
-      dnaEl.innerHTML = dims.map(function(d) {
-        var val = dna[d[1]] || 0;
-        var col = val >= 75 ? 'var(--green)' : val >= 50 ? 'var(--teal)' : val >= 30 ? 'var(--amber)' : 'var(--red)';
-        return '<div class="profile-dna-row"><div class="profile-dna-label">'+d[0]+'</div><div class="profile-dna-track"><div class="profile-dna-fill" style="width:'+val+'%;background:'+col+'"></div></div><div class="profile-dna-val">'+val+'%</div></div>';
-      }).join('');
-    }
-  }
-
-  var weakRes = await supabase.from('weaknesses').select('*').eq('user_id', user.id).order('count', {ascending: false}).limit(5)._execute();
-  var weaks = weakRes.data || [];
-  if (weaks.length > 0) {
-    var wEl = document.getElementById('profileWeaknesses');
-    if (wEl) wEl.innerHTML = weaks.map(function(w,i) {
-      return '<div class="profile-weakness"><div class="pweak-num">#'+(i+1)+'</div><div class="pweak-label">'+w.label+'</div><div class="pweak-count">'+w.count+'x</div></div>';
-    }).join('');
-  }
-}
 
 /* Close auth on backdrop click + Enter key — run after DOM ready */
 function initAuthListeners() {
@@ -4154,22 +4107,18 @@ function initIntro() {
   if (introShown && introEl) {
     introEl.classList.add('hidden');
   }
+  // Install banner: only show when PWA installable (no fake timer)
   // PWA install prompt - also show banner after delay if dismissed before
   window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
     deferredInstallPrompt = e;
+    window._pwaInstallable = true;
     if (!localStorage.getItem('nirve_install_dismissed')) {
-      setTimeout(showInstallBanner, 4000);
+      setTimeout(showInstallBanner, 2000);
     }
   });
-  // Show install banner — only after intro has been seen
-  if (!localStorage.getItem('nirve_install_dismissed')) {
-    if (introShown) {
-      // Intro already seen — show banner after 3s
-      setTimeout(showInstallBanner, 3000);
-    }
-    // Otherwise banner shows when closeIntro() is called
-  }
+  // Install banner shows ONLY when browser fires beforeinstallprompt
+  // No fake timers — real PWA install only
   var ibBtn = document.getElementById('ib-install-btn');
   if (ibBtn) {
     ibBtn.addEventListener('click', function() {
@@ -4203,10 +4152,7 @@ function closeIntro() {
   screen.style.pointerEvents = 'none';
   setTimeout(function() { if(screen) screen.classList.add('hidden'); }, 500);
   localStorage.setItem('nirve_intro_shown', '1');
-  // Show install banner after intro closes
-  if (!localStorage.getItem('nirve_install_dismissed')) {
-    setTimeout(showInstallBanner, 2000);
-  }
+  // Install banner shows when browser fires beforeinstallprompt
 }
 
 /* Welcome overlay */
@@ -4232,8 +4178,9 @@ function closeWelcome() {
 
 /* Install banner */
 function showInstallBanner() {
+  if (!deferredInstallPrompt && !window._pwaInstallable) return;
   var banner = document.getElementById('install-banner');
-  if (banner) {
+  if (banner && !localStorage.getItem('nirve_install_dismissed')) {
     banner.classList.add('visible');
   }
 }
@@ -4245,6 +4192,18 @@ function dismissInstall() {
     setTimeout(function() { banner.style.display = 'none'; }, 400);
   }
   localStorage.setItem('nirve_install_dismissed', '1');
+}
+
+
+/* ── SERVICE WORKER REGISTRATION ── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').then(function(reg) {
+      console.log('[NIRVE] SW registered:', reg.scope);
+    }).catch(function(err) {
+      console.log('[NIRVE] SW failed:', err);
+    });
+  });
 }
 
 /* -- INIT -- */
