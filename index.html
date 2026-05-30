@@ -1087,10 +1087,10 @@ body.fm .app-sidebar{display:none;}
   background: #050709;
   padding: 4px;
   position: relative; z-index: 3;
-  border: 1px solid rgba(200,165,80,0.4);
+  border: 1px solid rgba(26,155,138,0.4);
   box-shadow:
-    0 0 20px rgba(200,165,80,0.25),
-    0 0 40px rgba(200,165,80,0.12),
+    0 0 20px rgba(26,155,138,0.25),
+    0 0 40px rgba(26,155,138,0.12),
     0 8px 32px rgba(0,0,0,0.6);
 }
 
@@ -1114,7 +1114,7 @@ body.fm .app-sidebar{display:none;}
 }
 .ring-3 {
   width: 148px; height: 148px;
-  border-color: rgba(200,165,80,0.08);
+  border-color: rgba(26,155,138,0.08);
   animation-delay: 1.2s;
 }
 
@@ -1202,7 +1202,7 @@ body.fm .app-sidebar{display:none;}
   width: 52px; height: 52px; border-radius: 12px;
   object-fit: contain; background: #050709;
   padding: 3px; border: 0.5px solid var(--border2);
-  box-shadow: 0 0 24px rgba(200,165,80,0.2);
+  box-shadow: 0 0 24px rgba(26,155,138,0.2);
   margin-bottom: 16px;
 }
 .auth-modal-title {
@@ -1421,7 +1421,7 @@ body.fm .app-sidebar{display:none;}
 .intro-bg {
   position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(200,165,80,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(26,155,138,0.08) 0%, transparent 60%),
     radial-gradient(ellipse 60% 40% at 50% 0%, rgba(26,155,138,0.06) 0%, transparent 50%);
   pointer-events: none;
 }
@@ -1430,15 +1430,15 @@ body.fm .app-sidebar{display:none;}
   position: relative; z-index: 1;
   width: min(480px, 94vw);
   background: rgba(12,16,24,0.95);
-  border: 0.5px solid rgba(200,165,80,0.25);
+  border: 0.5px solid rgba(26,155,138,0.25);
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 0 0 0.5px rgba(200,165,80,0.1), 0 32px 80px rgba(0,0,0,0.7);
+  box-shadow: 0 0 0 0.5px rgba(26,155,138,0.1), 0 32px 80px rgba(0,0,0,0.7);
 }
 .intro-card::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(200,165,80,0.6), rgba(200,165,80,0.9), rgba(200,165,80,0.6), transparent);
+  background: linear-gradient(90deg, transparent, rgba(26,155,138,0.6), var(--teal2), rgba(26,155,138,0.6), transparent);
 }
 
 /* Steps */
@@ -1449,7 +1449,7 @@ body.fm .app-sidebar{display:none;}
 /* Character image */
 .intro-character-wrap {
   width: 100%; height: 280px; overflow: hidden; position: relative;
-  background: radial-gradient(ellipse at 50% 100%, rgba(200,165,80,0.12) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 50% 100%, rgba(26,155,138,0.12) 0%, transparent 70%);
 }
 .intro-character-wrap::after {
   content: '';
@@ -1458,7 +1458,7 @@ body.fm .app-sidebar{display:none;}
 }
 .intro-character {
   width: 100%; height: 100%; object-fit: cover; object-position: top;
-  filter: drop-shadow(0 0 40px rgba(200,165,80,0.2));
+  filter: drop-shadow(0 0 40px rgba(26,155,138,0.2));
 }
 
 /* Step content */
@@ -1468,23 +1468,23 @@ body.fm .app-sidebar{display:none;}
 .intro-tag {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 4px 14px; border-radius: 20px;
-  border: 0.5px solid rgba(200,165,80,0.3);
-  background: rgba(200,165,80,0.07);
+  border: 0.5px solid rgba(26,155,138,0.3);
+  background: rgba(26,155,138,0.07);
   font-family: var(--mono); font-size: 10px;
-  color: rgba(200,165,80,0.9); letter-spacing: 0.12em;
+  color: var(--teal2); letter-spacing: 0.12em;
   margin-bottom: 14px;
 }
 .intro-tag-dot {
   width: 5px; height: 5px; border-radius: 50%;
-  background: rgba(200,165,80,0.9);
-  box-shadow: 0 0 8px rgba(200,165,80,0.6);
+  background: var(--teal2);
+  box-shadow: 0 0 8px rgba(26,155,138,0.6);
   animation: pulse 2s ease-in-out infinite;
 }
 .intro-name {
   font-family: var(--serif); font-size: 36px; font-weight: 400;
   color: #f0ebe0; letter-spacing: -0.01em; margin-bottom: 8px;
 }
-.intro-name span { color: rgba(200,165,80,0.9); font-style: italic; }
+.intro-name span { color: var(--teal2); font-style: italic; }
 .intro-desc {
   font-size: 15px; color: var(--t1); line-height: 1.7;
   margin-bottom: 6px;
@@ -1492,13 +1492,13 @@ body.fm .app-sidebar{display:none;}
 .intro-author {
   font-size: 13px; color: var(--t2); margin-bottom: 24px;
 }
-.intro-author a { color: rgba(200,165,80,0.8); text-decoration: none; }
+.intro-author a { color: var(--teal2); text-decoration: none; }
 
 .intro-quote {
   font-family: var(--serif); font-size: 17px; font-style: italic;
   color: var(--t1); line-height: 1.7; margin-bottom: 8px;
   padding: 0 8px;
-  border-left: 2px solid rgba(200,165,80,0.4);
+  border-left: 2px solid rgba(26,155,138,0.4);
   text-align: left;
 }
 .intro-quote-src { font-size: 12px; color: var(--t2); text-align: left; margin-bottom: 24px; padding-left: 8px; }
@@ -1512,17 +1512,17 @@ body.fm .app-sidebar{display:none;}
   background: var(--t3); transition: all 0.3s;
   cursor: pointer;
 }
-.intro-dot.active { background: rgba(200,165,80,0.9); box-shadow: 0 0 8px rgba(200,165,80,0.4); width: 20px; border-radius: 4px; }
+.intro-dot.active { background: var(--teal2); box-shadow: 0 0 8px rgba(26,155,138,0.4); width: 20px; border-radius: 4px; }
 
 /* Buttons */
 .intro-btn {
   width: 100%; padding: 15px;
-  background: rgba(200,165,80,0.9); border: none; border-radius: 12px;
+  background: var(--teal2); border: none; border-radius: 12px;
   color: #000; font-family: var(--sans); font-size: 16px; font-weight: 700;
   cursor: pointer; transition: all 0.22s; letter-spacing: 0.01em;
   margin-bottom: 10px;
 }
-.intro-btn:hover { background: rgba(220,185,100,1); box-shadow: 0 0 40px rgba(200,165,80,0.25); }
+.intro-btn:hover { background: var(--teal2); box-shadow: 0 0 40px rgba(26,155,138,0.25); }
 .intro-skip {
   background: none; border: none; color: var(--t2);
   font-size: 13px; cursor: pointer; transition: color 0.2s;
@@ -1541,7 +1541,7 @@ body.fm .app-sidebar{display:none;}
 .welcome-overlay.open { opacity: 1; pointer-events: all; }
 .welcome-card {
   width: min(400px, 92vw);
-  background: var(--bg1); border: 0.5px solid rgba(200,165,80,0.25);
+  background: var(--bg1); border: 0.5px solid rgba(26,155,138,0.25);
   border-radius: 20px; overflow: hidden;
   transform: translateY(20px) scale(0.97);
   transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
@@ -1551,11 +1551,11 @@ body.fm .app-sidebar{display:none;}
 .welcome-card::before {
   content: '';
   display: block; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(200,165,80,0.6), transparent);
+  background: linear-gradient(90deg, transparent, rgba(26,155,138,0.6), transparent);
 }
 .welcome-char-area {
   width: 100%; height: 200px; overflow: hidden; position: relative;
-  background: radial-gradient(ellipse at 50% 100%, rgba(200,165,80,0.1) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 50% 100%, rgba(26,155,138,0.1) 0%, transparent 70%);
 }
 .welcome-char-area::after {
   content: '';
@@ -1568,7 +1568,7 @@ body.fm .app-sidebar{display:none;}
   font-family: var(--serif); font-size: 26px; font-weight: 400;
   color: var(--t0); margin-bottom: 8px; letter-spacing: -0.01em;
 }
-.welcome-greeting span { color: rgba(200,165,80,0.9); font-style: italic; }
+.welcome-greeting span { color: var(--teal2); font-style: italic; }
 .welcome-msg { font-size: 14px; color: var(--t1); line-height: 1.7; margin-bottom: 22px; }
 .welcome-btn {
   width: 100%; padding: 13px;
@@ -1582,7 +1582,7 @@ body.fm .app-sidebar{display:none;}
 #install-banner {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 9990;
   background: rgba(10,12,16,0.97);
-  border-top: 0.5px solid rgba(200,165,80,0.2);
+  border-top: 0.5px solid rgba(26,155,138,0.2);
   backdrop-filter: blur(20px);
   padding: 14px 24px;
   display: flex; align-items: center; gap: 16px;
@@ -1591,17 +1591,17 @@ body.fm .app-sidebar{display:none;}
   box-shadow: 0 -8px 32px rgba(0,0,0,0.4);
 }
 #install-banner.visible { transform: translateY(0); }
-.ib-logo { width: 44px; height: 44px; border-radius: 10px; object-fit: contain; background: #050709; padding: 3px; border: 0.5px solid rgba(200,165,80,0.25); flex-shrink: 0; }
+.ib-logo { width: 44px; height: 44px; border-radius: 10px; object-fit: contain; background: #050709; padding: 3px; border: 0.5px solid rgba(26,155,138,0.25); flex-shrink: 0; }
 .ib-text { flex: 1; }
 .ib-title { font-size: 14px; font-weight: 600; color: var(--t0); margin-bottom: 2px; }
 .ib-sub { font-size: 12px; color: var(--t2); }
 .ib-install {
   padding: 9px 20px; border-radius: 8px;
-  background: rgba(200,165,80,0.9); border: none;
+  background: var(--teal2); border: none;
   color: #000; font-family: var(--sans); font-size: 13px; font-weight: 700;
   cursor: pointer; transition: all 0.2s; flex-shrink: 0;
 }
-.ib-install:hover { background: rgba(220,185,100,1); }
+.ib-install:hover { background: var(--teal2); }
 .ib-dismiss {
   background: none; border: none; color: var(--t2);
   font-size: 13px; cursor: pointer; padding: 8px;
@@ -4106,12 +4106,23 @@ function initIntro() {
   if (introShown) {
     document.getElementById('intro-screen').classList.add('hidden');
   }
-  // PWA install prompt
+  // PWA install prompt - also show banner after delay if dismissed before
   window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
     deferredInstallPrompt = e;
-    setTimeout(showInstallBanner, 3000);
+    if (!localStorage.getItem('nirve_install_dismissed')) {
+      setTimeout(showInstallBanner, 4000);
+    }
   });
+  // Show install banner after 5s regardless (for non-PWA browsers)
+  if (!localStorage.getItem('nirve_install_dismissed')) {
+    setTimeout(function() {
+      var banner = document.getElementById('install-banner');
+      if (banner && !banner.classList.contains('visible')) {
+        banner.classList.add('visible');
+      }
+    }, 5000);
+  }
   var ibBtn = document.getElementById('ib-install-btn');
   if (ibBtn) {
     ibBtn.addEventListener('click', function() {
