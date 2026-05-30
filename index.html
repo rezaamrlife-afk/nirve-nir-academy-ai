@@ -1448,7 +1448,7 @@ body.fm .app-sidebar{display:none;}
 
 /* Character image */
 .intro-character-wrap {
-  width: 100%; height: 280px; overflow: hidden; position: relative;
+  width: 100%; height: 320px; overflow: hidden; position: relative;
   background: radial-gradient(ellipse at 50% 100%, rgba(26,155,138,0.12) 0%, transparent 70%);
 }
 .intro-character-wrap::after {
@@ -1457,7 +1457,7 @@ body.fm .app-sidebar{display:none;}
   background: linear-gradient(to bottom, transparent, rgba(12,16,24,0.98));
 }
 .intro-character {
-  width: 100%; height: 100%; object-fit: cover; object-position: top;
+  width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%;
   filter: drop-shadow(0 0 40px rgba(26,155,138,0.2));
 }
 
@@ -4114,14 +4114,13 @@ function initIntro() {
       setTimeout(showInstallBanner, 4000);
     }
   });
-  // Show install banner after 5s regardless (for non-PWA browsers)
+  // Show install banner — only after intro has been seen
   if (!localStorage.getItem('nirve_install_dismissed')) {
-    setTimeout(function() {
-      var banner = document.getElementById('install-banner');
-      if (banner && !banner.classList.contains('visible')) {
-        banner.classList.add('visible');
-      }
-    }, 5000);
+    if (introShown) {
+      // Intro already seen — show banner after 3s
+      setTimeout(showInstallBanner, 3000);
+    }
+    // Otherwise banner shows when closeIntro() is called
   }
   var ibBtn = document.getElementById('ib-install-btn');
   if (ibBtn) {
@@ -4150,6 +4149,10 @@ function closeIntro() {
   screen.style.pointerEvents = 'none';
   setTimeout(function() { screen.classList.add('hidden'); }, 500);
   localStorage.setItem('nirve_intro_shown', '1');
+  // Show install banner after intro closes
+  if (!localStorage.getItem('nirve_install_dismissed')) {
+    setTimeout(showInstallBanner, 2000);
+  }
 }
 
 /* Welcome overlay */
@@ -4175,7 +4178,7 @@ function closeWelcome() {
 /* Install banner */
 function showInstallBanner() {
   var banner = document.getElementById('install-banner');
-  if (banner && !localStorage.getItem('nirve_install_dismissed')) {
+  if (banner) {
     banner.classList.add('visible');
   }
 }
