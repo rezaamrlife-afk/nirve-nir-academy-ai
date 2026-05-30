@@ -4041,12 +4041,21 @@ async function handleAuthSubmit() {
     if (authMode === 'signin') {
       var res = await supabase.auth.signInWithPassword({ email: email, password: password });
       if (res.error) { showAuthError(res.error.message); }
-      else { closeAuth(); }
+      else {
+        closeAuth();
+        if (res.data && res.data.user) { onUserLoggedIn(res.data.user); }
+        else if (currentUser) { onUserLoggedIn(currentUser); }
+      }
     } else {
       var name = document.getElementById('auth-name') ? document.getElementById('auth-name').value.trim() : '';
       var res = await supabase.auth.signUp({ email: email, password: password, options: { data: { full_name: name || email.split('@')[0] } } });
       if (res.error) { showAuthError(res.error.message); }
-      else { showAuthSuccess('Account created! You are now signed in.'); setTimeout(function(){ closeAuth(); }, 1500); }
+      else {
+        showAuthSuccess('Account created! You are now signed in.');
+        if (res.data && res.data.user) { onUserLoggedIn(res.data.user); }
+        else if (currentUser) { onUserLoggedIn(currentUser); }
+        setTimeout(function(){ closeAuth(); }, 1000);
+      }
     }
   } catch(e) { showAuthError(e.message); }
   btn.disabled = false;
