@@ -367,6 +367,52 @@ body.fm .app-sidebar{display:none;}
 .hero-wordmark{font-family:var(--mono);font-size:44px;font-weight:600;letter-spacing:0.28em;background:linear-gradient(90deg,#e0dbd0 0%,var(--teal3) 35%,var(--teal2) 50%,var(--teal3) 65%,#e0dbd0 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:wmark 4s linear infinite;line-height:1;}
 .hero-wordmark-sub{font-family:var(--mono);font-size:11px;color:var(--t2);letter-spacing:0.12em;margin-top:3px;}
 @keyframes wmark{0%{background-position:0% center}100%{background-position:200% center}}
+
+/* DUAL SCORE */
+.dual-score{display:grid;grid-template-columns:1fr 1fr;gap:8px;opacity:0;transform:translateY(10px);transition:all 0.5s 0.18s cubic-bezier(0.22,1,0.36,1);}
+.dual-score.vis{opacity:1;transform:translateY(0);}
+.dscore-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r2);padding:12px 14px;}
+.dscore-label{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.12em;margin-bottom:5px;}
+.dscore-num{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--t0);margin-bottom:3px;}
+.dscore-sub{font-size:11px;color:var(--t2);margin-bottom:8px;}
+.dscore-bar{height:2px;background:var(--border);border-radius:1px;overflow:hidden;}
+.dscore-fill{height:100%;border-radius:1px;width:0;transition:width 0.9s cubic-bezier(0.22,1,0.36,1);}
+
+/* PERSPECTIVES */
+.perspectives{display:flex;flex-direction:column;gap:8px;opacity:0;transform:translateY(10px);transition:all 0.5s 0.45s cubic-bezier(0.22,1,0.36,1);}
+.perspectives.vis{opacity:1;transform:translateY(0);}
+
+.persp-card{border-radius:var(--r);overflow:hidden;border:0.5px solid var(--border);}
+.persp-examiner{border-left:2px solid var(--red);}
+.persp-teacher{border-left:2px solid var(--blue);}
+.persp-coach{border-left:2px solid var(--green);}
+
+.persp-hdr{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:0.5px solid var(--border);background:rgba(0,0,0,0.15);}
+.persp-icon{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;flex-shrink:0;}
+.persp-examiner .persp-icon{background:rgba(217,79,79,0.18);color:var(--red);}
+.persp-teacher .persp-icon{background:rgba(78,143,212,0.18);color:var(--blue);}
+.persp-coach .persp-icon{background:rgba(46,204,138,0.18);color:var(--green);}
+
+.persp-role{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;color:var(--t1);}
+.persp-role-sub{font-size:10px;color:var(--t2);margin-top:1px;}
+.persp-band-chip{margin-left:auto;font-family:var(--mono);font-size:18px;font-weight:700;color:var(--teal2);}
+.persp-predict-chip{margin-left:auto;font-size:11px;color:var(--green);font-family:var(--mono);background:rgba(46,204,138,0.1);padding:3px 8px;border-radius:4px;border:0.5px solid rgba(46,204,138,0.2);}
+
+.persp-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+.persp-verdict{font-size:13px;color:var(--t1);line-height:1.6;font-style:italic;}
+.persp-rows{display:flex;flex-direction:column;gap:5px;}
+.persp-row{display:flex;gap:8px;font-size:12px;line-height:1.5;}
+.persp-row-label{color:var(--t2);flex-shrink:0;width:60px;font-family:var(--mono);font-size:10px;letter-spacing:0.04em;padding-top:1px;}
+.persp-row-val{color:var(--t1);}
+.persp-tip{font-size:12px;color:var(--t2);padding-top:7px;border-top:0.5px solid var(--border);line-height:1.55;}
+.persp-tip-icon{color:var(--teal);margin-right:6px;}
+
+/* THINKING GAPS */
+.gaps-block{background:rgba(212,160,23,0.06);border:0.5px solid rgba(212,160,23,0.2);border-radius:var(--r2);padding:12px 14px;}
+.gaps-label{font-family:var(--mono);font-size:9px;color:var(--amber);letter-spacing:0.12em;margin-bottom:10px;}
+.gap-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--t1);line-height:1.55;padding:4px 0;border-bottom:0.5px solid rgba(212,160,23,0.1);}
+.gap-item:last-child{border-bottom:none;}
+.gap-icon{color:var(--amber);font-size:8px;flex-shrink:0;margin-top:4px;}
 </style>
 </head>
 <body>
@@ -852,22 +898,56 @@ function resetPanel() {
 /* -- PROMPT BUILDER -- */
 function buildPrompt(text, ctxId) {
   const c = CTXS[ctxId];
-  const dimStr = c.dims.length > 0 ? c.dims.map(d => '"' + d + '": <score>').join(', ') : '"overall": <0-10>';
-  const maxScore = c.type === 'band' ? '9.0 in 0.5 steps' : '10';
+  const dimStr = c.dims.length > 0 ? c.dims.map(d => '"' + d + '": <score 0-9>').join(', ') : '"overall": <0-10>';
+  const maxScore = c.type === 'band' ? '9.0 in 0.5 steps e.g. 6.0, 6.5, 7.0' : '10';
   return [
-    'You are an expert ' + c.label + ' examiner and writing coach with 15 years of experience.',
+    'You are NIRVE — a multi-perspective writing intelligence system.',
+    'You analyse student writing from THREE distinct perspectives simultaneously.',
+    '',
     'Context: ' + c.label,
     'Task prompt: ' + c.brief,
+    '',
     'Student essay:',
     '---',
     text,
     '---',
-    'Analyse this essay carefully. Return ONLY valid JSON, no markdown, no extra text.',
-    'JSON: {"band": <' + maxScore + '>, "descriptor": "<e.g. Good User>", "scores": {' + dimStr + '}, "cognitive": {"idea_quality": <0-10>, "structure": <0-10>, "reasoning": <0-10>, "coherence": <0-10>}, "feedback": [{"source": "examiner", "message": "<specific observation>", "fix": "<action>"}, {"source": "coach", "message": "<coaching>", "fix": "<example>"}, {"source": "struct", "message": "<structure note>", "fix": "<how to fix>"}], "rewrite": "<improved version of weakest paragraph>"}'
+    '',
+    'Return ONLY valid JSON, no markdown, no extra text.',
+    '',
+    'JSON format:',
+    '{',
+    '  "band": <' + maxScore + '>,',
+    '  "descriptor": "<e.g. Competent User>",',
+    '  "writing_score": <0-10 float, language quality>,',
+    '  "thinking_score": <0-10 float, quality of reasoning and argumentation>,',
+    '  "scores": {' + dimStr + '},',
+    '  "cognitive": {"idea_quality": <0-10>, "structure": <0-10>, "reasoning": <0-10>, "coherence": <0-10>},',
+    '  "examiner": {',
+    '    "verdict": "<one sentence: official band assessment>",',
+    '    "strength": "<what the examiner sees as the strongest element>",',
+    '    "weakness": "<what pulls the band down most>",',
+    '    "tip": "<one specific rubric-based improvement>"',
+    '  },',
+    '  "teacher": {',
+    '    "observation": "<pedagogical observation about the writing>",',
+    '    "pattern": "<a recurring language or structural pattern you notice>",',
+    '    "lesson": "<one teaching point that would most improve this writer>",',
+    '    "example": "<a concrete example or model phrase>"',
+    '  },',
+    '  "coach": {',
+    '    "motivation": "<one encouraging sentence acknowledging effort>",',
+    '    "focus": "<the single most important thing to work on now>",',
+    '    "action": "<a concrete task to do before the next essay>",',
+    '    "prediction": "<what band they could reach with this one change>"',
+    '  },',
+    '  "thinking_gaps": [',
+    '    "<specific gap in reasoning e.g. claim without evidence>",',
+    '    "<another gap e.g. missing counterargument>"',
+    '  ],',
+    '  "rewrite": "<improved version of the weakest paragraph>"',
+    '}'
   ].join('\n');
-}
-
-/* -- ANALYZE -- */
+}/* -- ANALYZE -- */
 async function doAnalyze() {
   const text = getText(), wc = getWC(text);
   if (wc < 30 || busy) return;
@@ -934,6 +1014,9 @@ function showResults(r, wc) {
     : null;
   lastBand = band;
 
+  const ws = r.writing_score ? r.writing_score.toFixed(1) : '—';
+  const ts = r.thinking_score ? r.thinking_score.toFixed(1) : '—';
+
   let html = `
     <div class="r-band" id="rb">
       <div>
@@ -942,13 +1025,31 @@ function showResults(r, wc) {
         <div class="r-bdesc">${r.descriptor || BDESC[band] || ''}</div>
         ${delta ? '<div class="r-bdelta">' + delta + '</div>' : ''}
       </div>
-      <svg width="62" height="62" viewBox="0 0 62 62">
-        <circle cx="31" cy="31" r="25" fill="none" stroke="rgba(26,155,138,0.12)" stroke-width="5"/>
-        <circle cx="31" cy="31" r="25" fill="none" stroke="var(--teal)" stroke-width="5"
-          stroke-dasharray="0 157" stroke-dashoffset="39" stroke-linecap="round"
-          id="rarc" style="transition:stroke-dasharray 1s cubic-bezier(0.22,1,0.36,1)"/>
-        <text x="31" y="35" text-anchor="middle" fill="var(--teal2)" font-size="11" font-weight="600" font-family="IBM Plex Mono" id="rpct">0%</text>
-      </svg>
+      <div style="text-align:right">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.1em;margin-bottom:6px">${c.label}</div>
+        <svg width="62" height="62" viewBox="0 0 62 62">
+          <circle cx="31" cy="31" r="25" fill="none" stroke="rgba(26,155,138,0.12)" stroke-width="5"/>
+          <circle cx="31" cy="31" r="25" fill="none" stroke="var(--teal)" stroke-width="5"
+            stroke-dasharray="0 157" stroke-dashoffset="39" stroke-linecap="round"
+            id="rarc" style="transition:stroke-dasharray 1s cubic-bezier(0.22,1,0.36,1)"/>
+          <text x="31" y="35" text-anchor="middle" fill="var(--teal2)" font-size="11" font-weight="600" font-family="IBM Plex Mono" id="rpct">0%</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="dual-score" id="dsc">
+      <div class="dscore-card">
+        <div class="dscore-label">WRITING SCORE</div>
+        <div class="dscore-num" id="wsNum">0.0</div>
+        <div class="dscore-sub">Language & Expression</div>
+        <div class="dscore-bar"><div class="dscore-fill" style="background:var(--teal)" id="wsBar"></div></div>
+      </div>
+      <div class="dscore-card">
+        <div class="dscore-label">THINKING SCORE</div>
+        <div class="dscore-num" id="tsNum">0.0</div>
+        <div class="dscore-sub">Reasoning & Argument</div>
+        <div class="dscore-bar"><div class="dscore-fill" style="background:var(--amber)" id="tsBar"></div></div>
+      </div>
     </div>`;
 
   if (c.dims.length && r.scores) {
@@ -956,42 +1057,98 @@ function showResults(r, wc) {
     const dimColors = {TR:'var(--teal)',CC:'var(--green)',LR:'var(--amber)',GA:'var(--teal2)','Task Response':'var(--teal)','Language Use':'var(--green)',Development:'var(--amber)',Argument:'var(--teal)',Structure:'var(--green)',Evidence:'var(--amber)',Register:'var(--teal2)',Clarity:'var(--teal)',Organisation:'var(--green)',Tone:'var(--amber)',Engagement:'var(--teal)',Voice:'var(--teal2)',Conciseness:'var(--green)'};
     c.dims.forEach((d, i) => {
       const v = parseFloat(r.scores[d] || 0);
-      const pct = (v / maxVal * 100).toFixed(0);
       const col = dimColors[d] || 'var(--teal)';
-      html += `<div class="r-dim"><div class="r-dl">${d}</div><div class="r-dv">${v}</div><div class="r-db"><div class="r-df" style="background:${col}" id="rd${i}" data-p="${pct}"></div></div></div>`;
+      html += `<div class="r-dim"><div class="r-dl">${d}</div><div class="r-dv">${v}</div><div class="r-db"><div class="r-df" style="background:${col}" id="rd${i}" data-p="${(v/maxVal*100).toFixed(0)}"></div></div></div>`;
     });
     html += '</div>';
   }
 
-  if (r.cognitive) {
-    html += `<div class="r-cog" id="rcog">
-      <div class="r-cog-lbl">COGNITIVE ANALYSIS</div>`;
-    [['Idea quality','idea_quality'],['Structure','structure'],['Reasoning','reasoning'],['Coherence','coherence']].forEach(([l,k],i) => {
-      const v = parseFloat(r.cognitive[k] || 0);
-      html += `<div class="r-cog-row"><div class="r-cog-label">${l}</div><div class="r-cog-track"><div class="r-cog-fill" id="rc${i}" data-p="${(v/10*100).toFixed(0)}"></div></div><div class="r-cog-val">${v.toFixed(1)}</div></div>`;
-    });
-    html += '</div>';
-  }
+  /* ── THREE PERSPECTIVES ── */
+  html += '<div class="perspectives" id="persp">';
 
-  if (r.feedback && r.feedback.length) {
-    html += '<div class="r-fb" id="rfb">';
-    const srcMap = {examiner:{cls:'fe',icon:'E',lbl:'EXAMINER'}, coach:{cls:'fc',icon:'C',lbl:'COACH'}, struct:{cls:'fs',icon:'S',lbl:'STRUCTURE'}};
-    r.feedback.forEach(f => {
-      const s = srcMap[f.source] || {cls:'fc',icon:'A',lbl:(f.source||'AI').toUpperCase()};
-      html += `<div class="r-fcard ${s.cls}">
-        <div class="r-fhdr"><div class="r-ficon">${s.icon}</div><div class="r-fsrc">${s.lbl}</div></div>
-        <div class="r-fbody">
-          <div class="r-fmsg">${f.message}</div>
-          ${f.fix ? '<div class="r-ffix"><span class="r-ffix-arr">→</span> ' + f.fix + '</div>' : ''}
+  /* EXAMINER */
+  if (r.examiner) {
+    html += `<div class="persp-card persp-examiner">
+      <div class="persp-hdr">
+        <div class="persp-icon">E</div>
+        <div>
+          <div class="persp-role">EXAMINER</div>
+          <div class="persp-role-sub">Official Assessment</div>
         </div>
-      </div>`;
+        <div class="persp-band-chip">${band}</div>
+      </div>
+      <div class="persp-body">
+        <div class="persp-verdict">${r.examiner.verdict || ''}</div>
+        <div class="persp-rows">
+          <div class="persp-row"><span class="persp-row-label">Strength</span><span class="persp-row-val">${r.examiner.strength || ''}</span></div>
+          <div class="persp-row"><span class="persp-row-label">Weakness</span><span class="persp-row-val">${r.examiner.weakness || ''}</span></div>
+          <div class="persp-tip"><span class="persp-tip-icon">&#8594;</span>${r.examiner.tip || ''}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* TEACHER */
+  if (r.teacher) {
+    html += `<div class="persp-card persp-teacher">
+      <div class="persp-hdr">
+        <div class="persp-icon">T</div>
+        <div>
+          <div class="persp-role">TEACHER</div>
+          <div class="persp-role-sub">Pedagogical Insight</div>
+        </div>
+      </div>
+      <div class="persp-body">
+        <div class="persp-verdict">${r.teacher.observation || ''}</div>
+        <div class="persp-rows">
+          <div class="persp-row"><span class="persp-row-label">Pattern</span><span class="persp-row-val">${r.teacher.pattern || ''}</span></div>
+          <div class="persp-row"><span class="persp-row-label">Lesson</span><span class="persp-row-val">${r.teacher.lesson || ''}</span></div>
+          <div class="persp-tip"><span class="persp-tip-icon">&#8594;</span>${r.teacher.example || ''}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* COACH */
+  if (r.coach) {
+    html += `<div class="persp-card persp-coach">
+      <div class="persp-hdr">
+        <div class="persp-icon">C</div>
+        <div>
+          <div class="persp-role">COACH</div>
+          <div class="persp-role-sub">Action Strategy</div>
+        </div>
+        <div class="persp-predict-chip">&#8593; ${r.coach.prediction || ''}</div>
+      </div>
+      <div class="persp-body">
+        <div class="persp-verdict">${r.coach.motivation || ''}</div>
+        <div class="persp-rows">
+          <div class="persp-row"><span class="persp-row-label">Focus</span><span class="persp-row-val">${r.coach.focus || ''}</span></div>
+          <div class="persp-tip"><span class="persp-tip-icon">&#9654;</span>${r.coach.action || ''}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* THINKING GAPS */
+  if (r.thinking_gaps && r.thinking_gaps.length) {
+    html += `<div class="gaps-block">
+      <div class="gaps-label">THINKING GAPS DETECTED</div>`;
+    r.thinking_gaps.forEach(g => {
+      html += `<div class="gap-item"><span class="gap-icon">&#9650;</span>${g}</div>`;
     });
     html += '</div>';
   }
 
+  /* REWRITE */
   if (r.rewrite) {
-    html += `<div class="r-rw" id="rrw"><div class="r-rw-lbl">SUGGESTED REWRITE</div><div class="r-rw-box">${r.rewrite}</div></div>`;
+    html += `<div class="r-rw" id="rrw">
+      <div class="r-rw-lbl">SUGGESTED REWRITE</div>
+      <div class="r-rw-box">${r.rewrite}</div>
+    </div>`;
   }
+
+  html += '</div>';
 
   document.getElementById('apBody').innerHTML = html;
 
@@ -1002,15 +1159,21 @@ function showResults(r, wc) {
       arcAnim('rarc', 'rpct', band / maxVal * 100, 157);
     }, 50);
     setTimeout(() => {
+      document.getElementById('dsc')?.classList.add('vis');
+      const wsFill = document.getElementById('wsBar');
+      const tsFill = document.getElementById('tsBar');
+      if (wsFill) wsFill.style.width = ((r.writing_score || 0) / 10 * 100).toFixed(0) + '%';
+      if (tsFill) tsFill.style.width = ((r.thinking_score || 0) / 10 * 100).toFixed(0) + '%';
+      countUp('wsNum', 0, r.writing_score || 0, 700, 1);
+      countUp('tsNum', 0, r.thinking_score || 0, 700, 1);
+    }, 200);
+    setTimeout(() => {
       document.getElementById('rdims')?.classList.add('vis');
       setTimeout(() => { document.querySelectorAll('[id^="rd"]').forEach(e => e.style.width = e.dataset.p + '%'); }, 150);
-    }, 220);
+    }, 350);
     setTimeout(() => {
-      document.getElementById('rcog')?.classList.add('vis');
-      setTimeout(() => { document.querySelectorAll('[id^="rc"]').forEach(e => e.style.width = e.dataset.p + '%'); }, 150);
-    }, 390);
-    setTimeout(() => document.getElementById('rfb')?.classList.add('vis'), 540);
-    setTimeout(() => document.getElementById('rrw')?.classList.add('vis'), 680);
+      document.getElementById('persp')?.classList.add('vis');
+    }, 500);
   });
 
   setStatus('done', 'COMPLETE');
