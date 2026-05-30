@@ -1430,7 +1430,7 @@ body.fm .app-sidebar{display:none;}
     <a class="nav-link" href="https://niracademy.com" target="_blank">NIR Academy</a>
   </div>
   <div class="nav-actions" id="navActions">
-    <button class="btn-ghost" onclick="showLanding()">Home</button>
+    <button class="btn-ghost" onclick="openAuth()">Sign in</button>
     <button class="btn-nav-cta" onclick="showApp()">Start Writing &rarr;</button>
   </div>
   <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Open menu">
@@ -1459,6 +1459,7 @@ body.fm .app-sidebar{display:none;}
   </div>
   <div class="mm-footer">
     <button class="mm-cta" onclick="showApp();toggleMenu()">Start Writing Free &rarr;</button>
+    <button class="mm-cta" style="background:transparent;border:0.5px solid var(--border2);color:var(--t1);margin-top:8px" onclick="openAuth();toggleMenu()">Sign In</button>
     <div class="mm-note">Pedagogy First &middot; AI Enhanced &middot; Future Ready<br>Dr. Niki Majidi &middot; niracademy.com</div>
   </div>
 </div>
