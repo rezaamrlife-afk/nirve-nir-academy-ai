@@ -1682,6 +1682,9 @@ body.fm .app-sidebar{display:none;}
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:10px">
+      <div id="appNavUser" style="display:flex;align-items:center;gap:8px">
+        <!-- filled by updateNavForUser / updateNavForGuest -->
+      </div>
       <div class="app-ai"><div class="app-ai-dot"></div>AI ACTIVE</div>
       <select class="app-ctx" id="ctxSel" onchange="setCtx(this.value)">
         <option value="ielts_t2">IELTS Task 2</option>
@@ -3400,28 +3403,30 @@ function onUserLoggedOut() {
 }
 
 function updateNavForUser(user) {
-  var actions = document.getElementById('navActions');
-  if (!actions) return;
   var name = user.user_metadata && user.user_metadata.full_name
     ? user.user_metadata.full_name.split(' ')[0]
     : user.email.split('@')[0];
   var avatarUrl = user.user_metadata && user.user_metadata.avatar_url
     ? user.user_metadata.avatar_url : null;
   var initials = name.charAt(0).toUpperCase();
-
-  actions.innerHTML =
+  var userChip =
     '<div class="nav-user" onclick="showProfile()">' +
     '<div class="nav-avatar">' + (avatarUrl ? '<img src="' + avatarUrl + '">' : initials) + '</div>' +
     '<span class="nav-user-name">' + name + '</span>' +
     '</div>';
+  var actions = document.getElementById('navActions');
+  if (actions) actions.innerHTML = userChip;
+  var appNav = document.getElementById('appNavUser');
+  if (appNav) appNav.innerHTML = userChip;
 }
 
 function updateNavForGuest() {
+  var guestHtml =
+    '<button class="btn-ghost" onclick="openAuth()" style="flex-shrink:0">Sign in</button>';
   var actions = document.getElementById('navActions');
-  if (!actions) return;
-  actions.innerHTML =
-    '<button class="btn-ghost" onclick="openAuth()">Sign in</button>' +
-    '<button class="btn-nav-cta" onclick="showApp()">Start Writing &rarr;</button>';
+  if (actions) actions.innerHTML = guestHtml + '<button class="btn-nav-cta" onclick="showApp()">Start Writing &rarr;</button>';
+  var appNav = document.getElementById('appNavUser');
+  if (appNav) appNav.innerHTML = '<button class="btn-ghost" onclick="openAuth()" style="flex-shrink:0;padding:5px 12px;font-size:12px">Sign in</button>';
 }
 
 /* ── PROFILE VIEW ── */
@@ -3598,6 +3603,7 @@ function initAuthListeners() {
 }
 
 /* -- INIT -- */
+updateNavForGuest();
 initSupabase();
 initAuthListeners();
 buildTplList();
