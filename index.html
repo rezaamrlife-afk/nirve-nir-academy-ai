@@ -3672,7 +3672,19 @@ function initSupabase() {
           });
           var d = await r.json();
           if (!r.ok || d.error || d.msg) { console.error('[NIRVE] Signup error:', d); return {data: null, error: {message: d.error_description || d.msg || d.error || 'Signup failed (status ' + r.status + ')'}}; }
-          if (d.access_token) { _session = d; currentUser = d.user; localStorage.setItem('nirve_session', JSON.stringify(d)); onUserLoggedIn(d.user); }
+          if (d.access_token) {
+            _session = d; currentUser = d.user;
+            localStorage.setItem('nirve_session', JSON.stringify(d));
+            onUserLoggedIn(d.user);
+          } else if (d.user && d.user.id) {
+            // Supabase returned user but no token yet - sign them in
+            currentUser = d.user;
+            onUserLoggedIn(d.user);
+          } else if (d.id && d.email) {
+            // Direct user object returned
+            currentUser = d;
+            onUserLoggedIn(d);
+          }
           return {data: d, error: null};
         } catch(e) { return {data: null, error: {message: e.message}}; }
       },
@@ -3685,7 +3697,19 @@ function initSupabase() {
           });
           var d = await r.json();
           if (!r.ok || d.error || d.error_description) { console.error('[NIRVE] Login error:', d); return {data: null, error: {message: d.error_description || d.error || 'Login failed (status ' + r.status + ')'}}; }
-          if (d.access_token) { _session = d; currentUser = d.user; localStorage.setItem('nirve_session', JSON.stringify(d)); onUserLoggedIn(d.user); }
+          if (d.access_token) {
+            _session = d; currentUser = d.user;
+            localStorage.setItem('nirve_session', JSON.stringify(d));
+            onUserLoggedIn(d.user);
+          } else if (d.user && d.user.id) {
+            // Supabase returned user but no token yet - sign them in
+            currentUser = d.user;
+            onUserLoggedIn(d.user);
+          } else if (d.id && d.email) {
+            // Direct user object returned
+            currentUser = d;
+            onUserLoggedIn(d);
+          }
           return {data: d, error: null};
         } catch(e) { return {data: null, error: {message: e.message}}; }
       },
@@ -4041,6 +4065,10 @@ function onUserLoggedIn(user) {
   currentUser = user;
   updateNavForUser(user);
   closeAuth();
+  // Hide intro if still showing
+  var intro = document.getElementById('intro-screen');
+  if (intro) { intro.classList.add('hidden'); intro.style.display = 'none'; }
+  localStorage.setItem('nirve_intro_shown', '1');
   // Show welcome message
   var name = (user.user_metadata && user.user_metadata.full_name)
     ? user.user_metadata.full_name.split(' ')[0] : user.email.split('@')[0];
@@ -4203,6 +4231,19 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+
+function handleInstallClick() {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(function(r) {
+      if (r.outcome === 'accepted') dismissInstall();
+      deferredInstallPrompt = null;
+    });
+  } else {
+    dismissInstall();
+  }
+}
+
 /* -- INIT -- */
 updateNavForGuest();
 initSupabase();
@@ -4322,7 +4363,7 @@ initPanelListener();
     <div class="ib-title">Install NIRVE</div>
     <div class="ib-sub">Add to your home screen for instant access</div>
   </div>
-  <button class="ib-install" id="ib-install-btn">Install</button>
+  <button class="ib-install" id="ib-install-btn" onclick="handleInstallClick()">Install</button>
   <button class="ib-dismiss" onclick="dismissInstall()">Not now</button>
 </div>
 
