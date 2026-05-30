@@ -413,6 +413,48 @@ body.fm .app-sidebar{display:none;}
 .gap-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--t0);line-height:1.6;padding:7px 0;border-bottom:0.5px solid rgba(212,160,23,0.12);}
 .gap-item:last-child{border-bottom:none;}
 .gap-icon{color:var(--amber);font-size:8px;flex-shrink:0;margin-top:4px;}
+
+/* INSIGHT ENGINE */
+.insight-block{display:flex;align-items:flex-start;gap:14px;background:linear-gradient(135deg,rgba(26,155,138,0.08) 0%,rgba(26,155,138,0.04) 100%);border:0.5px solid var(--border2);border-radius:var(--r);padding:16px;opacity:0;transform:translateY(10px);transition:all 0.5s 0.65s cubic-bezier(0.22,1,0.36,1);}
+.insight-block.vis{opacity:1;transform:translateY(0);}
+.insight-icon{font-size:20px;color:var(--teal2);flex-shrink:0;margin-top:1px;}
+.insight-label{font-family:var(--mono);font-size:9px;color:var(--teal);letter-spacing:0.14em;font-weight:600;margin-bottom:6px;}
+.insight-text{font-size:14px;color:var(--t0);line-height:1.7;font-style:italic;}
+
+/* COGNITIVE MAP */
+.cmap-block{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:14px 16px;opacity:0;transform:translateY(10px);transition:all 0.5s 0.68s cubic-bezier(0.22,1,0.36,1);}
+.cmap-block.vis{opacity:1;transform:translateY(0);}
+.cmap-label{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.14em;font-weight:600;margin-bottom:12px;}
+.cmap-nodes{display:flex;flex-direction:column;gap:5px;}
+.cmap-node{border-radius:var(--r2);overflow:hidden;}
+.cmap-introduction{border-left:2px solid var(--teal);}
+.cmap-body{border-left:2px solid var(--blue);background:rgba(78,143,212,0.04);}
+.cmap-conclusion{border-left:2px solid var(--teal2);}
+.cmap-node-hdr{display:flex;align-items:center;gap:8px;padding:8px 12px;flex-wrap:wrap;}
+.cmap-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.cmap-node-label{font-size:13px;color:var(--t1);flex:1;font-weight:500;}
+.cmap-badge{font-size:10px;padding:2px 7px;border-radius:3px;font-family:var(--mono);letter-spacing:0.04em;}
+.cmap-ev{background:rgba(46,204,138,0.12);color:var(--green);border:0.5px solid rgba(46,204,138,0.2);}
+.cmap-no-ev{background:rgba(217,79,79,0.1);color:var(--red);border:0.5px solid rgba(217,79,79,0.2);}
+.cmap-ex{background:rgba(78,143,212,0.12);color:var(--blue);border:0.5px solid rgba(78,143,212,0.2);}
+.cmap-gaps{margin-top:10px;padding-top:10px;border-top:0.5px solid var(--border);display:flex;flex-direction:column;gap:5px;}
+.cmap-gap-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--amber);line-height:1.5;}
+.cmap-gap-icon{flex-shrink:0;margin-top:2px;font-size:10px;}
+
+/* EVOLUTION SIMULATOR */
+.evo-block{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:16px;opacity:0;transform:translateY(10px);transition:all 0.5s 0.85s cubic-bezier(0.22,1,0.36,1);}
+.evo-block.vis{opacity:1;transform:translateY(0);}
+.evo-label{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.14em;font-weight:600;margin-bottom:8px;}
+.evo-reason{font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.55;font-style:italic;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:var(--r2);}
+.evo-original{margin-bottom:14px;}
+.evo-orig-label{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.1em;margin-bottom:6px;}
+.evo-orig-text{font-size:13px;color:var(--t2);line-height:1.65;font-family:Georgia,serif;padding:10px 12px;background:rgba(0,0,0,0.15);border-radius:var(--r2);border-left:2px solid var(--t3);}
+.evo-levels{display:flex;flex-direction:column;gap:10px;}
+.evo-level{border-radius:var(--r2);overflow:hidden;}
+.evo-level-hdr{display:flex;align-items:flex-start;gap:10px;padding:8px 12px 6px;border-bottom:0.5px solid var(--border);}
+.evo-level-badge{font-family:var(--mono);font-size:10px;font-weight:700;padding:3px 10px;border-radius:4px;border:0.5px solid;flex-shrink:0;letter-spacing:0.06em;}
+.evo-level-change{font-size:11px;color:var(--t1);line-height:1.5;margin-top:2px;}
+.evo-level-text{font-size:13px;color:var(--t1);line-height:1.7;font-family:Georgia,serif;padding:10px 12px;}
 </style>
 </head>
 <body>
@@ -959,7 +1001,18 @@ function buildPrompt(text, ctxId) {
     '    "<specific gap in reasoning e.g. claim without evidence>",',
     '    "<another gap e.g. missing counterargument>"',
     '  ],',
-    '  "rewrite": "<improved version of the weakest paragraph>"',
+    '  "rewrite": "<improved version of the weakest paragraph only — not the full essay>",',
+    '  "insight": "<one powerful personalised insight about this writer that they could not easily discover themselves — e.g. You consistently introduce claims without evidence, or Your strongest skill is structure but weakest is analytical depth>",',
+    '  "cognitive_map": {',
+    '    "nodes": [',
+    '      {"id": "intro", "type": "introduction", "label": "<1-4 word summary>", "quality": <0-3>},',
+    '      {"id": "b1", "type": "body", "label": "<main claim of body 1>", "quality": <0-3>, "has_evidence": <true/false>, "has_example": <true/false>},',
+    '      {"id": "b2", "type": "body", "label": "<main claim of body 2>", "quality": <0-3>, "has_evidence": <true/false>, "has_example": <true/false>},',
+    '      {"id": "b3", "type": "body", "label": "<claim of body 3 if exists, else null>", "quality": <0-3>, "has_evidence": <true/false>, "has_example": <true/false>},',
+    '      {"id": "conc", "type": "conclusion", "label": "<1-4 word summary>", "quality": <0-3>}',
+    '    ],',
+    '    "gaps": ["<gap description e.g. B1 lacks evidence>", "<another gap>"]',
+    '  }',
     '}'
   ].join('\n');
 }/* -- ANALYZE -- */
@@ -1003,7 +1056,47 @@ async function doAnalyze() {
     }
     const data = await resp.json();
     const result = JSON.parse(data.choices[0].message.content);
-    showResults(result, wc);
+    // Evolution Simulator - second parallel call
+    let evolution = null;
+    try {
+      const evoPrompt = [
+        'You are an IELTS writing coach. Take the weakest paragraph from this essay and show its evolution across three band levels.',
+        '',
+        'Essay context: ' + currentCtx + ' — ' + CTXS[currentCtx].brief,
+        'Full essay:',
+        '---',
+        text,
+        '---',
+        'Identify the weakest paragraph. Then rewrite it at Band 6, Band 7, and Band 8 level.',
+        'For each level, add a one-sentence explanation of what changed.',
+        '',
+        'Return ONLY valid JSON:',
+        '{',
+        '  "weakest_paragraph": "<original text of the weakest paragraph>",',
+        '  "weakness_reason": "<why this paragraph is the weakest>",',
+        '  "band6": {"text": "<rewritten at band 6>", "change": "<what improved vs original>"},',
+        '  "band7": {"text": "<rewritten at band 7>", "change": "<what improved vs band 6>"},',
+        '  "band8": {"text": "<rewritten at band 8>", "change": "<what improved vs band 7>"}'
+        ,'}'
+      ].join('\n');
+      const evoResp = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','Authorization':'Bearer ' + GROQ_KEY},
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          messages: [{role:'user', content: evoPrompt}],
+          temperature: 0.4,
+          max_tokens: 1200,
+          response_format: {type:'json_object'}
+        })
+      });
+      if (evoResp.ok) {
+        const evoData = await evoResp.json();
+        evolution = JSON.parse(evoData.choices[0].message.content);
+      }
+    } catch(evoErr) { evolution = null; }
+
+    showResults(result, wc, evolution);
   } catch(e) {
     document.getElementById('apBody').innerHTML = `
       <div class="err-wrap">
@@ -1018,7 +1111,7 @@ async function doAnalyze() {
 }
 
 /* -- SHOW RESULTS -- */
-function showResults(r, wc) {
+function showResults(r, wc, evolution) {
   const c = CTXS[currentCtx];
   const band = r.band;
   const maxVal = c.type === 'band' ? 9 : 10;
@@ -1163,6 +1256,62 @@ function showResults(r, wc) {
     </div>`;
   }
 
+  /* INSIGHT ENGINE */
+  if (r.insight) {
+    html += `<div class="insight-block" id="ins">
+      <div class="insight-icon">&#9670;</div>
+      <div class="insight-content">
+        <div class="insight-label">NIRVE INSIGHT</div>
+        <div class="insight-text">${r.insight}</div>
+      </div>
+    </div>`;
+  }
+
+  /* COGNITIVE MAP */
+  if (r.cognitive_map && r.cognitive_map.nodes) {
+    html += '<div class="cmap-block" id="cmap"><div class="cmap-label">COGNITIVE MAP</div>';
+    html += '<div class="cmap-nodes">';
+    r.cognitive_map.nodes.forEach(function(node) {
+      if (!node || !node.label) return;
+      const qualColors = ['var(--red)', 'var(--amber)', 'var(--teal)', 'var(--green)'];
+      const qc = qualColors[Math.min(node.quality || 0, 3)];
+      const badges = [];
+      if (node.has_evidence === true) badges.push('<span class="cmap-badge cmap-ev">Evidence</span>');
+      if (node.has_evidence === false && node.type === 'body') badges.push('<span class="cmap-badge cmap-no-ev">No Evidence</span>');
+      if (node.has_example === true) badges.push('<span class="cmap-badge cmap-ex">Example</span>');
+      html += '<div class="cmap-node cmap-' + node.type + '">';
+      html += '<div class="cmap-node-hdr"><div class="cmap-dot" style="background:' + qc + '"></div><div class="cmap-node-label">' + node.label + '</div>' + badges.join('') + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    if (r.cognitive_map.gaps && r.cognitive_map.gaps.length) {
+      html += '<div class="cmap-gaps">';
+      r.cognitive_map.gaps.forEach(function(g) {
+        html += '<div class="cmap-gap-item"><span class="cmap-gap-icon">&#9661;</span>' + g + '</div>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  /* EVOLUTION SIMULATOR */
+  if (evolution && evolution.band6) {
+    html += '<div class="evo-block" id="evo">';
+    html += '<div class="evo-label">WRITING EVOLUTION SIMULATOR</div>';
+    if (evolution.weakness_reason) {
+      html += '<div class="evo-reason">' + evolution.weakness_reason + '</div>';
+    }
+    html += '<div class="evo-original"><div class="evo-orig-label">YOUR VERSION</div><div class="evo-orig-text">' + (evolution.weakest_paragraph || '') + '</div></div>';
+    html += '<div class="evo-levels">';
+    [['band6','BAND 6','var(--amber)'], ['band7','BAND 7','var(--teal)'], ['band8','BAND 8','var(--green)']].forEach(function(item) {
+      const key = item[0], label = item[1], col = item[2];
+      const level = evolution[key];
+      if (!level) return;
+      html += '<div class="evo-level"><div class="evo-level-hdr" style="color:' + col + '"><div class="evo-level-badge" style="background:' + col + '22;border-color:' + col + '44">' + label + '</div><div class="evo-level-change">' + (level.change || '') + '</div></div><div class="evo-level-text">' + (level.text || '') + '</div></div>';
+    });
+    html += '</div></div>';
+  }
+
   html += '</div>';
 
   document.getElementById('apBody').innerHTML = html;
@@ -1189,6 +1338,13 @@ function showResults(r, wc) {
     setTimeout(() => {
       document.getElementById('persp')?.classList.add('vis');
     }, 500);
+    setTimeout(() => {
+      document.getElementById('ins')?.classList.add('vis');
+      document.getElementById('cmap')?.classList.add('vis');
+    }, 700);
+    setTimeout(() => {
+      document.getElementById('evo')?.classList.add('vis');
+    }, 900);
   });
 
   setStatus('done', 'COMPLETE');
