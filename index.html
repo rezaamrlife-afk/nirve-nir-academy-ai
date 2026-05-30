@@ -229,7 +229,7 @@ footer{padding:48px 52px;border-top:0.5px solid var(--border);position:relative;
 .app-main{display:grid;grid-template-columns:200px 1fr 350px;flex:1;min-height:0;overflow:hidden;}
 
 /* SIDEBAR */
-.app-sidebar{border-right:0.5px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:3px;background:rgba(7,9,11,0.4);overflow-y:auto;}
+.app-sidebar{border-right:0.5px solid var(--border);padding:16px 12px 24px;display:flex;flex-direction:column;gap:3px;background:rgba(7,9,11,0.4);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;}
 .as-section{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.14em;text-transform:uppercase;padding:8px 10px 4px;}
 .as-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--r3);font-size:14px;color:var(--t2);cursor:pointer;transition:all 0.15s;border:0.5px solid transparent;}
 .as-item:hover{color:var(--t1);background:rgba(255,255,255,0.03);}
@@ -785,6 +785,31 @@ body.fm .app-sidebar{display:none;}
 .bp-spark-bar{flex:1;border-radius:2px 2px 0 0;min-height:4px;transition:height 0.3s ease;}
 .bp-spark-vals{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--t2);margin-top:3px;}
 .bp-note{font-size:11px;color:var(--t2);line-height:1.5;font-style:italic;padding-top:8px;border-top:0.5px solid var(--border);}
+
+/* WRITING DNA PROFILE */
+.dna-panel{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--r);padding:14px;margin-bottom:12px;animation:riseUp 0.5s cubic-bezier(0.22,1,0.36,1) both;}
+.dna-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.dna-title{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--teal2);letter-spacing:0.12em;}
+.dna-badge{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:3px;background:rgba(26,155,138,0.1);border:0.5px solid var(--border2);color:var(--teal);letter-spacing:0.06em;}
+.dna-summary{display:flex;flex-direction:column;gap:5px;padding:8px 10px;background:rgba(0,0,0,0.18);border-radius:var(--r2);margin-bottom:12px;}
+.dna-sw{display:flex;align-items:center;gap:7px;font-size:12px;}
+.dna-sw-icon{font-size:8px;flex-shrink:0;}
+.dna-str-icon{color:var(--green);}
+.dna-wk-icon{color:var(--amber);}
+.dna-sw-label{color:var(--t2);width:58px;flex-shrink:0;}
+.dna-sw-val{font-weight:500;}
+.dna-dims{display:flex;flex-direction:column;gap:10px;}
+.dna-dim{}
+.dna-dim-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.dna-dim-label{font-size:12px;color:var(--t1);font-weight:500;}
+.dna-dim-val{font-family:var(--mono);font-size:12px;font-weight:600;}
+.dna-dim-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:3px;}
+.dna-dim-fill{height:100%;border-radius:2px;transition:width 0.9s cubic-bezier(0.22,1,0.36,1);}
+.dna-dim-desc{font-size:10px;color:var(--t2);}
+
+/* SIDEBAR SECTION DIVIDERS */
+.sidebar-section-title{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:0.12em;text-transform:uppercase;padding:14px 10px 6px;border-top:0.5px solid var(--border);margin-top:8px;}
+.sidebar-section-title:first-child{border-top:none;margin-top:0;padding-top:4px;}
 </style>
 </head>
 <body>
@@ -1095,7 +1120,7 @@ body.fm .app-sidebar{display:none;}
 
     <!-- SIDEBAR -->
     <div class="app-sidebar" id="appSidebar">
-      <div class="as-section">Writing Mode</div>
+      <div class="sidebar-section-title">Writing Mode</div>
       <div id="tplList"></div>
       <div class="as-founder">
         <div class="asf-label">FOUNDER</div>
@@ -1433,6 +1458,133 @@ function bpRenderPrediction() {
   }
 }
 
+
+/* ═══════════════════════════════════════════════════════
+   WRITING DNA PROFILE
+   Builds a unique writing profile from session data
+   ═══════════════════════════════════════════════════════ */
+
+const DNA_DIMS = [
+  { key: 'analytical',   label: 'Analytical',   desc: 'Logic & reasoning depth' },
+  { key: 'academic',     label: 'Academic',      desc: 'Formal register & precision' },
+  { key: 'persuasive',   label: 'Persuasive',    desc: 'Argument strength' },
+  { key: 'structural',   label: 'Structural',    desc: 'Organisation & flow' },
+  { key: 'evidence',     label: 'Evidence',      desc: 'Use of support & examples' },
+  { key: 'vocabulary',   label: 'Vocabulary',    desc: 'Lexical range & accuracy' },
+];
+
+function dnaExtract(result) {
+  // Extract DNA dimensions from AI result
+  var dna = {};
+  var cog = result.cognitive || {};
+  var scores = result.scores || {};
+  var ts = result.thinking_score || 5;
+  var ws = result.writing_score || 5;
+  var band = result.band || 5;
+
+  // Analytical = thinking_score + reasoning
+  dna.analytical = Math.min(100, Math.round(((ts / 10) * 60 + (cog.reasoning || 5) / 10 * 40)));
+
+  // Academic = writing_score weighted + register score if exists
+  var regScore = scores['Register'] || scores['LR'] || scores['GA'] || 6;
+  dna.academic = Math.min(100, Math.round((ws / 10 * 50 + regScore / 9 * 50)));
+
+  // Persuasive = TR score + argument quality
+  var trScore = scores['TR'] || scores['Argument'] || scores['Task Response'] || band;
+  dna.persuasive = Math.min(100, Math.round((trScore / 9 * 60 + (cog.reasoning || 5) / 10 * 40)));
+
+  // Structural = CC score + structure cognitive
+  var ccScore = scores['CC'] || scores['Structure'] || scores['Organisation'] || band;
+  dna.structural = Math.min(100, Math.round((ccScore / 9 * 55 + (cog.structure || 5) / 10 * 45)));
+
+  // Evidence = idea quality + thinking gaps count (inverse)
+  var gapPenalty = Math.min(3, (result.thinking_gaps || []).length) * 8;
+  dna.evidence = Math.min(100, Math.max(10, Math.round((cog.idea_quality || 5) / 10 * 80 + 20 - gapPenalty)));
+
+  // Vocabulary = LR score
+  var lrScore = scores['LR'] || scores['Lexical Resource'] || scores['Vocabulary'] || band;
+  dna.vocabulary = Math.min(100, Math.round((lrScore / 9) * 100));
+
+  return dna;
+}
+
+function dnaLoad() {
+  var mem = wmeLoad();
+  return mem.dna || null;
+}
+
+function dnaUpdate(newDna) {
+  var mem = wmeLoad();
+  if (!mem.dna) {
+    mem.dna = newDna;
+  } else {
+    // Weighted moving average — new session has 30% weight
+    DNA_DIMS.forEach(function(d) {
+      mem.dna[d.key] = Math.round(mem.dna[d.key] * 0.7 + newDna[d.key] * 0.3);
+    });
+  }
+  wmeSave(mem);
+}
+
+function dnaGetStrengthWeakness(dna) {
+  if (!dna) return { strength: null, weakness: null };
+  var sorted = DNA_DIMS.map(function(d) {
+    return { label: d.label, val: dna[d.key] || 0 };
+  }).sort(function(a, b) { return b.val - a.val; });
+  return { strength: sorted[0], weakness: sorted[sorted.length - 1] };
+}
+
+function dnaRender() {
+  var existing = document.getElementById('dna-panel');
+  if (existing) existing.remove();
+
+  var dna = dnaLoad();
+  if (!dna) return;
+
+  var sw = dnaGetStrengthWeakness(dna);
+
+  var html = '<div class="dna-panel" id="dna-panel">';
+  html += '<div class="dna-hdr">';
+  html += '<div class="dna-title">WRITING DNA</div>';
+  html += '<div class="dna-badge">Profile</div>';
+  html += '</div>';
+
+  // Strength / Weakness summary
+  if (sw.strength && sw.weakness) {
+    html += '<div class="dna-summary">';
+    html += '<div class="dna-sw"><span class="dna-sw-icon dna-str-icon">&#9650;</span><span class="dna-sw-label">Strongest:</span><span class="dna-sw-val" style="color:var(--green)">' + sw.strength.label + '</span></div>';
+    html += '<div class="dna-sw"><span class="dna-sw-icon dna-wk-icon">&#9660;</span><span class="dna-sw-label">Weakest:</span><span class="dna-sw-val" style="color:var(--amber)">' + sw.weakness.label + '</span></div>';
+    html += '</div>';
+  }
+
+  // DNA dimensions
+  html += '<div class="dna-dims">';
+  DNA_DIMS.forEach(function(d) {
+    var val = dna[d.key] || 0;
+    var color = val >= 75 ? 'var(--green)' : val >= 50 ? 'var(--teal)' : val >= 30 ? 'var(--amber)' : 'var(--red)';
+    html += '<div class="dna-dim">';
+    html += '<div class="dna-dim-top"><span class="dna-dim-label">' + d.label + '</span><span class="dna-dim-val" style="color:' + color + '">' + val + '%</span></div>';
+    html += '<div class="dna-dim-bar"><div class="dna-dim-fill" style="width:' + val + '%;background:' + color + '"></div></div>';
+    html += '<div class="dna-dim-desc">' + d.desc + '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  html += '</div>';
+
+  // Insert after bp-panel or wme-panel
+  var bp = document.getElementById('bp-panel');
+  var wme = document.getElementById('wme-panel');
+  var founder = document.querySelector('.as-founder');
+  if (bp) {
+    bp.insertAdjacentHTML('afterend', html);
+  } else if (wme) {
+    wme.insertAdjacentHTML('afterend', html);
+  } else if (founder) {
+    founder.insertAdjacentHTML('beforebegin', html);
+  }
+}
+
 const CTXS = {
   ielts_t2: {label:'IELTS Task 2',color:'#1A9B8A',minW:250,type:'band',dims:['TR','CC','LR','GA'],
     brief:'Some people believe universities should focus on academic knowledge. Others think universities should prepare students for employment. Discuss both views and give your own opinion. Write at least 250 words.'},
@@ -1474,7 +1626,7 @@ function showApp() {
   document.getElementById('mainNav').style.display = 'none';
   buildTplList();
   setCtx('ielts_t2');
-  setTimeout(function(){ renderWMEPanel(); bpRenderPrediction(); }, 200);
+  setTimeout(function(){ renderWMEPanel(); bpRenderPrediction(); dnaRender(); }, 200);
 }
 
 function goTo(id) {
@@ -1728,6 +1880,9 @@ async function doAnalyze() {
 
     wmeRecord(result, currentCtx);
     bpRenderPrediction();
+    var dna = dnaExtract(result);
+    dnaUpdate(dna);
+    dnaRender();
     showResults(result, wc, evolution);
   } catch(e) {
     document.getElementById('apBody').innerHTML = `
