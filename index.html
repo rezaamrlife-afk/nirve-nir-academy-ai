@@ -1656,7 +1656,7 @@ body.fm .app-sidebar{display:none;}
   </div>
   <div class="mm-links">
     <div class="mm-section">Explore</div>
-    <a class="mm-link" onclick="goTo('features');toggleMenu()"><span class="mm-icon">&#9670;</span>Features</a>
+    <a class="mm-link" onclick="navigate('landing');setTimeout(function(){goTo('features');},100);toggleMenu()"><span class="mm-icon">&#9670;</span>Features</a>
     <a class="mm-link" onclick="goTo('scoring');toggleMenu()"><span class="mm-icon">&#9670;</span>Scoring</a>
     <a class="mm-link" onclick="goTo('testimonials');toggleMenu()"><span class="mm-icon">&#9670;</span>Results</a>
     <a class="mm-link" href="https://niracademy.com" target="_blank"><span class="mm-icon">&#9670;</span>NIR Academy</a>
@@ -2941,24 +2941,75 @@ const BDESC = {9:'Expert User',8.5:'Expert User',8:'Very Good User',7.5:'Good Us
 let currentCtx = 'ielts_t2', busy = false, lastBand = null, fm = false;
 
 /* -- VIEW SWITCHING -- */
-function showLanding() {
-  document.getElementById('landing').style.display = 'block';
-  document.getElementById('mainNav').style.display = 'flex';
-  document.getElementById('app-view').style.display = 'none';
+
+/* ═══════════════════════════════════════════════
+   CENTRAL NAVIGATION SYSTEM
+   Single source of truth for all page switching
+   ═══════════════════════════════════════════════ */
+
+var VIEWS = ['landing', 'app-view', 'profile-view'];
+
+function navigate(page) {
+  // Hide ALL views first
+  VIEWS.forEach(function(v) {
+    var el = document.getElementById(v);
+    if (el) { el.style.display = 'none'; }
+  });
+
+  // Reset body
   document.body.style.overflow = '';
-  document.getElementById('navLinks').style.display = '';
+  document.body.classList.remove('panel-open');
+
+  // Show target view
+  switch(page) {
+    case 'landing':
+      var el = document.getElementById('landing');
+      if (el) el.style.display = 'block';
+      var nav = document.getElementById('mainNav');
+      if (nav) nav.style.display = 'flex';
+      var nl = document.getElementById('navLinks');
+      if (nl) nl.style.display = '';
+      var na = document.getElementById('navActions');
+      // Restore nav actions
+      if (currentUser) {
+        updateNavForUser(currentUser);
+      } else {
+        updateNavForGuest();
+      }
+      break;
+
+    case 'app':
+      var el = document.getElementById('app-view');
+      if (el) el.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      var nav = document.getElementById('mainNav');
+      if (nav) nav.style.display = 'none';
+      buildTplList();
+      setCtx('ielts_t2');
+      setTimeout(function(){ renderWMEPanel(); bpRenderPrediction(); dnaRender(); }, 200);
+      break;
+
+    case 'profile':
+      if (!currentUser) { openAuth(); return; }
+      var el = document.getElementById('profile-view');
+      if (el) el.style.display = 'block';
+      var nav = document.getElementById('mainNav');
+      if (nav) nav.style.display = 'flex';
+      var nl = document.getElementById('navLinks');
+      if (nl) nl.style.display = 'none';
+      loadProfileData();
+      break;
+  }
 }
 
-function showApp() {
-  document.getElementById('landing').style.display = 'none';
-  document.getElementById('app-view').style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  document.getElementById('navLinks').style.display = 'none';
-  document.getElementById('mainNav').style.display = 'none';
-  buildTplList();
-  setCtx('ielts_t2');
-  setTimeout(function(){ renderWMEPanel(); bpRenderPrediction(); dnaRender(); }, 200);
+/* Public navigation wrappers */
+function showLanding() { navigate('landing'); }
+function showApp()     {
+  navigate('app');
+  if (!localStorage.getItem('nirve_intro_shown')) return; // intro will show
 }
+function showProfile() { navigate('profile'); }
+
 
 function goTo(id) {
   document.getElementById(id)?.scrollIntoView({behavior:'smooth'});
@@ -3541,8 +3592,9 @@ const obs = new IntersectionObserver(entries => {
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
 /* -- NAV SCROLL -- */
-window.addEventListener('scroll', () => {
-  document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 50);
+window.addEventListener('scroll', function() {
+  var nav = document.getElementById('mainNav');
+  if (nav) nav.classList.toggle('scrolled', window.scrollY > 50);
 }, {passive:true});
 
 
@@ -3551,7 +3603,7 @@ function toggleMenu() {
   var menu = document.getElementById('mobileMenu');
   var backdrop = document.getElementById('mmBackdrop');
   var hamburger = document.getElementById('hamburger');
-  if (!menu) return;
+  if (!menu || !backdrop || !hamburger) return;
   var isOpen = menu.classList.contains('open');
   if (isOpen) {
     menu.classList.remove('open');
@@ -3730,7 +3782,6 @@ function initSupabase() {
     var refreshToken = params.get('refresh_token');
     var expiresIn = params.get('expires_in');
     if (accessToken) {
-      // Get user info
       fetch(SUPA_URL + '/auth/v1/user', {
         headers: {'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + accessToken}
       }).then(function(r) { return r.json(); }).then(function(user) {
@@ -3746,17 +3797,6 @@ function initSupabase() {
 
 
 /* ── PROFILE VIEW ── */
-async function showProfile() {
-  if (!currentUser) { openAuth(); return; }
-
-  document.getElementById('landing').style.display = 'none';
-  document.getElementById('app-view').style.display = 'none';
-  document.getElementById('profile-view').style.display = 'block';
-  document.getElementById('mainNav').style.display = 'flex';
-
-  await loadProfileData();
-}
-
 async function loadProfileData() {
   if (!supabase || !currentUser) return;
 
@@ -3981,8 +4021,11 @@ async function handleAuthSubmit() {
 }
 
 async function signOut() {
-  if (supabase) await supabase.auth.signOut();
-  showLanding();
+  if (supabase) supabase.auth.signOut();
+  currentUser = null;
+  localStorage.removeItem('nirve_session');
+  updateNavForGuest();
+  navigate('landing');
 }
 
 function onUserLoggedIn(user) {
@@ -4107,8 +4150,9 @@ var introShown = localStorage.getItem('nirve_intro_shown');
 
 function initIntro() {
   // Show intro only first time
-  if (introShown) {
-    document.getElementById('intro-screen').classList.add('hidden');
+  var introEl = document.getElementById('intro-screen');
+  if (introShown && introEl) {
+    introEl.classList.add('hidden');
   }
   // PWA install prompt - also show banner after delay if dismissed before
   window.addEventListener('beforeinstallprompt', function(e) {
@@ -4135,23 +4179,29 @@ function initIntro() {
           if (r.outcome === 'accepted') dismissInstall();
           deferredInstallPrompt = null;
         });
+      } else {
+        // Fallback: show instructions
+        alert('To install NIRVE: open browser menu → "Add to Home Screen" or "Install App"');
       }
     });
   }
 }
 
 function goIntroStep(n) {
-  document.querySelectorAll('.intro-step').forEach(function(s) { s.classList.remove('active'); });
+  var steps = document.querySelectorAll('.intro-step');
+  if (!steps || steps.length === 0) return;
+  steps.forEach(function(s) { s.classList.remove('active'); });
   var step = document.getElementById('intro-step-' + n);
   if (step) step.classList.add('active');
 }
 
 function closeIntro() {
   var screen = document.getElementById('intro-screen');
+  if (!screen) return;
   screen.style.opacity = '0';
   screen.style.transition = 'opacity 0.5s ease';
   screen.style.pointerEvents = 'none';
-  setTimeout(function() { screen.classList.add('hidden'); }, 500);
+  setTimeout(function() { if(screen) screen.classList.add('hidden'); }, 500);
   localStorage.setItem('nirve_intro_shown', '1');
   // Show install banner after intro closes
   if (!localStorage.getItem('nirve_install_dismissed')) {
@@ -4162,6 +4212,7 @@ function closeIntro() {
 /* Welcome overlay */
 function showWelcome(userName) {
   var overlay = document.getElementById('welcomeOverlay');
+  if (!overlay) return;
   var nameEl = document.getElementById('welcomeName');
   var msgEl = document.getElementById('welcomeMsg');
   if (!overlay) return;
@@ -4212,7 +4263,7 @@ setTimeout(function() {
 }, 1500);
 
 // Mobile panel close on backdrop tap
-document.addEventListener('DOMContentLoaded', function() {
+function initPanelListener() {
   var panel = document.getElementById('appPanel');
   if (!panel) return;
   panel.addEventListener('click', function(e) {
@@ -4223,8 +4274,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   });
-});
-
+}
+initPanelListener();
 </script>
 
 
