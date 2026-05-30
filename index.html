@@ -51,20 +51,20 @@ nav.scrolled .nav-line{opacity:0.45;}
 
 /* HERO */
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:130px 52px 80px;}
-.hero-badge{display:inline-flex;align-items:center;gap:9px;padding:6px 18px;border-radius:30px;border:0.5px solid var(--border2);background:rgba(26,155,138,0.06);font-family:var(--mono);font-size:11px;color:var(--teal2);letter-spacing:0.1em;margin-bottom:36px;opacity:0;animation:riseUp 0.8s 0.1s cubic-bezier(0.22,1,0.36,1) forwards;}
+.hero-badge{display:inline-flex;align-items:center;gap:9px;padding:6px 18px;border-radius:30px;border:0.5px solid var(--border2);background:rgba(26,155,138,0.06);font-family:var(--mono);font-size:11px;color:var(--teal2);letter-spacing:0.1em;margin-bottom:36px;opacity:1;}
 .badge-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);animation:pulse 2s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 10px var(--teal)}50%{opacity:0.4;box-shadow:0 0 4px var(--teal)}}
-.hero-title{font-family:var(--serif);font-size:clamp(46px,7.5vw,82px);font-weight:400;line-height:1.06;letter-spacing:-0.025em;color:var(--t0);max-width:860px;margin-bottom:26px;opacity:0;animation:riseUp 0.9s 0.22s cubic-bezier(0.22,1,0.36,1) forwards;}
+.hero-title{font-family:var(--serif);font-size:clamp(46px,7.5vw,82px);font-weight:400;line-height:1.06;letter-spacing:-0.025em;color:var(--t0);max-width:860px;margin-bottom:26px;opacity:1;}
 .hero-title em{font-style:italic;color:var(--teal3);}
-.hero-sub{font-size:18px;font-weight:400;color:var(--t1);max-width:520px;line-height:1.75;margin-bottom:44px;opacity:0;animation:riseUp 0.9s 0.35s cubic-bezier(0.22,1,0.36,1) forwards;}
-.hero-actions{display:flex;align-items:center;gap:14px;margin-bottom:76px;opacity:0;animation:riseUp 0.9s 0.46s cubic-bezier(0.22,1,0.36,1) forwards;}
+.hero-sub{font-size:18px;font-weight:400;color:var(--t1);max-width:520px;line-height:1.75;margin-bottom:44px;opacity:1;}
+.hero-actions{display:flex;align-items:center;gap:14px;margin-bottom:76px;opacity:1;}
 .btn-cta{padding:14px 34px;border-radius:10px;background:var(--teal);border:none;color:#000;font-family:var(--sans);font-size:16px;font-weight:600;cursor:pointer;transition:all 0.24s;position:relative;overflow:hidden;}
 .btn-cta:hover{background:var(--teal2);box-shadow:0 0 52px rgba(26,155,138,0.22);transform:translateY(-1px);}
 .btn-cta-o{padding:14px 34px;border-radius:10px;border:0.5px solid var(--border2);background:transparent;color:var(--t1);font-family:var(--sans);font-size:16px;font-weight:500;cursor:pointer;transition:all 0.22s;}
 .btn-cta-o:hover{border-color:var(--teal);color:var(--teal2);}
 
 /* APP SHELL PREVIEW */
-.app-shell-preview{width:100%;max-width:1100px;margin:0 auto;border-radius:18px;border:0.5px solid var(--border2);overflow:hidden;background:var(--bg1);box-shadow:0 0 0 0.5px rgba(26,155,138,0.1),0 48px 96px rgba(0,0,0,0.55);opacity:0;animation:riseUp 1s 0.58s cubic-bezier(0.22,1,0.36,1) forwards;position:relative;}
+.app-shell-preview{width:100%;max-width:1100px;margin:0 auto;border-radius:18px;border:0.5px solid var(--border2);overflow:hidden;background:var(--bg1);box-shadow:0 0 0 0.5px rgba(26,155,138,0.1),0 48px 96px rgba(0,0,0,0.55);opacity:1;position:relative;}
 .app-shell-preview::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(26,155,138,0.5),rgba(34,186,166,0.8),rgba(26,155,138,0.5),transparent);}
 .preview-bar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:48px;background:rgba(7,9,11,0.9);border-bottom:0.5px solid var(--border);}
 .p-dots{display:flex;gap:7px;}
@@ -390,7 +390,7 @@ body.fm .app-sidebar{display:none;}
 </nav>
 
 <!-- ═══════════════════════════════ LANDING -->
-<div id="landing">
+<div id="landing" style="display:block">
 
 <!-- HERO -->
 <section class="hero">
@@ -603,7 +603,7 @@ body.fm .app-sidebar{display:none;}
 </div><!-- /landing -->
 
 <!-- ═══════════════════════════════ APP -->
-<div id="app-view">
+<div id="app-view" style="display:none">
 <div class="app-wrap">
 
   <!-- APP TOPBAR -->
@@ -736,7 +736,7 @@ let currentCtx = 'ielts_t2', busy = false, lastBand = null, fm = false;
 
 /* -- VIEW SWITCHING -- */
 function showLanding() {
-  document.getElementById('landing').style.display = '';
+  document.getElementById('landing').style.display = 'block';
   document.getElementById('app-view').style.display = 'none';
   document.body.style.overflow = '';
   document.getElementById('navLinks').style.display = '';
@@ -744,7 +744,7 @@ function showLanding() {
 
 function showApp() {
   document.getElementById('landing').style.display = 'none';
-  document.getElementById('app-view').style.display = '';
+  document.getElementById('app-view').style.display = 'block';
   document.body.style.overflow = 'hidden';
   document.getElementById('navLinks').style.display = 'none';
   buildTplList();
@@ -1041,6 +1041,14 @@ window.addEventListener('scroll', () => {
 
 /* -- INIT -- */
 buildTplList();
+// Fallback: ensure hero is visible even if animations fail
+setTimeout(function() {
+  var els = document.querySelectorAll('.hero-badge,.hero-title,.hero-sub,.hero-actions,.app-shell-preview');
+  els.forEach(function(el) {
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+  });
+}, 1500);
 </script>
 </body>
 </html>
