@@ -3755,7 +3755,10 @@ function buildTplList() {
 function setCtx(id) {
   currentCtx = id;
   const c = CTXS[id];
-  document.getElementById('briefTxt').textContent = c.brief;
+  // Use rotating prompt bank
+  var prompt = getNextPrompt(id);
+  c.brief = prompt;
+  document.getElementById('briefTxt').textContent = prompt;
   const brief = document.getElementById('aeBrief');
   brief.style.borderLeftColor = c.color;
   document.getElementById('wcTarget').textContent = c.minW > 0 ? '/ ' + c.minW + ' min' : '';
