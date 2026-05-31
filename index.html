@@ -3641,7 +3641,7 @@ const CTXS = {
   ielts_t2: {label:'IELTS Task 2',color:'#1A9B8A',minW:250,type:'band',dims:['TR','CC','LR','GA'],
     brief:'Some people believe universities should focus on academic knowledge. Others think universities should prepare students for employment. Discuss both views and give your own opinion. Write at least 250 words.'},
   ielts_t1: {label:'IELTS Task 1',color:'#1A9B8A',minW:150,type:'band',dims:['TR','CC','LR','GA'],
-    brief:'The bar chart shows household ownership vs rented accommodation in England and Wales 1918-2011. Summarise main features and make comparisons. Write at least 150 words.'},
+    brief:'You recently moved into a new apartment and have noticed several problems. Write a letter to your landlord describing the problems and asking them to resolve the issues. Write at least 150 words.'},
   toefl: {label:'TOEFL Independent',color:'#2ABBA6',minW:300,type:'toefl',dims:['Task Response','Language Use','Development'],
     brief:'Do you agree or disagree: It is better to have broad knowledge of many subjects than to specialize in one. Use specific reasons and examples.'},
   academic: {label:'Academic Essay',color:'#D4A017',minW:500,type:'academic',dims:['Argument','Structure','Evidence','Register'],
@@ -4808,13 +4808,15 @@ function updateNavForUser(user) {
     ? user.user_metadata.full_name.split(' ')[0] : user.email.split('@')[0];
   var avatarUrl = user.user_metadata && user.user_metadata.avatar_url ? user.user_metadata.avatar_url : null;
   var initials = name.charAt(0).toUpperCase();
+  var toggleBtn = '<button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" style="flex-shrink:0">🌙</button>';
   var chip = '<div class="nav-user" onclick="showProfile()">' +
     '<div class="nav-avatar">' + (avatarUrl ? '<img src="' + avatarUrl + '">' : initials) + '</div>' +
     '<span class="nav-user-name">' + name + '</span></div>';
   var a = document.getElementById('navActions');
-  if (a) a.innerHTML = chip;
+  if (a) a.innerHTML = toggleBtn + chip;
   var b = document.getElementById('appNavUser');
   if (b) b.innerHTML = chip;
+  applyTheme(_theme);
 }
 
 function updateNavForGuest() {
