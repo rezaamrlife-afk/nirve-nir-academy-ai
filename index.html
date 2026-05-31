@@ -2367,6 +2367,93 @@ body.fm .app-sidebar{display:none;}
   background: rgba(212,160,23,0.15);
   border-color: var(--amber);
 }
+
+/* ═══════════════════════════════════════════════
+   PRINT / PDF EXPORT
+   ═══════════════════════════════════════════════ */
+@media print {
+  /* Hide everything except report */
+  body > *:not(#nirve-report) { display: none !important; }
+  #nirve-report { display: block !important; }
+
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  @page { margin: 20mm 16mm; size: A4; }
+}
+
+/* Report container — hidden until print */
+#nirve-report {
+  display: none;
+  font-family: 'Georgia', serif;
+  color: #0D1B2A;
+  background: #fff;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 40px;
+}
+.rpt-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  border-bottom: 2px solid #0E8F7F;
+  padding-bottom: 16px; margin-bottom: 24px;
+}
+.rpt-brand { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 700; color: #0E8F7F; letter-spacing: 0.2em; }
+.rpt-brand-sub { font-size: 10px; color: #6B8499; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+.rpt-meta { text-align: right; font-size: 12px; color: #6B8499; line-height: 1.8; }
+.rpt-section { margin-bottom: 24px; break-inside: avoid; }
+.rpt-section-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; font-weight: 700;
+  color: #0E8F7F; letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border-bottom: 0.5px solid #DDE5EC;
+  padding-bottom: 6px; margin-bottom: 12px;
+}
+.rpt-essay {
+  font-size: 13px; line-height: 1.9;
+  color: #0D1B2A; background: #F4F6F8;
+  padding: 16px 18px; border-radius: 6px;
+  border-left: 3px solid #0E8F7F;
+  white-space: pre-wrap;
+}
+.rpt-scores {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+}
+.rpt-score-card {
+  background: #F4F6F8; border-radius: 8px;
+  padding: 12px; text-align: center;
+  border: 0.5px solid #DDE5EC;
+}
+.rpt-score-num { font-size: 28px; font-weight: 700; color: #0E8F7F; font-family: 'IBM Plex Mono', monospace; }
+.rpt-score-label { font-size: 10px; color: #6B8499; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px; }
+.rpt-gap-item {
+  background: #FFF8EC; border-left: 3px solid #C4860A;
+  padding: 10px 14px; border-radius: 4px; margin-bottom: 8px;
+}
+.rpt-gap-num { font-size: 10px; color: #C4860A; font-weight: 700; font-family: monospace; margin-bottom: 4px; }
+.rpt-gap-text { font-size: 13px; color: #0D1B2A; line-height: 1.6; }
+.rpt-gap-quote { font-size: 12px; color: #6B8499; font-style: italic; margin-top: 6px; padding-left: 10px; border-left: 2px solid #DDE5EC; }
+.rpt-exercise { border: 0.5px solid #DDE5EC; border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; break-inside: avoid; }
+.rpt-ex-label { font-size: 10px; color: #0E8F7F; font-family: monospace; font-weight: 700; margin-bottom: 6px; }
+.rpt-ex-q { font-size: 13px; color: #0D1B2A; font-weight: 600; margin-bottom: 8px; line-height: 1.5; }
+.rpt-ex-answer { font-size: 13px; color: #2C4A63; background: #F4F6F8; padding: 8px 12px; border-radius: 4px; line-height: 1.7; }
+.rpt-ex-score { font-size: 11px; color: #0E8F7F; font-weight: 700; margin-top: 6px; font-family: monospace; }
+.rpt-ex-verdict { font-size: 12px; color: #2C4A63; margin-top: 6px; line-height: 1.6; font-style: italic; }
+.rpt-weak-item { background: #FFFBF0; border: 0.5px solid #C4860A; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px; font-size: 13px; color: #0D1B2A; line-height: 1.6; }
+.rpt-evo-block { border: 0.5px solid #DDE5EC; border-radius: 6px; padding: 14px; margin-bottom: 10px; break-inside: avoid; }
+.rpt-evo-label { font-size: 10px; color: #0E8F7F; font-family: monospace; font-weight: 700; margin-bottom: 8px; }
+.rpt-evo-text { font-size: 13px; color: #2C4A63; line-height: 1.8; font-style: italic; }
+.rpt-footer { border-top: 0.5px solid #DDE5EC; padding-top: 12px; font-size: 11px; color: #A8BCC8; text-align: center; margin-top: 32px; }
+.rpt-prompt { font-size: 13px; color: #2C4A63; line-height: 1.7; background: #F4F6F8; padding: 12px 14px; border-radius: 6px; margin-bottom: 0; }
+.rpt-export-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 16px; border-radius: 7px;
+  border: 0.5px solid rgba(14,143,127,0.35);
+  background: rgba(14,143,127,0.06);
+  color: #0E8F7F; font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  cursor: pointer; transition: all 0.2s;
+}
+.rpt-export-btn:hover { background: rgba(14,143,127,0.12); border-color: #0E8F7F; }
+[data-theme="light"] .rpt-export-btn { border-color: rgba(14,143,127,0.3); }
 </style>
 </head>
 <body>
@@ -4097,6 +4184,9 @@ async function doAnalyze() {
     saveWeaknessesToSupabase(result);
     saveDNAToSupabase(dnaLoad());
     showResults(result, wc, evolution);
+    // Show export button
+    var expBtn = document.getElementById('exportReportBtn');
+    if (expBtn) expBtn.style.display = 'inline-flex';
   } catch(e) {
     document.getElementById('apBody').innerHTML = `
       <div class="err-wrap">
@@ -5182,6 +5272,146 @@ function showHighlightClearBtn(count) {
   footer.appendChild(btn);
 }
 
+
+/* ═══════════════════════════════════════════════
+   SESSION REPORT EXPORT
+   Builds a print-ready report from existing data.
+   No new AI calls. Pure presentation layer.
+   ═══════════════════════════════════════════════ */
+
+function buildSessionReport() {
+  var ctx = CTXS[currentCtx] || {};
+  var essay = CT.essay || document.getElementById('editor').innerText.trim();
+  var gaps = CT.gaps || [];
+  var exercises = CT.exercises || [];
+  var analysis = CT.originalAnalysis || {};
+  var result = analysis.result || {};
+  var evolution = analysis.evolution || null;
+
+  // Scores
+  var band = result.band || '—';
+  var wScore = result.writing_score || '—';
+  var tScore = result.thinking_score || '—';
+  var ctxType = ctx.type || 'band';
+
+  // Date
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('en-GB', {day:'2-digit', month:'long', year:'numeric'});
+
+  // Weak sentences
+  var weakSentences = [];
+  var editor = document.getElementById('editor');
+  if (editor) {
+    var spans = editor.querySelectorAll('.weak-highlight');
+    spans.forEach(function(s) { weakSentences.push(s.textContent.trim()); });
+  }
+
+  // Build scores HTML
+  var scoresHtml = '';
+  if (ctxType === 'band') {
+    var dims = ctx.dims || ['TR','CC','LR','GA'];
+    var dimScores = result.dim_scores || {};
+    scoresHtml = '<div class="rpt-scores">';
+    scoresHtml += '<div class="rpt-score-card"><div class="rpt-score-num">' + band + '</div><div class="rpt-score-label">IELTS Band</div></div>';
+    dims.forEach(function(d) {
+      var val = dimScores[d] || dimScores[d.toLowerCase()] || '—';
+      scoresHtml += '<div class="rpt-score-card"><div class="rpt-score-num" style="font-size:22px">' + val + '</div><div class="rpt-score-label">' + d + '</div></div>';
+    });
+    scoresHtml += '</div>';
+  } else {
+    scoresHtml = '<div class="rpt-scores">';
+    scoresHtml += '<div class="rpt-score-card"><div class="rpt-score-num">' + band + '</div><div class="rpt-score-label">Score</div></div>';
+    scoresHtml += '<div class="rpt-score-card"><div class="rpt-score-num" style="font-size:22px">' + wScore + '</div><div class="rpt-score-label">Writing</div></div>';
+    scoresHtml += '<div class="rpt-score-card"><div class="rpt-score-num" style="font-size:22px">' + tScore + '</div><div class="rpt-score-label">Thinking</div></div>';
+    scoresHtml += '</div>';
+  }
+
+  // Build gaps HTML
+  var gapsHtml = '';
+  if (gaps.length > 0) {
+    gaps.forEach(function(gap, i) {
+      var quoted = gap.match(/"([^"]+)"/);
+      var quoteHtml = quoted ? '<div class="rpt-gap-quote">"' + quoted[1] + '"</div>' : '';
+      var cleanGap = gap.replace(/"[^"]+"/g, '').trim();
+      gapsHtml += '<div class="rpt-gap-item"><div class="rpt-gap-num">GAP ' + (i+1) + '</div><div class="rpt-gap-text">' + cleanGap + '</div>' + quoteHtml + '</div>';
+    });
+  } else {
+    gapsHtml = '<p style="color:#6B8499;font-size:13px">No thinking gaps identified.</p>';
+  }
+
+  // Build exercises HTML
+  var exercisesHtml = '';
+  if (exercises.length > 0) {
+    exercises.forEach(function(ex, i) {
+      var scoreHtml = ex.score ? '<div class="rpt-ex-score">' + ex.score + '/10</div>' : '';
+      var verdictHtml = ex.verdict ? '<div class="rpt-ex-verdict">' + ex.verdict + '</div>' : '';
+      var answerHtml = ex.userAnswer ? '<div class="rpt-ex-answer">' + ex.userAnswer + '</div>' : '<div style="color:#A8BCC8;font-size:12px;font-style:italic">No answer submitted</div>';
+      exercisesHtml += '<div class="rpt-exercise"><div class="rpt-ex-label">EXERCISE ' + (i+1) + ' — ' + (ex.type || '').toUpperCase() + '</div><div class="rpt-ex-q">' + (ex.question || '') + '</div>' + answerHtml + scoreHtml + verdictHtml + '</div>';
+    });
+  } else {
+    exercisesHtml = '<p style="color:#6B8499;font-size:13px">CT Coach exercises not completed this session.</p>';
+  }
+
+  // Build weak sentences HTML
+  var weakHtml = '';
+  if (weakSentences.length > 0) {
+    weakSentences.forEach(function(s) {
+      weakHtml += '<div class="rpt-weak-item">&#9670; ' + s + '</div>';
+    });
+  } else {
+    weakHtml = '<p style="color:#6B8499;font-size:13px">No weak sentences highlighted.</p>';
+  }
+
+  // Build evolution HTML
+  var evoHtml = '';
+  if (evolution && evolution.levels) {
+    evolution.levels.forEach(function(lvl) {
+      evoHtml += '<div class="rpt-evo-block"><div class="rpt-evo-label">BAND ' + lvl.band + '</div><div class="rpt-evo-text">' + (lvl.text || '') + '</div></div>';
+    });
+  } else {
+    evoHtml = '<p style="color:#6B8499;font-size:13px">Evolution simulator not available for this session.</p>';
+  }
+
+  // Assemble full report
+  var html = '<div class="rpt-header">' +
+    '<div><div class="rpt-brand">NIRVE</div><div class="rpt-brand-sub">Writing Intelligence System</div></div>' +
+    '<div class="rpt-meta"><div>' + ctx.label + '</div><div>' + dateStr + '</div><div style="color:#0E8F7F;font-weight:600">Band ' + band + '</div></div>' +
+    '</div>' +
+
+    '<div class="rpt-section"><div class="rpt-section-title">Task Prompt</div>' +
+    '<div class="rpt-prompt">' + (ctx.brief || '—') + '</div></div>' +
+
+    '<div class="rpt-section"><div class="rpt-section-title">Your Writing</div>' +
+    '<div class="rpt-essay">' + essay.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div></div>' +
+
+    '<div class="rpt-section"><div class="rpt-section-title">Scores</div>' + scoresHtml + '</div>' +
+
+    '<div class="rpt-section"><div class="rpt-section-title">Thinking Gaps</div>' + gapsHtml + '</div>' +
+
+    '<div class="rpt-section"><div class="rpt-section-title">Weak Sentences</div>' + weakHtml + '</div>' +
+
+    '<div class="rpt-section"><div class="rpt-section-title">CT Coach Exercises</div>' + exercisesHtml + '</div>' +
+
+    '<div class="rpt-section"><div class="rpt-section-title">Evolution — Improved Versions</div>' + evoHtml + '</div>' +
+
+    '<div class="rpt-footer">Generated by NIRVE Writing Intelligence &nbsp;·&nbsp; NIR Academy &nbsp;·&nbsp; ' + dateStr + '</div>';
+
+  return html;
+}
+
+function exportSessionReport() {
+  var report = document.getElementById('nirve-report');
+  if (!report) return;
+  var html = buildSessionReport();
+  report.innerHTML = html;
+  report.style.display = 'block';
+  setTimeout(function() {
+    window.print();
+    // Hide after print dialog closes
+    setTimeout(function() { report.style.display = 'none'; }, 1000);
+  }, 200);
+}
+
 /* -- INIT -- */
 initTheme();
 updateNavForGuest();
@@ -5215,6 +5445,146 @@ initPanelListener();
 
 function initTheme() {
   applyTheme(_theme);
+}
+
+
+/* ═══════════════════════════════════════════════
+   SESSION REPORT EXPORT
+   Builds a print-ready report from existing data.
+   No new AI calls. Pure presentation layer.
+   ═══════════════════════════════════════════════ */
+
+function buildSessionReport() {
+  var ctx = CTXS[currentCtx] || {};
+  var essay = CT.essay || document.getElementById('editor').innerText.trim();
+  var gaps = CT.gaps || [];
+  var exercises = CT.exercises || [];
+  var analysis = CT.originalAnalysis || {};
+  var result = analysis.result || {};
+  var evolution = analysis.evolution || null;
+
+  // Scores
+  var band = result.band || '—';
+  var wScore = result.writing_score || '—';
+  var tScore = result.thinking_score || '—';
+  var ctxType = ctx.type || 'band';
+
+  // Date
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('en-GB', {day:'2-digit', month:'long', year:'numeric'});
+
+  // Weak sentences
+  var weakSentences = [];
+  var editor = document.getElementById('editor');
+  if (editor) {
+    var spans = editor.querySelectorAll('.weak-highlight');
+    spans.forEach(function(s) { weakSentences.push(s.textContent.trim()); });
+  }
+
+  // Build scores HTML
+  var scoresHtml = '';
+  if (ctxType === 'band') {
+    var dims = ctx.dims || ['TR','CC','LR','GA'];
+    var dimScores = result.dim_scores || {};
+    scoresHtml = '<div class="rpt-scores">';
+    scoresHtml += '<div class="rpt-score-card"><div class="rpt-score-num">' + band + '</div><div class="rpt-score-label">IELTS Band</div></div>';
+    dims.forEach(function(d) {
+      var val = dimScores[d] || dimScores[d.toLowerCase()] || '—';
+      scoresHtml += '<div class="rpt-score-card"><div class="rpt-score-num" style="font-size:22px">' + val + '</div><div class="rpt-score-label">' + d + '</div></div>';
+    });
+    scoresHtml += '</div>';
+  } else {
+    scoresHtml = '<div class="rpt-scores">';
+    scoresHtml += '<div class="rpt-score-card"><div class="rpt-score-num">' + band + '</div><div class="rpt-score-label">Score</div></div>';
+    scoresHtml += '<div class="rpt-score-card"><div class="rpt-score-num" style="font-size:22px">' + wScore + '</div><div class="rpt-score-label">Writing</div></div>';
+    scoresHtml += '<div class="rpt-score-card"><div class="rpt-score-num" style="font-size:22px">' + tScore + '</div><div class="rpt-score-label">Thinking</div></div>';
+    scoresHtml += '</div>';
+  }
+
+  // Build gaps HTML
+  var gapsHtml = '';
+  if (gaps.length > 0) {
+    gaps.forEach(function(gap, i) {
+      var quoted = gap.match(/"([^"]+)"/);
+      var quoteHtml = quoted ? '<div class="rpt-gap-quote">"' + quoted[1] + '"</div>' : '';
+      var cleanGap = gap.replace(/"[^"]+"/g, '').trim();
+      gapsHtml += '<div class="rpt-gap-item"><div class="rpt-gap-num">GAP ' + (i+1) + '</div><div class="rpt-gap-text">' + cleanGap + '</div>' + quoteHtml + '</div>';
+    });
+  } else {
+    gapsHtml = '<p style="color:#6B8499;font-size:13px">No thinking gaps identified.</p>';
+  }
+
+  // Build exercises HTML
+  var exercisesHtml = '';
+  if (exercises.length > 0) {
+    exercises.forEach(function(ex, i) {
+      var scoreHtml = ex.score ? '<div class="rpt-ex-score">' + ex.score + '/10</div>' : '';
+      var verdictHtml = ex.verdict ? '<div class="rpt-ex-verdict">' + ex.verdict + '</div>' : '';
+      var answerHtml = ex.userAnswer ? '<div class="rpt-ex-answer">' + ex.userAnswer + '</div>' : '<div style="color:#A8BCC8;font-size:12px;font-style:italic">No answer submitted</div>';
+      exercisesHtml += '<div class="rpt-exercise"><div class="rpt-ex-label">EXERCISE ' + (i+1) + ' — ' + (ex.type || '').toUpperCase() + '</div><div class="rpt-ex-q">' + (ex.question || '') + '</div>' + answerHtml + scoreHtml + verdictHtml + '</div>';
+    });
+  } else {
+    exercisesHtml = '<p style="color:#6B8499;font-size:13px">CT Coach exercises not completed this session.</p>';
+  }
+
+  // Build weak sentences HTML
+  var weakHtml = '';
+  if (weakSentences.length > 0) {
+    weakSentences.forEach(function(s) {
+      weakHtml += '<div class="rpt-weak-item">&#9670; ' + s + '</div>';
+    });
+  } else {
+    weakHtml = '<p style="color:#6B8499;font-size:13px">No weak sentences highlighted.</p>';
+  }
+
+  // Build evolution HTML
+  var evoHtml = '';
+  if (evolution && evolution.levels) {
+    evolution.levels.forEach(function(lvl) {
+      evoHtml += '<div class="rpt-evo-block"><div class="rpt-evo-label">BAND ' + lvl.band + '</div><div class="rpt-evo-text">' + (lvl.text || '') + '</div></div>';
+    });
+  } else {
+    evoHtml = '<p style="color:#6B8499;font-size:13px">Evolution simulator not available for this session.</p>';
+  }
+
+  // Assemble full report
+  var html = '<div class="rpt-header">' +
+    '<div><div class="rpt-brand">NIRVE</div><div class="rpt-brand-sub">Writing Intelligence System</div></div>' +
+    '<div class="rpt-meta"><div>' + ctx.label + '</div><div>' + dateStr + '</div><div style="color:#0E8F7F;font-weight:600">Band ' + band + '</div></div>' +
+    '</div>' +
+
+    '<div class="rpt-section"><div class="rpt-section-title">Task Prompt</div>' +
+    '<div class="rpt-prompt">' + (ctx.brief || '—') + '</div></div>' +
+
+    '<div class="rpt-section"><div class="rpt-section-title">Your Writing</div>' +
+    '<div class="rpt-essay">' + essay.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div></div>' +
+
+    '<div class="rpt-section"><div class="rpt-section-title">Scores</div>' + scoresHtml + '</div>' +
+
+    '<div class="rpt-section"><div class="rpt-section-title">Thinking Gaps</div>' + gapsHtml + '</div>' +
+
+    '<div class="rpt-section"><div class="rpt-section-title">Weak Sentences</div>' + weakHtml + '</div>' +
+
+    '<div class="rpt-section"><div class="rpt-section-title">CT Coach Exercises</div>' + exercisesHtml + '</div>' +
+
+    '<div class="rpt-section"><div class="rpt-section-title">Evolution — Improved Versions</div>' + evoHtml + '</div>' +
+
+    '<div class="rpt-footer">Generated by NIRVE Writing Intelligence &nbsp;·&nbsp; NIR Academy &nbsp;·&nbsp; ' + dateStr + '</div>';
+
+  return html;
+}
+
+function exportSessionReport() {
+  var report = document.getElementById('nirve-report');
+  if (!report) return;
+  var html = buildSessionReport();
+  report.innerHTML = html;
+  report.style.display = 'block';
+  setTimeout(function() {
+    window.print();
+    // Hide after print dialog closes
+    setTimeout(function() { report.style.display = 'none'; }, 1000);
+  }, 200);
 }
 
 /* -- INIT -- */
@@ -5340,6 +5710,10 @@ initPanelListener();
   <button class="ib-install" id="ib-install-btn" onclick="handleInstallClick()">Install</button>
   <button class="ib-dismiss" onclick="dismissInstall()">Not now</button>
 </div>
+
+
+<!-- ═══════════════════════════════════════════════ NIRVE SESSION REPORT -->
+<div id="nirve-report"></div>
 
 </body>
 </html>
