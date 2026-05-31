@@ -597,7 +597,8 @@ body.fm .app-sidebar{display:none;}
   .app-panel {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: 60vh;
+    height: 85vh;
+    max-height: 85dvh;
     border-left: none;
     border-top: 0.5px solid var(--border2);
     border-radius: 16px 16px 0 0;
@@ -605,6 +606,9 @@ body.fm .app-sidebar{display:none;}
     transform: translateY(100%);
     transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
     background: var(--bg1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   .app-panel.panel-open {
     transform: translateY(0);
@@ -901,8 +905,9 @@ body.fm .app-sidebar{display:none;}
 
 /* Coach body */
 .ct-body {
-  flex: 1; overflow-y: auto; padding: 14px 16px;
+  flex: 1; min-height: 0; overflow-y: auto; padding: 14px 16px 32px;
   display: flex; flex-direction: column; gap: 10px;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Diagnose mode */
@@ -1416,6 +1421,18 @@ body.fm .app-sidebar{display:none;}
   .profile-header { flex-direction: column; text-align: center; }
   .profile-header-actions { margin-left: 0; }
   .stats-grid { grid-template-columns: repeat(2,1fr); }
+
+  /* CT COACH mobile — ensure full scroll */
+  .ct-body {
+    padding-bottom: max(32px, env(safe-area-inset-bottom, 32px));
+  }
+  .ct-coach {
+    min-height: 0;
+  }
+  .ct-submit, .ct-next {
+    margin-bottom: 8px;
+  }
+
 }
 
 /* ═══════════════════════ INTRODUCTION SCREEN */
