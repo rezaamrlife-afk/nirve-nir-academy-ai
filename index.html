@@ -2801,9 +2801,12 @@ body.fm .app-sidebar{display:none;}
           <div class="ap-title">INTELLIGENCE OUTPUT</div>
           <div class="ap-sub">Powered by Llama 3.1 &middot; Groq</div>
         </div>
-        <div class="ap-status">
-          <div class="ap-sdot standby" id="apDot"></div>
-          <span id="apTxt" style="font-family:var(--mono);font-size:10px;color:var(--t2);letter-spacing:0.08em">STANDBY</span>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          <button class="rpt-export-btn" id="exportReportBtn" onclick="exportSessionReport()" style="display:none">&#8681; Export</button>
+          <div class="ap-status">
+            <div class="ap-sdot standby" id="apDot"></div>
+            <span id="apTxt" style="font-family:var(--mono);font-size:10px;color:var(--t2);letter-spacing:0.08em">STANDBY</span>
+          </div>
         </div>
       </div>
       <div class="ap-body" id="apBody">
