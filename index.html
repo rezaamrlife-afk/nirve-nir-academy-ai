@@ -2333,6 +2333,40 @@ body.fm .app-sidebar{display:none;}
 [data-theme="light"] .hamburger:hover { border-color: var(--teal); }
 [data-theme="light"] .hb-line { background: var(--t1); }
 [data-theme="light"] .hamburger.open .hb-line { background: var(--teal); }
+
+/* ── WEAK SENTENCE HIGHLIGHTING ── */
+.weak-highlight {
+  background: rgba(212,160,23,0.18);
+  border-bottom: 2px solid rgba(212,160,23,0.7);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+}
+.weak-highlight:hover {
+  background: rgba(212,160,23,0.28);
+}
+[data-theme="light"] .weak-highlight {
+  background: rgba(196,134,10,0.12);
+  border-bottom-color: rgba(196,134,10,0.6);
+}
+[data-theme="light"] .weak-highlight:hover {
+  background: rgba(196,134,10,0.22);
+}
+.highlight-clear-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 6px;
+  border: 0.5px solid rgba(212,160,23,0.35);
+  background: rgba(212,160,23,0.08);
+  color: var(--amber); font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.08em;
+  cursor: pointer; transition: all 0.2s;
+  margin-left: 8px;
+}
+.highlight-clear-btn:hover {
+  background: rgba(212,160,23,0.15);
+  border-color: var(--amber);
+}
 </style>
 </head>
 <body>
@@ -2787,35 +2821,9 @@ body.fm .app-sidebar{display:none;}
           <div class="stat-item"><div class="stat-num" id="statStreak">0</div><div class="stat-lbl">This Week</div></div>
         </div>
       </div>
-
-      <!-- Writing DNA -->
-      <div class="profile-card">
-        <div class="profile-card-title">WRITING DNA</div>
-        <div id="profileDNA">
-          <div class="profile-empty">Complete an analysis to build your Writing DNA profile.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Weaknesses -->
-    <div class="profile-card" style="margin-bottom:20px">
-      <div class="profile-card-title">RECURRING WEAKNESSES</div>
-      <div id="profileWeaknesses">
-        <div class="profile-empty">No patterns detected yet. Complete 3+ analyses to see recurring weaknesses.</div>
-      </div>
-    </div>
-
-    <!-- Session History -->
-    <div class="profile-card">
-      <div class="profile-card-title">ESSAY HISTORY</div>
-      <div id="profileHistory">
-        <div class="profile-empty">No essays analysed yet. Start writing to build your history.</div>
-      </div>
     </div>
   </div>
 </div>
-
-
 
 <script>
 /* -- CONFIG -- */
@@ -3637,6 +3645,80 @@ function ctRenderCompare() {
   return html;
 }
 
+
+/* ── PROMPT BANKS ─────────────────────────────────────────── */
+const PROMPT_BANKS = {
+  ielts_t2: [
+    'Some people believe universities should focus on academic knowledge. Others think universities should prepare students for employment. Discuss both views and give your own opinion. Write at least 250 words.',
+    'In many countries, people are living longer than ever before. Some people say this is a positive development. Others disagree. Discuss both views and give your own opinion. Write at least 250 words.',
+    'Some people think that children should begin their formal education at a very early age. Others believe children should not start school until the age of seven. Discuss both views and give your own opinion. Write at least 250 words.',
+    'Many people believe that social media has had a negative impact on society. Others think it has brought many benefits. Discuss both views and give your own opinion. Write at least 250 words.',
+    'Some people believe that it is best to live in a big city. Others prefer to live in a small town or the countryside. Discuss both views and give your own opinion. Write at least 250 words.',
+    'Some people argue that technology has made our lives too complicated. Others disagree. Discuss both views and give your own opinion. Write at least 250 words.'
+  ],
+  ielts_t1: [
+    'You recently moved into a new apartment and have noticed several problems. Write a letter to your landlord describing the problems and asking them to resolve the issues. Write at least 150 words.',
+    'You borrowed an important book from your friend last month and you have lost it. Write a letter to your friend explaining what happened, apologising and saying what you will do. Write at least 150 words.',
+    'You have seen an advertisement for a part-time job at a local company. Write a letter to the manager expressing your interest and asking for further information. Write at least 150 words.',
+    'You are planning to visit a city you have never been to. Write a letter to a friend who lives there asking for advice on accommodation and places to visit. Write at least 150 words.',
+    'You recently attended a training course at work. Write a letter to your manager explaining what you learned and suggesting improvements to the course. Write at least 150 words.',
+    'You have received a bill for a service you did not use. Write a letter to the company explaining the situation and asking them to correct the mistake. Write at least 150 words.'
+  ],
+  toefl: [
+    'Do you agree or disagree: It is better to have broad knowledge of many subjects than to specialize in one. Use specific reasons and examples.',
+    'Do you agree or disagree: The most important qualities of a good leader are self-confidence and intelligence. Use specific reasons and examples.',
+    'Some people prefer to spend their free time alone. Others prefer to spend it with friends. Which do you prefer and why?',
+    'Do you agree or disagree: Modern technology has made people\'s lives easier and more comfortable. Use specific reasons and examples.',
+    'Do you agree or disagree: It is more important for students to study science than arts. Use specific reasons and examples.',
+    'Should university students be required to take courses outside their major? Use specific reasons and examples.'
+  ],
+  academic: [
+    'Write an argumentative academic essay with a clear thesis, body paragraphs with evidence, and a conclusion.',
+    'To what extent should governments intervene in the free market to address economic inequality? Present a clear argument with evidence.',
+    'Evaluate the claim that artificial intelligence poses a greater threat than benefit to modern society.',
+    'Is globalisation a force for positive change or does it create more problems than it solves? Write an academic essay.',
+    'To what extent is climate change the most significant challenge facing humanity today?',
+    'Critically evaluate the view that education systems prioritise conformity over creativity.'
+  ],
+  research: [
+    'Write a structured research abstract (150-250 words): background, objective, methodology, key results, and conclusion.',
+    'Write a research abstract for a study on social media use and academic performance among university students.',
+    'Write a research abstract for a study on the effectiveness of project-based learning in secondary school science.',
+    'Write a research abstract for a study on the impact of remote work on employee productivity and mental health.',
+    'Write a research abstract investigating machine learning approaches to early detection of language learning difficulties.',
+    'Write a research abstract on the effectiveness of cognitive behavioural therapy in treating academic anxiety.'
+  ],
+  report: [
+    'Write a professional report with executive summary, findings, analysis, and actionable recommendations.',
+    'Write a report for management analysing the impact of a recent shift to remote working, including recommendations.',
+    'Write a business report evaluating three possible locations for a new company branch, with a final recommendation.',
+    'Write a report for a city council examining the causes of declining public transport usage and proposing solutions.',
+    'Write a report assessing the environmental impact of a proposed commercial development, including mitigation strategies.',
+    'Write a report for a school board evaluating the effectiveness of a new digital learning initiative.'
+  ],
+  article: [
+    'Write an informative article for a general educated audience with an engaging opening and clear structure.',
+    'Write an article exploring why critical thinking skills are increasingly important in the age of artificial intelligence.',
+    'Write an article examining what makes an effective leader in today\'s rapidly changing workplace.',
+    'Write an article exploring the ethical implications of genetic engineering in human medicine.',
+    'Write an article analysing why emotional intelligence has become as valuable as technical skills in modern organisations.',
+    'Write an article exploring the long-term consequences of declining reading habits in the digital age.'
+  ],
+  free: ['Write freely on any topic. No word limit or constraints.']
+};
+
+function getNextPrompt(ctxId) {
+  var bank = PROMPT_BANKS[ctxId];
+  if (!bank || bank.length <= 1) return (bank && bank[0]) || '';
+  var key = 'nirve_last_prompt_' + ctxId;
+  var lastIdx = parseInt(localStorage.getItem(key) || '-1');
+  var pool = [];
+  for (var i = 0; i < bank.length; i++) { if (i !== lastIdx) pool.push(i); }
+  var nextIdx = pool[Math.floor(Math.random() * pool.length)];
+  localStorage.setItem(key, nextIdx);
+  return bank[nextIdx];
+}
+
 const CTXS = {
   ielts_t2: {label:'IELTS Task 2',color:'#1A9B8A',minW:250,type:'band',dims:['TR','CC','LR','GA'],
     brief:'Some people believe universities should focus on academic knowledge. Others think universities should prepare students for employment. Discuss both views and give your own opinion. Write at least 250 words.'},
@@ -3770,7 +3852,9 @@ function setCtx(id) {
 /* -- EDITOR -- */
 function getText() { return document.getElementById('editor').innerText.trim(); }
 function getWC(t) { return t.length === 0 ? 0 : t.split(/\s+/).filter(Boolean).length; }
-function onInput() { updateWC(); }
+function onInput() {
+  // Clear highlights when user edits
+  clearHighlights(true); updateWC(); }
 
 function updateWC() {
   const t = getText(), wc = getWC(t), min = CTXS[currentCtx].minW;
@@ -4280,6 +4364,10 @@ function showResults(r, wc, evolution) {
   CT.essay = document.getElementById('editor').innerText.trim();
   CT.ctx = currentCtx;
   CT.originalAnalysis = {result: r, wc: wc, evolution: evolution};
+  // Highlight weak sentences in editor
+  if (CT.gaps.length > 0) {
+    setTimeout(function() { highlightWeakSentences(CT.gaps); }, 600);
+  }
 
   setStatus('done', 'COMPLETE');
   busy = false; updateWC();
@@ -4993,6 +5081,137 @@ function applyTheme(theme) {
 function toggleTheme() {
   applyTheme(_theme === 'dark' ? 'light' : 'dark');
 }
+
+function initTheme() {
+  applyTheme(_theme);
+}
+
+
+/* ── WEAK SENTENCE HIGHLIGHTING ────────────────────────────
+   Highlights sentences from thinking_gaps in the editor.
+   Uses fuzzy matching to find gap text in essay.
+   ────────────────────────────────────────────────────────── */
+
+function highlightWeakSentences(gaps) {
+  var editor = document.getElementById('editor');
+  if (!editor || !gaps || gaps.length === 0) return;
+
+  // Get current text
+  var text = editor.innerText;
+  if (!text.trim()) return;
+
+  // Clear any existing highlights first
+  clearHighlights(false);
+
+  // Extract quoted sentences from gaps
+  // Gaps often contain a quoted sentence or a description
+  var toHighlight = [];
+  gaps.forEach(function(gap) {
+    // Extract quoted text if present
+    var quoted = gap.match(/"([^"]+)"/);
+    if (quoted) {
+      toHighlight.push(quoted[1]);
+    } else {
+      // Try to find a sentence that matches key phrases in the gap
+      var sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+      sentences.forEach(function(sentence) {
+        var gapWords = gap.toLowerCase().split(' ').filter(function(w) { return w.length > 5; });
+        var matches = 0;
+        gapWords.forEach(function(word) {
+          if (sentence.toLowerCase().indexOf(word) > -1) matches++;
+        });
+        if (matches >= 2 && toHighlight.indexOf(sentence.trim()) === -1) {
+          toHighlight.push(sentence.trim());
+        }
+      });
+    }
+  });
+
+  if (toHighlight.length === 0) return;
+
+  // Limit to 3 highlights max
+  toHighlight = toHighlight.slice(0, 3);
+
+  // Build new HTML with highlights
+  var html = editor.innerHTML;
+  // Work on plain text version for matching, then apply to HTML
+  toHighlight.forEach(function(phrase, idx) {
+    if (!phrase || phrase.length < 10) return;
+    // Escape regex special chars
+    var escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var regex = new RegExp('(' + escaped + ')', 'gi');
+    html = html.replace(regex, '<span class="weak-highlight" title="Thinking gap detected">$1</span>');
+  });
+
+  editor.innerHTML = html;
+
+  // Show clear button
+  showHighlightClearBtn(toHighlight.length);
+}
+
+function clearHighlights(removeBtn) {
+  var editor = document.getElementById('editor');
+  if (!editor) return;
+  // Remove all highlight spans but keep text
+  var highlights = editor.querySelectorAll('.weak-highlight');
+  highlights.forEach(function(span) {
+    var text = document.createTextNode(span.textContent);
+    span.parentNode.replaceChild(text, span);
+  });
+  // Normalize text nodes
+  editor.normalize();
+  if (removeBtn !== false) {
+    var btn = document.getElementById('highlight-clear-btn');
+    if (btn) btn.remove();
+  }
+}
+
+function showHighlightClearBtn(count) {
+  // Remove existing btn
+  var existing = document.getElementById('highlight-clear-btn');
+  if (existing) existing.remove();
+
+  var footer = document.querySelector('.ae-footer');
+  if (!footer) return;
+
+  var btn = document.createElement('button');
+  btn.id = 'highlight-clear-btn';
+  btn.className = 'highlight-clear-btn';
+  btn.innerHTML = '&#9679; ' + count + ' weak sentence' + (count > 1 ? 's' : '') + ' &nbsp; &times; clear';
+  btn.onclick = function() { clearHighlights(true); };
+  footer.appendChild(btn);
+}
+
+/* -- INIT -- */
+initTheme();
+updateNavForGuest();
+initSupabase();
+initAuthListeners();
+buildTplList();
+initIntro();
+// Fallback: ensure hero is visible even if animations fail
+setTimeout(function() {
+  var els = document.querySelectorAll('.hero-badge,.hero-title,.hero-sub,.hero-actions,.app-shell-preview');
+  els.forEach(function(el) {
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+  });
+}, 1500);
+
+// Mobile panel close on backdrop tap
+function initPanelListener() {
+  var panel = document.getElementById('appPanel');
+  if (!panel) return;
+  panel.addEventListener('click', function(e) {
+    if (e.target === panel || e.target.classList.contains('ap-hdr')) {
+      if (window.innerWidth <= 768 && panel.classList.contains('panel-open')) {
+        panel.classList.remove('panel-open');
+        document.body.classList.remove('panel-open');
+      }
+    }
+  });
+}
+initPanelListener();
 
 function initTheme() {
   applyTheme(_theme);
