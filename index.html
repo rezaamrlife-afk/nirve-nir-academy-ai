@@ -2987,9 +2987,9 @@ body.fm .app-sidebar{display:none;}
 
 <script>
 /* -- CONFIG -- */
-const GROQ_KEY   = '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';
+const GROQ_KEY   = ''; // Key is handled server-side via /api/analyze
 const GROQ_MODEL = 'llama-3.1-8b-instant';
-const GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_URL   = '/api/analyze';
 
 
 /* ═══════════════════════════════════════════════════════
@@ -3568,7 +3568,7 @@ async function ctStartTraining() {
   try {
     var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY},
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         model: GROQ_MODEL,
         messages: [{role: 'user', content: prompt}],
@@ -3721,7 +3721,7 @@ async function ctSubmitAnswer() {
   try {
     var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY},
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         model: GROQ_MODEL,
         messages: [{role: 'user', content: prompt}],
