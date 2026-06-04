@@ -3566,7 +3566,7 @@ async function ctStartTraining() {
   ].join('\n');
 
   try {
-    var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    var resp = await fetch(GROQ_URL, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -3719,7 +3719,7 @@ async function ctSubmitAnswer() {
   ].join('\n');
 
   try {
-    var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    var resp = await fetch(GROQ_URL, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
