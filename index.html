@@ -4193,7 +4193,7 @@ async function doAnalyze() {
   try {
     const resp = await fetch(GROQ_URL, {
       method: 'POST',
-      headers: {'Content-Type':'application/json','Authorization':'Bearer ' + GROQ_KEY},
+      headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         model: GROQ_MODEL,
         messages: [{role:'user', content: buildPrompt(text, currentCtx)}],
@@ -4233,7 +4233,7 @@ async function doAnalyze() {
       ].join('\n');
       const evoResp = await fetch(GROQ_URL, {
         method: 'POST',
-        headers: {'Content-Type':'application/json','Authorization':'Bearer ' + GROQ_KEY},
+        headers: {'Content-Type':'application/json'},
         body: JSON.stringify({
           model: GROQ_MODEL,
           messages: [{role:'user', content: evoPrompt}],
