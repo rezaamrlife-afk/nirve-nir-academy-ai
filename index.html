@@ -5091,6 +5091,7 @@ async function handleAuthSubmit() {
       if (res.error) { showAuthError(res.error.message); }
       else {
         closeAuth();
+        showToast('Welcome back!', 'success', 2000);
         if (res.data && res.data.user) { onUserLoggedIn(res.data.user); }
         else if (currentUser) { onUserLoggedIn(currentUser); }
       }
@@ -5099,10 +5100,12 @@ async function handleAuthSubmit() {
       var res = await supabase.auth.signUp({ email: email, password: password, options: { data: { full_name: name || email.split('@')[0] } } });
       if (res.error) { showAuthError(res.error.message); }
       else {
-        showAuthSuccess('Account created! You are now signed in.');
-        if (res.data && res.data.user) { onUserLoggedIn(res.data.user); }
-        else if (currentUser) { onUserLoggedIn(currentUser); }
-        setTimeout(function(){ closeAuth(); }, 1000);
+        showAuthSuccess('Account created! Welcome to NIRVE.');
+        setTimeout(function() {
+          closeAuth();
+          if (res.data && res.data.user) { onUserLoggedIn(res.data.user); }
+          else if (currentUser) { onUserLoggedIn(currentUser); }
+        }, 1800);
       }
     }
   } catch(e) { showAuthError(e.message); }
@@ -5119,9 +5122,9 @@ async function signOut() {
   currentUser = null;
   if (supabase) supabase._session = null;
   localStorage.removeItem('nirve_session');
-  updateNavForGuest();
+  // nav already updated by supabase.auth.signOut() → onUserLoggedOut()
+  showToast('You have been signed out', 'info', 2500);
   navigate('landing');
-  showToast('Signed out successfully', 'info');
 }
 
 function onUserLoggedIn(user) {
