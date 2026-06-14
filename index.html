@@ -964,7 +964,7 @@ body.fm .app-sidebar{display:none;}
   width: 100%; min-height: 90px; padding: 12px 14px;
   background: var(--bg2); border: 0.5px solid var(--border2);
   border-radius: var(--r); color: var(--t0);
-  font-family: Georgia, serif; font-size: 15px; line-height: 1.75;
+  font-family: Georgia, serif; font-size: 16px; line-height: 1.75;
   resize: none; outline: none; transition: border-color 0.2s;
 }
 .ct-input:focus { border-color: var(--border3); }
@@ -2101,7 +2101,7 @@ body.fm .app-sidebar{display:none;}
 
 /* ── THEME TOGGLE BUTTON ── */
 .theme-toggle {
-  width: 36px; height: 36px;
+  width: 44px; height: 44px;
   border-radius: 8px;
   border: 0.5px solid var(--border2);
   background: transparent;
@@ -2523,6 +2523,49 @@ body.fm .app-sidebar{display:none;}
 @media (max-width: 768px) {
   #toast-container { bottom: 80px; right: 12px; left: 12px; }
   .toast { max-width: 100%; }
+
+  /* Mobile panel improvements */
+  .app-panel {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 88vh;
+    max-height: 88dvh;
+    border-left: none;
+    border-top: 0.5px solid var(--border2);
+    border-radius: 16px 16px 0 0;
+    z-index: 100;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
+    background: var(--bg1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .app-panel.panel-open {
+    transform: translateY(0);
+  }
+  .ap-hdr {
+    flex-shrink: 0;
+    border-radius: 16px 16px 0 0;
+  }
+  .ap-hdr::before {
+    content: '';
+    display: block;
+    width: 36px; height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    margin: 10px auto 0;
+  }
+
+}
+
+@media (max-width: 480px) {
+  .auth-modal { border-radius: 16px 16px 0 0; width: 100%; margin: 0; position: fixed; bottom: 0; left: 0; right: 0; max-height: 92vh; overflow-y: auto; }
+  .auth-overlay { align-items: flex-end; }
+  .hero-title { font-size: clamp(36px, 10vw, 52px); }
+  .btn-cta, .btn-cta-o { width: 100%; text-align: center; justify-content: center; }
+  .hero-actions { flex-direction: column; align-items: stretch; gap: 12px; }
+  .metrics { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
@@ -2957,31 +3000,6 @@ body.fm .app-sidebar{display:none;}
 <div id="profile-view">
   <div class="profile-wrap">
     <button class="profile-back" onclick="showLanding()">&#8592; Back to NIRVE</button>
-
-    <div class="profile-header" id="profileHeader">
-      <div class="profile-avatar-big" id="profileAvatar">?</div>
-      <div class="profile-info">
-        <div class="profile-name" id="profileName">Loading...</div>
-        <div class="profile-email" id="profileEmail"></div>
-        <div class="profile-since" id="profileSince"></div>
-      </div>
-      <div class="profile-header-actions">
-        <button class="btn-signout" onclick="signOut()">Sign out</button>
-      </div>
-    </div>
-
-    <div class="profile-grid">
-      <!-- Band Stats -->
-      <div class="profile-card">
-        <div class="profile-card-title">BAND STATISTICS</div>
-        <div class="stats-grid" id="profileStats">
-          <div class="stat-item"><div class="stat-num" id="statCurrent">—</div><div class="stat-lbl">Current Band</div></div>
-          <div class="stat-item"><div class="stat-num" id="statBest">—</div><div class="stat-lbl">Best Band</div></div>
-          <div class="stat-item"><div class="stat-num" id="statSessions">0</div><div class="stat-lbl">Sessions</div></div>
-          <div class="stat-item"><div class="stat-num" id="statStreak">0</div><div class="stat-lbl">This Week</div></div>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -5154,6 +5172,7 @@ function goIntroStep(n) {
 function closeIntro() {
   var screen = document.getElementById('intro-screen');
   if (!screen) return;
+  document.body.style.overflow = '';
   screen.style.opacity = '0';
   screen.style.transition = 'opacity 0.5s ease';
   screen.style.pointerEvents = 'none';
@@ -5166,6 +5185,7 @@ function closeIntro() {
 function showWelcome(userName) {
   var overlay = document.getElementById('welcomeOverlay');
   if (!overlay) return;
+  document.body.style.overflow = 'hidden';
   var nameEl = document.getElementById('welcomeName');
   var msgEl = document.getElementById('welcomeMsg');
   if (!overlay) return;
@@ -5181,6 +5201,7 @@ function showWelcome(userName) {
 function closeWelcome() {
   var overlay = document.getElementById('welcomeOverlay');
   if (overlay) overlay.classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 /* Install banner */
@@ -5720,6 +5741,37 @@ function showToast(msg, type, duration) {
     }, 300);
   }, duration);
 }
+
+/* -- INIT -- */
+initTheme();
+updateNavForGuest();
+initSupabase();
+initAuthListeners();
+buildTplList();
+initIntro();
+// Fallback: ensure hero is visible even if animations fail
+setTimeout(function() {
+  var els = document.querySelectorAll('.hero-badge,.hero-title,.hero-sub,.hero-actions,.app-shell-preview');
+  els.forEach(function(el) {
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+  });
+}, 1500);
+
+// Mobile panel close on backdrop tap
+function initPanelListener() {
+  var panel = document.getElementById('appPanel');
+  if (!panel) return;
+  panel.addEventListener('click', function(e) {
+    if (e.target === panel || e.target.classList.contains('ap-hdr')) {
+      if (window.innerWidth <= 768 && panel.classList.contains('panel-open')) {
+        panel.classList.remove('panel-open');
+        document.body.classList.remove('panel-open');
+      }
+    }
+  });
+}
+initPanelListener();
 
 /* -- INIT -- */
 initTheme();
