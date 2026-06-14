@@ -2627,6 +2627,15 @@ body.fm .app-sidebar{display:none;}
   text-decoration: underline;
 }
 .auth-switch-btn:hover { color: var(--teal3); }
+
+#navUserChip {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+@media (max-width: 768px) {
+  #navUserChip { display: flex !important; }
+}
 </style>
 </head>
 <body>
@@ -5168,6 +5177,8 @@ function updateNavForUser(user) {
 }
 
 function updateNavForGuest() {
+  var existingChip = document.getElementById('navUserChip');
+  if (existingChip) existingChip.remove();
   var a = document.getElementById('navActions');
   if (a) a.innerHTML = '<button class="btn-ghost" onclick="openAuth()">Sign in</button><button class="btn-nav-cta" onclick="showApp()">Start Writing &rarr;</button>';
   var b = document.getElementById('appNavUser');
