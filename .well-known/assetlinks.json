@@ -1,1 +1,8 @@
-
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.niracademy.nirve",
+        "sha256_cert_fingerprints": ["4D:79:6B:2B:E1:E0:F7:2E:AD:99:39:EB:CD:95:51:64:5C:D8:B1:80:4B:DB:F1:94:BB:5B:20:A2:CF:A4:76:5E"]
+      }
+    }]
