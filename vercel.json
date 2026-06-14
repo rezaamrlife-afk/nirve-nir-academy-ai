@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/((?!api/|.well-known/|manifest.json|sw.js|icon-192.png|icon-512.png|favicon.ico).*)", "destination": "/index.html" }
+    { "source": "/((?!api/|.well-known/|manifest.json|sw.js|icon-192.png|icon-512.png|favicon.ico|privacy-policy.html).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
