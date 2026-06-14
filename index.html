@@ -773,6 +773,8 @@ body.fm .app-sidebar{display:none;}
   .hamburger { display: flex; }
   .nav-links { display: none !important; }
   .nav-actions { display: none !important; }
+  .app-ctx { display: block !important; }
+  .nav-user { display: flex !important; }
   nav { padding: 0 16px; }
 }
 
@@ -2600,6 +2602,31 @@ body.fm .app-sidebar{display:none;}
 .nav-user-menu-item:hover { background: var(--bg2); color: var(--t0); }
 .nav-user-menu-item.danger:hover { color: var(--red); }
 .nav-user-menu-divider { height: 0.5px; background: var(--border); margin: 4px 0; }
+
+.auth-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+}
+.auth-footer-text {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--t2);
+}
+.auth-switch-btn {
+  background: none;
+  border: none;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--teal2);
+  cursor: pointer;
+  padding: 0;
+  font-weight: 600;
+  text-decoration: underline;
+}
+.auth-switch-btn:hover { color: var(--teal3); }
 </style>
 </head>
 <body>
