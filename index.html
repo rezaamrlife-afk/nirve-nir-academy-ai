@@ -31,7 +31,7 @@ body{background:var(--bg);color:var(--t0);font-family:var(--sans);line-height:1.
 @keyframes ambDrift{from{opacity:.75;transform:scale(1)}to{opacity:1;transform:scale(1.05) translateX(8px)}}
 
 /* -- NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:200;overflow:visible;display:flex;align-items:center;justify-content:space-between;padding:0 52px;height:64px;background:rgba(7,9,11,0.82);backdrop-filter:blur(40px) saturate(200%);border-bottom:0.5px solid rgba(26,155,138,0.12);transition:all 0.4s;box-shadow:0 1px 0 rgba(26,155,138,0.06);}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;overflow:visible;display:flex;align-items:center;justify-content:space-between;padding:0 52px;height:64px;background:rgba(7,9,11,0.82);backdrop-filter:blur(40px) saturate(200%);border-bottom:0.5px solid rgba(26,155,138,0.12);box-shadow:0 1px 0 rgba(26,155,138,0.06);-webkit-transform:translateZ(0);transform:translateZ(0);}
 nav.scrolled{background:rgba(7,9,11,0.97);}
 .nav-line{position:absolute;bottom:0;left:0;right:0;height:0.5px;background:linear-gradient(90deg,transparent,rgba(26,155,138,0.6),rgba(56,212,190,0.8),rgba(26,155,138,0.6),transparent);opacity:0.5;}
 nav.scrolled .nav-line{opacity:0.45;}
@@ -215,7 +215,7 @@ footer{padding:48px 52px;border-top:0.5px solid var(--border);position:relative;
 
 /* ════════════ APP ════════════ */
 .app-wrap{height:100%;width:100%;display:flex;flex-direction:column;overflow:hidden;}
-.app-top{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:58px;border-bottom:0.5px solid var(--border);flex-shrink:0;background:rgba(7,9,11,0.95);backdrop-filter:blur(20px);}
+.app-top{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:58px;border-bottom:0.5px solid var(--border);flex-shrink:0;background:rgba(7,9,11,0.95);backdrop-filter:blur(20px);-webkit-transform:translateZ(0);transform:translateZ(0);position:sticky;top:0;z-index:100;}
 .app-brand{display:flex;align-items:center;gap:10px;}
 .app-logo{width:32px;height:32px;border-radius:6px;object-fit:contain;border:0.5px solid var(--border2);background:#050709;padding:2px;}
 .app-name{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--teal2);letter-spacing:0.2em;}
