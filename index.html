@@ -5117,10 +5117,10 @@ function updateNavForUser(user) {
   var avatarUrl = user.user_metadata && user.user_metadata.avatar_url ? user.user_metadata.avatar_url : null;
   var initials = name.charAt(0).toUpperCase();
   var toggleBtn = '<button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" style="flex-shrink:0">🌙</button>';
-  var chip = '<div class="nav-user">' +
+  var chip = '<div class="nav-user" onclick="toggleNavMenu(event)">' +
     '<div class="nav-avatar">' + (avatarUrl ? '<img src="' + avatarUrl + '">' : initials) + '</div>' +
     '<span class="nav-user-name">' + name + '</span>' +
-    '<div class="nav-user-menu">' +
+    '<div class="nav-user-menu" id="navUserMenu">' +
     '<button class="nav-user-menu-item" onclick="showProfile()">My Profile</button>' +
     '<div class="nav-user-menu-divider"></div>' +
     '<button class="nav-user-menu-item danger" onclick="signOut()">Sign Out</button>' +
@@ -5590,6 +5590,30 @@ function toggleAuthPassword() {
   }
 }
 
+
+function toggleNavMenu(e) {
+  e.stopPropagation();
+  var menu = document.getElementById('navUserMenu');
+  if (!menu) return;
+  var isOpen = menu.parentElement.classList.contains('open');
+  // Close all first
+  document.querySelectorAll('.nav-user.open').forEach(function(el) {
+    el.classList.remove('open');
+  });
+  if (!isOpen) {
+    menu.parentElement.classList.add('open');
+    // Close on outside click
+    setTimeout(function() {
+      document.addEventListener('click', function closeMenu() {
+        document.querySelectorAll('.nav-user.open').forEach(function(el) {
+          el.classList.remove('open');
+        });
+        document.removeEventListener('click', closeMenu);
+      });
+    }, 0);
+  }
+}
+
 /* -- INIT -- */
 initTheme();
 updateNavForGuest();
@@ -5808,6 +5832,30 @@ function toggleAuthPassword() {
   }
 }
 
+
+function toggleNavMenu(e) {
+  e.stopPropagation();
+  var menu = document.getElementById('navUserMenu');
+  if (!menu) return;
+  var isOpen = menu.parentElement.classList.contains('open');
+  // Close all first
+  document.querySelectorAll('.nav-user.open').forEach(function(el) {
+    el.classList.remove('open');
+  });
+  if (!isOpen) {
+    menu.parentElement.classList.add('open');
+    // Close on outside click
+    setTimeout(function() {
+      document.addEventListener('click', function closeMenu() {
+        document.querySelectorAll('.nav-user.open').forEach(function(el) {
+          el.classList.remove('open');
+        });
+        document.removeEventListener('click', closeMenu);
+      });
+    }, 0);
+  }
+}
+
 /* -- INIT -- */
 initTheme();
 updateNavForGuest();
@@ -5850,6 +5898,30 @@ function toggleAuthPassword() {
   } else {
     input.type = 'password';
     if (btn) btn.textContent = '👁';
+  }
+}
+
+
+function toggleNavMenu(e) {
+  e.stopPropagation();
+  var menu = document.getElementById('navUserMenu');
+  if (!menu) return;
+  var isOpen = menu.parentElement.classList.contains('open');
+  // Close all first
+  document.querySelectorAll('.nav-user.open').forEach(function(el) {
+    el.classList.remove('open');
+  });
+  if (!isOpen) {
+    menu.parentElement.classList.add('open');
+    // Close on outside click
+    setTimeout(function() {
+      document.addEventListener('click', function closeMenu() {
+        document.querySelectorAll('.nav-user.open').forEach(function(el) {
+          el.classList.remove('open');
+        });
+        document.removeEventListener('click', closeMenu);
+      });
+    }, 0);
   }
 }
 
