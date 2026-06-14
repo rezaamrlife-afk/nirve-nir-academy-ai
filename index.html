@@ -2567,6 +2567,38 @@ body.fm .app-sidebar{display:none;}
   .hero-actions { flex-direction: column; align-items: stretch; gap: 12px; }
   .metrics { grid-template-columns: repeat(2, 1fr); }
 }
+
+.nav-user { position: relative; }
+.nav-user-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--bg1);
+  border: 0.5px solid var(--border2);
+  border-radius: 10px;
+  min-width: 160px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  overflow: hidden;
+  z-index: 999;
+}
+.nav-user:hover .nav-user-menu,
+.nav-user.open .nav-user-menu { display: block; }
+.nav-user-menu-item {
+  display: block; width: 100%;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  color: var(--t1);
+  font-family: var(--sans);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.nav-user-menu-item:hover { background: var(--bg2); color: var(--t0); }
+.nav-user-menu-item.danger:hover { color: var(--red); }
+.nav-user-menu-divider { height: 0.5px; background: var(--border); margin: 4px 0; }
 </style>
 </head>
 <body>
@@ -2978,32 +3010,7 @@ body.fm .app-sidebar{display:none;}
 
       <div id="signup-name-field" class="auth-field" style="display:none">
         <label class="auth-label">FULL NAME</label>
-        <input class="auth-input" id="auth-name" type="text" placeholder="Your name">
-      </div>
-
-      <div class="auth-field">
-        <label class="auth-label">EMAIL ADDRESS</label>
-        <input class="auth-input" id="auth-email" type="email" placeholder="you@example.com">
-      </div>
-
-      <div class="auth-field">
-        <label class="auth-label">PASSWORD</label>
-        <input class="auth-input" id="auth-password" type="password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;">
-      </div>
-
-      <button class="auth-submit" id="auth-submit-btn" onclick="handleAuthSubmit()">Sign In</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════ PROFILE VIEW -->
-<div id="profile-view">
-  <div class="profile-wrap">
-    <button class="profile-back" onclick="showLanding()">&#8592; Back to NIRVE</button>
-  </div>
-</div>
-
-<script>
+        <input
 /* -- CONFIG -- */
 const GROQ_KEY   = ''; // Key is handled server-side via /api/analyze
 const GROQ_MODEL = 'llama-3.1-8b-instant';
@@ -5084,9 +5091,14 @@ function updateNavForUser(user) {
   var avatarUrl = user.user_metadata && user.user_metadata.avatar_url ? user.user_metadata.avatar_url : null;
   var initials = name.charAt(0).toUpperCase();
   var toggleBtn = '<button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" style="flex-shrink:0">🌙</button>';
-  var chip = '<div class="nav-user" onclick="showProfile()">' +
+  var chip = '<div class="nav-user">' +
     '<div class="nav-avatar">' + (avatarUrl ? '<img src="' + avatarUrl + '">' : initials) + '</div>' +
-    '<span class="nav-user-name">' + name + '</span></div>';
+    '<span class="nav-user-name">' + name + '</span>' +
+    '<div class="nav-user-menu">' +
+    '<button class="nav-user-menu-item" onclick="showProfile()">My Profile</button>' +
+    '<div class="nav-user-menu-divider"></div>' +
+    '<button class="nav-user-menu-item danger" onclick="signOut()">Sign Out</button>' +
+    '</div></div>';
   var a = document.getElementById('navActions');
   if (a) a.innerHTML = toggleBtn + chip;
   var b = document.getElementById('appNavUser');
@@ -5776,6 +5788,34 @@ initPanelListener();
 /* -- INIT -- */
 initTheme();
 updateNavForGuest();
+initSupabase();
+initAuthListeners();
+buildTplList();
+initIntro();
+// Fallback: ensure hero is visible even if animations fail
+setTimeout(function() {
+  var els = document.querySelectorAll('.hero-badge,.hero-title,.hero-sub,.hero-actions,.app-shell-preview');
+  els.forEach(function(el) {
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+  });
+}, 1500);
+
+// Mobile panel close on backdrop tap
+function initPanelListener() {
+  var panel = document.getElementById('appPanel');
+  if (!panel) return;
+  panel.addEventListener('click', function(e) {
+    if (e.target === panel || e.target.classList.contains('ap-hdr')) {
+      if (window.innerWidth <= 768 && panel.classList.contains('panel-open')) {
+        panel.classList.remove('panel-open');
+        document.body.classList.remove('panel-open');
+      }
+    }
+  });
+}
+initPanelListener();
+uest();
 initSupabase();
 initAuthListeners();
 buildTplList();
