@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/((?!api/|manifest.json|sw.js|icon-192.png|icon-512.png|favicon.ico).*)", "destination": "/index.html" }
+    { "source": "/((?!api/|.well-known/|manifest.json|sw.js|icon-192.png|icon-512.png|favicon.ico).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
@@ -14,6 +14,13 @@
       "source": "/manifest.json",
       "headers": [
         { "key": "Content-Type", "value": "application/manifest+json" }
+      ]
+    },
+    {
+      "source": "/.well-known/assetlinks.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" },
+        { "key": "Cache-Control", "value": "no-cache" }
       ]
     }
   ]
