@@ -59,12 +59,20 @@
     padding: 24px;
     margin-top: 40px;
   }
-  .contact-box p { margin: 0; }
+  .contact-box p { margin-bottom: 8px; }
   .divider {
     width: 40px; height: 2px;
     background: #0E8F7F;
     margin: 0 0 48px;
   }
+  .highlight-box {
+    background: #EEF3F7;
+    border-left: 3px solid #0E8F7F;
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  .highlight-box p { margin: 0; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -79,64 +87,91 @@
 
   <p>By using NIRVE, you agree to the practices described in this Privacy Policy.</p>
 
-  <h2>1. Information We Collect</h2>
+  <h2>1. Data Controller</h2>
+
+  <div class="highlight-box">
+    <p>NIR Academy is the Data Controller responsible for the processing of personal data described in this Privacy Policy. All data processing decisions are made by NIR Academy, founded and directed by Dr. Niki Majidi.</p>
+  </div>
+
+  <p><strong>Contact:</strong> <a href="mailto:info@niracademy.com">info@niracademy.com</a> &nbsp;·&nbsp; <a href="https://niracademy.com">niracademy.com</a></p>
+
+  <h2>2. Information We Collect</h2>
 
   <p><strong>Account Information:</strong> When you create an account, we collect your email address, full name (optional), and a securely hashed password. If you sign in with Google, we receive your name, email address, and profile photo from Google.</p>
 
   <p><strong>Writing Content:</strong> Essays, letters, and texts you write inside NIRVE are processed by our AI engine to generate scores and feedback. Writing content is stored in your session history to enable progress tracking.</p>
 
-  <p><strong>Usage Data:</strong> We collect data about your sessions, including writing scores, band trends, thinking gaps, weakness patterns, and writing DNA profiles. This data is used to personalise your experience and show your progress over time.</p>
+  <p><strong>Usage and Performance Data:</strong> We collect data about your sessions, including writing scores, band trends, thinking gaps, weakness patterns, and your Writing Performance Profile. This data is used to personalise your experience and show your progress over time.</p>
 
   <p><strong>Device Information:</strong> We may collect basic device and browser information such as device type, operating system, and browser version for technical compatibility and performance purposes.</p>
 
-  <h2>2. How We Use Your Information</h2>
+  <h2>3. How We Use Your Information</h2>
 
   <ul>
     <li>To provide AI-powered writing analysis, scoring, and feedback</li>
     <li>To personalise your learning experience based on your writing history</li>
     <li>To track your progress, band trends, and recurring weaknesses</li>
-    <li>To generate your Writing DNA profile and Band Prediction</li>
+    <li>To generate your Writing Performance Profile and Band Prediction</li>
     <li>To authenticate your account and maintain your session</li>
     <li>To improve and maintain the performance of the NIRVE platform</li>
     <li>To communicate with you about your account if necessary</li>
   </ul>
 
-  <h2>3. AI Processing</h2>
+  <h2>4. Legal Basis for Processing (GDPR)</h2>
+
+  <p>Where applicable under the General Data Protection Regulation (GDPR), we process personal data on the following legal bases:</p>
+
+  <ul>
+    <li><strong>Performance of a contract</strong> — Processing necessary to provide the NIRVE writing intelligence service you have requested</li>
+    <li><strong>User consent</strong> — Where you have given explicit consent for specific processing activities, such as account creation and Google sign-in</li>
+    <li><strong>Legitimate interests</strong> — Including platform security, fraud prevention, service improvement, and technical maintenance, where these interests are not overridden by your privacy rights</li>
+    <li><strong>Compliance with legal obligations</strong> — Where processing is required to comply with applicable laws and regulations</li>
+  </ul>
+
+  <h2>5. AI Processing</h2>
 
   <p>NIRVE uses the Groq API (powered by Llama AI models) to analyse your writing and generate feedback. Your writing content is sent to Groq's servers for processing. Groq's use of this data is governed by their own privacy policy. We do not use your writing content to train our own AI models.</p>
 
   <p>No writing content is shared with third parties for advertising or marketing purposes.</p>
 
-  <h2>4. Data Storage</h2>
+  <h2>6. International Data Transfers</h2>
 
-  <p>Your account information, session history, and progress data are stored securely using Supabase, a cloud database platform with industry-standard encryption. Data is stored in the European Union region.</p>
+  <p>Your account data is stored on Supabase infrastructure in the European Union region. However, writing submissions processed through our AI provider (Groq) may be transferred to and processed in countries outside the European Economic Area, including the United States.</p>
+
+  <p>Where such transfers occur, we rely on appropriate safeguards including standard contractual clauses and data processing agreements with our service providers to ensure your personal data receives an adequate level of protection consistent with GDPR requirements.</p>
+
+  <h2>7. Data Storage</h2>
+
+  <p>Your account information, session history, and progress data are stored securely using Supabase, a cloud database platform with industry-standard encryption. Primary data storage is in the European Union region.</p>
 
   <p>Local device storage (localStorage) is used to store your theme preference, prompt history, and session state for a smoother user experience. This data remains on your device and is not transmitted to our servers.</p>
 
-  <h2>5. Data Retention</h2>
+  <h2>8. Data Retention</h2>
 
   <p>We retain your account and session data for as long as your account is active. You may request deletion of your account and all associated data at any time by contacting us at the email address below.</p>
 
-  <p>If you delete a conversation or session within the app, the associated data is removed from our servers within 30 days.</p>
+  <p>Requests for account and data deletion are normally processed within 30 days of verification. If you delete a session within the app, the associated data is removed from our servers within 30 days.</p>
 
-  <h2>6. Data Sharing</h2>
+  <h2>9. Data Sharing</h2>
 
   <p>We do not sell, rent, or trade your personal information to third parties.</p>
 
   <p>We share data only with the following trusted service providers, strictly for operating the platform:</p>
 
   <ul>
-    <li><strong>Supabase</strong> — Database and authentication (supabase.com)</li>
-    <li><strong>Groq</strong> — AI inference for writing analysis (groq.com)</li>
-    <li><strong>Vercel</strong> — Application hosting (vercel.com)</li>
-    <li><strong>Google</strong> — OAuth authentication (if you choose to sign in with Google)</li>
+    <li><strong>Supabase</strong> — Database and authentication (<a href="https://supabase.com">supabase.com</a>)</li>
+    <li><strong>Groq</strong> — AI inference for writing analysis (<a href="https://groq.com">groq.com</a>)</li>
+    <li><strong>Vercel</strong> — Application hosting and performance analytics (<a href="https://vercel.com">vercel.com</a>)</li>
+    <li><strong>Google</strong> — OAuth authentication, if you choose to sign in with Google (<a href="https://google.com">google.com</a>)</li>
   </ul>
 
-  <h2>7. Children's Privacy</h2>
+  <p>We do not use Google Analytics, Meta Pixel, or any third-party advertising or behavioural tracking tools.</p>
+
+  <h2>10. Children's Privacy</h2>
 
   <p>NIRVE is designed for users aged 13 and above. We do not knowingly collect personal information from children under the age of 13. If you believe a child under 13 has provided us with personal information, please contact us immediately and we will take steps to delete such information.</p>
 
-  <h2>8. Your Rights</h2>
+  <h2>11. Your Rights</h2>
 
   <p>Depending on your location, you may have the following rights regarding your personal data:</p>
 
@@ -144,33 +179,38 @@
     <li>The right to access the personal data we hold about you</li>
     <li>The right to correct inaccurate or incomplete data</li>
     <li>The right to request deletion of your data</li>
-    <li>The right to withdraw consent at any time</li>
-    <li>The right to data portability</li>
+    <li>The right to withdraw consent at any time without affecting prior lawful processing</li>
+    <li>The right to data portability in a structured, machine-readable format</li>
+    <li>The right to object to processing based on legitimate interests</li>
+    <li>The right to lodge a complaint with your local data protection authority if you believe your privacy rights have been violated</li>
   </ul>
 
-  <p>To exercise any of these rights, please contact us using the information below.</p>
+  <p>To exercise any of these rights, please contact us using the information in Section 14 below.</p>
 
-  <h2>9. Security</h2>
+  <h2>12. Security</h2>
 
-  <p>We implement industry-standard security measures to protect your data, including encrypted connections (HTTPS), hashed passwords, and secure database access controls. However, no system is completely secure, and we cannot guarantee absolute security.</p>
+  <p>We implement industry-standard security measures to protect your data, including encrypted connections (HTTPS), hashed passwords, row-level security in our database, and secure API key management. However, no system is completely secure, and we cannot guarantee absolute security.</p>
 
-  <h2>10. Cookies and Local Storage</h2>
+  <h2>13. Cookies and Local Storage</h2>
 
-  <p>NIRVE does not use tracking cookies. We use browser localStorage to store user preferences and session state. This data is stored locally on your device and is not used for advertising or tracking purposes.</p>
+  <p>NIRVE does not use tracking cookies or advertising cookies. We use browser localStorage to store user preferences and session state. This data is stored locally on your device and is not used for advertising, profiling, or tracking purposes.</p>
 
-  <h2>11. Changes to This Policy</h2>
+  <h2>14. Changes to This Policy</h2>
 
-  <p>We may update this Privacy Policy from time to time. When we make significant changes, we will update the "Last Updated" date at the top of this page. Continued use of NIRVE after changes constitutes acceptance of the updated policy.</p>
+  <p>We may update this Privacy Policy from time to time. When we make significant changes, we will update the "Last Updated" date at the top of this page. Continued use of NIRVE after changes constitutes acceptance of the updated policy. For material changes, we will make reasonable efforts to notify registered users.</p>
 
-  <h2>12. Contact Us</h2>
+  <h2>15. Contact and Privacy Requests</h2>
 
   <div class="contact-box">
-    <p>If you have any questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact us:</p>
+    <p><strong>Privacy Contact — NIR Academy</strong></p>
     <br>
-    <p><strong>NIR Academy</strong><br>
-    Founded by Dr. Niki Majidi<br>
-    Email: <a href="mailto:privacy@niracademy.com">privacy@niracademy.com</a><br>
-    Website: <a href="https://niracademy.com">niracademy.com</a></p>
+    <p>For all privacy-related inquiries, data access requests, deletion requests, or complaints, please contact our designated privacy contact point:</p>
+    <br>
+    <p><strong>Dr. Niki Majidi</strong> — Founder, NIR Academy</p>
+    <p>Email: <a href="mailto:info@niracademy.com">info@niracademy.com</a></p>
+    <p>Website: <a href="https://niracademy.com">niracademy.com</a></p>
+    <br>
+    <p style="font-size:13px;color:#6B8499;">We aim to respond to all privacy requests within 30 days of receipt and verification.</p>
   </div>
 
 </div>
