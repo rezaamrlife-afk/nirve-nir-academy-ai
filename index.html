@@ -5111,8 +5111,13 @@ async function handleAuthSubmit() {
 }
 
 async function signOut() {
-  if (supabase) supabase.auth.signOut();
+  try {
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+  } catch(e) { console.error('[NIRVE] signOut error:', e); }
   currentUser = null;
+  if (supabase) supabase._session = null;
   localStorage.removeItem('nirve_session');
   updateNavForGuest();
   navigate('landing');
