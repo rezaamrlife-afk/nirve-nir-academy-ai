@@ -568,7 +568,8 @@ body.fm .app-sidebar{display:none;}
 @media (max-width: 768px) {
 
   /* APP TOP BAR */
-  .app-top { padding: 0 14px; height: 52px; gap: 8px; flex-wrap: nowrap; overflow-x: auto; }
+  .app-top { padding: 0 14px; height: 52px; gap: 8px; flex-wrap: nowrap; overflow-x: auto;   -webkit-transform: translateZ(0); transform: translateZ(0);
+}
   .app-brand { flex-shrink: 0; }
   .app-logo { width: 28px; height: 28px; }
   .app-name { font-size: 13px; letter-spacing: 0.15em; }
@@ -775,7 +776,7 @@ body.fm .app-sidebar{display:none;}
   .nav-actions { display: none !important; }
   .app-ctx { display: block !important; }
   .nav-user { display: flex !important; }
-  nav { padding: 0 16px; }
+  nav { padding: 0 16px; touch-action: none; -webkit-transform: translateZ(0); transform: translateZ(0); }
 }
 
 /* BAND PREDICTION ENGINE */
@@ -5161,14 +5162,10 @@ function updateNavForUser(user) {
   var avatarUrl = user.user_metadata && user.user_metadata.avatar_url ? user.user_metadata.avatar_url : null;
   var initials = name.charAt(0).toUpperCase();
   var toggleBtn = '<button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" style="flex-shrink:0">🌙</button>';
-  var chip = '<div class="nav-user" onclick="toggleNavMenu(event)">' +
+  var chip = '<div class="nav-user" onclick="openUserMenu()">' +
     '<div class="nav-avatar">' + (avatarUrl ? '<img src="' + avatarUrl + '">' : initials) + '</div>' +
     '<span class="nav-user-name">' + name + '</span>' +
-    '<div class="nav-user-menu" id="navUserMenu">' +
-    '<button class="nav-user-menu-item" onclick="showProfile()">My Profile</button>' +
-    '<div class="nav-user-menu-divider"></div>' +
-    '<button class="nav-user-menu-item danger" onclick="signOut()">Sign Out</button>' +
-    '</div></div>';
+    '</div>';
   var a = document.getElementById('navActions');
   if (a) a.innerHTML = toggleBtn + chip;
   var b = document.getElementById('appNavUser');
@@ -5660,11 +5657,37 @@ function toggleNavMenu(e) {
   }
 }
 
-/* -- INIT -- */
-initTheme();
-updateNavForGuest();
-initSupabase();
-initAuthListeners();
+
+function openUserMenu() {
+  var existing = document.getElementById('userMenuSheet');
+  if (existing) { existing.remove(); return; }
+  var sheet = document.createElement('div');
+  sheet.id = 'userMenuSheet';
+  var backdrop = document.createElement('div');
+  backdrop.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.5)';
+  backdrop.onclick = function() { sheet.remove(); };
+  var panel = document.createElement('div');
+  panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:0.5px solid var(--border2);border-radius:16px 16px 0 0;padding:8px 0 32px;z-index:9001';
+  var handle = document.createElement('div');
+  handle.style.cssText = 'width:36px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 16px';
+  var btnProfile = document.createElement('button');
+  btnProfile.style.cssText = 'display:flex;align-items:center;width:100%;padding:14px 24px;background:none;border:none;color:var(--t0);font-family:var(--sans);font-size:15px;cursor:pointer;text-align:left';
+  btnProfile.textContent = 'My Profile';
+  btnProfile.onclick = function() { sheet.remove(); showProfile(); };
+  var divider = document.createElement('div');
+  divider.style.cssText = 'height:0.5px;background:var(--border);margin:4px 0';
+  var btnSignOut = document.createElement('button');
+  btnSignOut.style.cssText = 'display:flex;align-items:center;width:100%;padding:14px 24px;background:none;border:none;color:var(--red);font-family:var(--sans);font-size:15px;cursor:pointer;text-align:left';
+  btnSignOut.textContent = 'Sign Out';
+  btnSignOut.onclick = function() { sheet.remove(); signOut(); };
+  panel.appendChild(handle);
+  panel.appendChild(btnProfile);
+  panel.appendChild(divider);
+  panel.appendChild(btnSignOut);
+  sheet.appendChild(backdrop);
+  sheet.appendChild(panel);
+  document.body.appendChild(sheet);
+}
 buildTplList();
 initIntro();
 // Fallback: ensure hero is visible even if animations fail
@@ -5902,11 +5925,37 @@ function toggleNavMenu(e) {
   }
 }
 
-/* -- INIT -- */
-initTheme();
-updateNavForGuest();
-initSupabase();
-initAuthListeners();
+
+function openUserMenu() {
+  var existing = document.getElementById('userMenuSheet');
+  if (existing) { existing.remove(); return; }
+  var sheet = document.createElement('div');
+  sheet.id = 'userMenuSheet';
+  var backdrop = document.createElement('div');
+  backdrop.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.5)';
+  backdrop.onclick = function() { sheet.remove(); };
+  var panel = document.createElement('div');
+  panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:0.5px solid var(--border2);border-radius:16px 16px 0 0;padding:8px 0 32px;z-index:9001';
+  var handle = document.createElement('div');
+  handle.style.cssText = 'width:36px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 16px';
+  var btnProfile = document.createElement('button');
+  btnProfile.style.cssText = 'display:flex;align-items:center;width:100%;padding:14px 24px;background:none;border:none;color:var(--t0);font-family:var(--sans);font-size:15px;cursor:pointer;text-align:left';
+  btnProfile.textContent = 'My Profile';
+  btnProfile.onclick = function() { sheet.remove(); showProfile(); };
+  var divider = document.createElement('div');
+  divider.style.cssText = 'height:0.5px;background:var(--border);margin:4px 0';
+  var btnSignOut = document.createElement('button');
+  btnSignOut.style.cssText = 'display:flex;align-items:center;width:100%;padding:14px 24px;background:none;border:none;color:var(--red);font-family:var(--sans);font-size:15px;cursor:pointer;text-align:left';
+  btnSignOut.textContent = 'Sign Out';
+  btnSignOut.onclick = function() { sheet.remove(); signOut(); };
+  panel.appendChild(handle);
+  panel.appendChild(btnProfile);
+  panel.appendChild(divider);
+  panel.appendChild(btnSignOut);
+  sheet.appendChild(backdrop);
+  sheet.appendChild(panel);
+  document.body.appendChild(sheet);
+}
 buildTplList();
 initIntro();
 // Fallback: ensure hero is visible even if animations fail
@@ -5971,11 +6020,37 @@ function toggleNavMenu(e) {
   }
 }
 
-/* -- INIT -- */
-initTheme();
-updateNavForGuest();
-initSupabase();
-initAuthListeners();
+
+function openUserMenu() {
+  var existing = document.getElementById('userMenuSheet');
+  if (existing) { existing.remove(); return; }
+  var sheet = document.createElement('div');
+  sheet.id = 'userMenuSheet';
+  var backdrop = document.createElement('div');
+  backdrop.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.5)';
+  backdrop.onclick = function() { sheet.remove(); };
+  var panel = document.createElement('div');
+  panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:0.5px solid var(--border2);border-radius:16px 16px 0 0;padding:8px 0 32px;z-index:9001';
+  var handle = document.createElement('div');
+  handle.style.cssText = 'width:36px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 16px';
+  var btnProfile = document.createElement('button');
+  btnProfile.style.cssText = 'display:flex;align-items:center;width:100%;padding:14px 24px;background:none;border:none;color:var(--t0);font-family:var(--sans);font-size:15px;cursor:pointer;text-align:left';
+  btnProfile.textContent = 'My Profile';
+  btnProfile.onclick = function() { sheet.remove(); showProfile(); };
+  var divider = document.createElement('div');
+  divider.style.cssText = 'height:0.5px;background:var(--border);margin:4px 0';
+  var btnSignOut = document.createElement('button');
+  btnSignOut.style.cssText = 'display:flex;align-items:center;width:100%;padding:14px 24px;background:none;border:none;color:var(--red);font-family:var(--sans);font-size:15px;cursor:pointer;text-align:left';
+  btnSignOut.textContent = 'Sign Out';
+  btnSignOut.onclick = function() { sheet.remove(); signOut(); };
+  panel.appendChild(handle);
+  panel.appendChild(btnProfile);
+  panel.appendChild(divider);
+  panel.appendChild(btnSignOut);
+  sheet.appendChild(backdrop);
+  sheet.appendChild(panel);
+  document.body.appendChild(sheet);
+}
 buildTplList();
 initIntro();
 // Fallback: ensure hero is visible even if animations fail
