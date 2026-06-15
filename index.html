@@ -31,7 +31,7 @@ body{background:var(--bg);color:var(--t0);font-family:var(--sans);line-height:1.
 @keyframes ambDrift{from{opacity:.75;transform:scale(1)}to{opacity:1;transform:scale(1.05) translateX(8px)}}
 
 /* -- NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:200;overflow:visible;display:flex;align-items:center;justify-content:space-between;padding:0 52px;height:64px;background:rgba(7,9,11,0.82);backdrop-filter:blur(40px) saturate(200%);border-bottom:0.5px solid rgba(26,155,138,0.12);box-shadow:0 1px 0 rgba(26,155,138,0.06);-webkit-transform:translateZ(0);transform:translateZ(0);}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;overflow:visible;display:flex;align-items:center;justify-content:space-between;padding:0 52px;height:64px;background:rgba(7,9,11,0.82);backdrop-filter:blur(40px) saturate(200%);border-bottom:0.5px solid rgba(26,155,138,0.12);box-shadow:0 1px 0 rgba(26,155,138,0.06);-webkit-transform:translateZ(0);transform:translateZ(0);will-change:background,box-shadow;}
 nav.scrolled{background:rgba(7,9,11,0.97);}
 .nav-line{position:absolute;bottom:0;left:0;right:0;height:0.5px;background:linear-gradient(90deg,transparent,rgba(26,155,138,0.6),rgba(56,212,190,0.8),rgba(26,155,138,0.6),transparent);opacity:0.5;}
 nav.scrolled .nav-line{opacity:0.45;}
@@ -500,7 +500,7 @@ body.fm .app-sidebar{display:none;}
 @media (max-width: 768px) {
 
   /* NAV */
-  nav { padding: 0 16px; height: 56px; }
+  nav { padding: 0 16px; height: 56px; -webkit-transform: translateZ(0); transform: translateZ(0); will-change: background, box-shadow; }
   .nav-links { display: none; }
   .nav-actions { gap: 8px; }
   .btn-ghost { padding: 6px 12px; font-size: 13px; }
@@ -776,7 +776,7 @@ body.fm .app-sidebar{display:none;}
   .nav-actions { display: none !important; }
   .app-ctx { display: block !important; }
   .nav-user { display: flex !important; }
-  nav { padding: 0 16px; touch-action: none; -webkit-transform: translateZ(0); transform: translateZ(0); }
+  #navUserChip { display: flex !important; align-items: center; }
 }
 
 /* BAND PREDICTION ENGINE */
@@ -2634,9 +2634,7 @@ body.fm .app-sidebar{display:none;}
   align-items: center;
   margin-left: auto;
 }
-@media (max-width: 768px) {
-  #navUserChip { display: flex !important; }
-}
+
 </style>
 </head>
 <body>
@@ -4658,11 +4656,7 @@ const obs = new IntersectionObserver(entries => {
 }, {threshold: 0.1, rootMargin: '0px 0px -40px 0px'});
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
-/* -- NAV SCROLL -- */
-window.addEventListener('scroll', function() {
-  var nav = document.getElementById('mainNav');
-  if (nav) nav.classList.toggle('scrolled', window.scrollY > 50);
-}, {passive:true});
+/* -- NAV SCROLL -- removed to prevent reflow */
 
 
 /* -- HAMBURGER MENU -- */
