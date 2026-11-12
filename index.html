@@ -242,6 +242,14 @@ footer{padding:48px 52px;border-top:0.5px solid var(--border);position:relative;
 .as-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--r3);font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t2);cursor:pointer;transition:all 0.15s;border:0.5px solid transparent;}
 .as-item:hover{color:var(--t1);background:rgba(255,255,255,0.03);}
 .as-item.active{color:var(--teal2);background:rgba(26,155,138,0.09);border-color:rgba(26,155,138,0.15);}
+
+/* Grouped writing modes */
+.as-group-h{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;cursor:pointer;font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--t2);padding:10px 10px 6px;}
+.as-group-h:hover{color:var(--teal2);}
+.as-group-h:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:6px;}
+.as-chev{width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .2s;margin-right:4px;}
+.as-group.open .as-chev{transform:rotate(45deg);}
+.as-group:not(.open) .as-group-body{display:none;}
 .as-dot{width:5px;height:5px;border-radius:50%;background:var(--teal);flex-shrink:0;opacity:0.3;}
 .as-item.active .as-dot{opacity:1;box-shadow:0 0 5px var(--teal);}
 .as-founder{margin-top:auto;padding:12px;border-radius:var(--r2);border:0.5px solid var(--border2);background:rgba(26,155,138,0.04);}
@@ -4771,6 +4779,73 @@ const CTXS = {
 };
 
 const TPLS = ['ielts_t2','ielts_t1','toefl','academic','research','report','article','free'];
+
+/* ---- Extra writing modes (data-driven: shown inside the existing Writing Mode list, grouped) ---- */
+Object.assign(CTXS, {
+  ielts_gt1:{label:'IELTS GT Task 1',color:'#1A9B8A',minW:150,type:'band',dims:['TR','CC','LR','GA'],brief:'',
+    rubric:'This is IELTS General Training Task 1 (a letter). Judge whether all three bullet points are covered, whether tone and register (formal, semi-formal or informal) match the situation and the opening/closing, and the clarity of purpose.'},
+  toefl_integrated:{label:'TOEFL Integrated',color:'#2ABBA6',minW:150,type:'toefl',dims:['Content & Accuracy','Organization','Language Use'],brief:'',
+    rubric:'This is TOEFL Integrated Writing. The response must summarise the LECTURE and explain how it challenges specific points in the READING. Penalise personal opinion, copied reading text, and missing or inaccurate lecture points. Target length 150-225 words.'},
+  toefl_discussion:{label:'TOEFL Discussion',color:'#38D4BE',minW:100,type:'toefl',dims:['Contribution','Language Use','Development'],brief:'',
+    rubric:'This is the TOEFL Academic Discussion task. Judge whether the writer states a clear opinion, engages with at least one classmate\'s idea, adds a NEW supported idea, and uses natural, accurate language in a discussion-board register.'},
+  cambridge:{label:'Cambridge C1/C2',color:'#1A9B8A',minW:220,type:'cambridge',dims:['Content','Communicative Achievement','Organisation','Language'],brief:'',
+    rubric:'This is Cambridge C1 Advanced / C2 Proficiency writing. Assess against the four Cambridge criteria: Content, Communicative Achievement (register, genre conventions, effect on the reader), Organisation, and Language (range and accuracy). Reward sophisticated but natural language.'},
+  business:{label:'Business Writing',color:'#2ECC8A',minW:200,type:'academic',dims:['Clarity','Tone & Professionalism','Structure','Persuasion'],brief:'',
+    rubric:'This is professional business writing. Judge clarity of the main message in the first lines, concise and respectful tone, logical structure, a concrete call to action, and absence of filler.'},
+  email_letter:{label:'Email & Letter',color:'#3FB57D',minW:120,type:'academic',dims:['Purpose','Tone & Register','Structure','Language'],brief:'',
+    rubric:'This is an email or formal letter. Judge a clear purpose, correct greeting and sign-off, appropriate register, polite but direct requests, and tidy paragraphing.'},
+  sop:{label:'Statement of Purpose',color:'#D4A017',minW:500,type:'academic',dims:['Motivation','Fit & Evidence','Structure','Voice'],brief:'',
+    rubric:'This is a Statement of Purpose for admission. Judge a specific motivation, concrete evidence (experience, projects, results), fit with the programme, clear future goals, and an authentic personal voice. Penalise clichés and generic claims.'},
+  lit_review:{label:'Literature Review',color:'#B8932A',minW:500,type:'academic',dims:['Synthesis','Critical Evaluation','Structure','Academic Register'],brief:'',
+    rubric:'This is a literature review. Judge thematic synthesis (not source-by-source listing), critical comparison of findings, identification of a research gap, and academic register. Do NOT reward invented citations; flag claims that need a source.'},
+  research_proposal:{label:'Research Proposal',color:'#8A7030',minW:400,type:'academic',dims:['Problem & Gap','Research Questions','Methodology','Feasibility & Structure'],brief:'',
+    rubric:'This is a research proposal. Judge a clear problem and gap, focused researchable questions, an appropriate and justified method, realistic scope, and the expected contribution.'},
+  summary:{label:'Summary & Paraphrasing',color:'#5FD3A0',minW:60,type:'academic',dims:['Accuracy','Concision','Paraphrase Quality','Cohesion'],brief:'',
+    rubric:'This is a summary/paraphrasing task based on the PASSAGE in the task prompt. Judge accuracy of main ideas, concision, how far wording and structure differ from the source (penalise close copying), and cohesion. No new opinions.'}
+});
+Object.assign(PROMPT_BANKS, {
+  ielts_gt1:[
+    'A neighbour has been playing loud music late at night. Write a letter to your neighbour. In your letter: describe the problem, explain how it affects you, and suggest what could be done. Write at least 150 words. You do NOT need to write any addresses. Begin: "Dear Mr/Ms ...,"',
+    'You bought a laptop online but it arrived damaged. Write a letter to the company\'s customer service manager. In your letter: describe what happened, explain what you have already tried, and say what you want the company to do. Write at least 150 words. Begin: "Dear Sir or Madam,"',
+    'A friend is moving to your city next month. Write a letter to your friend. In your letter: say how you feel about the news, suggest areas where they could live, and offer to help with the move. Write at least 150 words. Begin: "Dear ...,"'],
+  toefl_integrated:[
+    'READING: Many cities are adopting four-day work weeks because they raise productivity, cut office costs, and improve employee wellbeing. LECTURE: The professor says the evidence is weaker: productivity gains appeared mainly in small firms with flexible tasks, costs shifted to employees through longer days, and customer-facing businesses struggled with coverage. TASK: Summarize the points in the lecture, explaining how they challenge the specific points in the reading. (150-225 words)',
+    'READING: Electric cars are clearly better for the environment: they have no tailpipe emissions, reduce dependence on oil, and make cities quieter. LECTURE: The professor argues that much electricity still comes from coal, battery production is carbon-intensive and mining damages ecosystems, and battery disposal remains unsolved. TASK: Summarize the points in the lecture, explaining how they challenge the specific points in the reading. (150-225 words)',
+    'READING: Online universities will soon replace traditional campuses because they are cheaper, more flexible, and reach more students. LECTURE: The professor points out that completion rates are low, students miss networking and hands-on lab work, and employers still prefer campus degrees in some fields. TASK: Summarize the points in the lecture, explaining how they challenge the specific points in the reading. (150-225 words)'],
+  toefl_discussion:[
+    'PROFESSOR: Should universities require every student to take at least one course outside their major? MAYA: Yes, it broadens thinking and helps students discover new interests. CHEN: No, it wastes time and money for students who already know their career path. TASK: Add your own contribution to the discussion (at least 100 words). Express and support your opinion and make a meaningful contribution.',
+    'PROFESSOR: Should cities ban private cars from their downtown areas? ANA: Yes, it would cut pollution and make streets safer for pedestrians. LUKA: No, small businesses depend on drivers, and many people cannot walk long distances. TASK: Add your own contribution to the discussion (at least 100 words). Express and support your opinion and make a meaningful contribution.',
+    'PROFESSOR: Is it better for students to take lecture notes by hand or on a laptop? SARA: By hand, because summarising helps memory. DEV: On a laptop, because you capture more detail and can organise notes easily. TASK: Add your own contribution to the discussion (at least 100 words). Express and support your opinion and make a meaningful contribution.'],
+  cambridge:[
+    'ESSAY: Your class has attended a panel discussion on whether governments should invest more in public transport than in new roads. Notes: (1) air quality (2) cost to taxpayers (3) your own idea. Write an essay discussing TWO of the points. Explain which is more important and give reasons. (220-260 words)',
+    'PROPOSAL: Your college wants to improve student wellbeing. Write a proposal for the principal describing current problems, suggesting two realistic improvements, and explaining how they would benefit students. (220-260 words)',
+    'REVIEW: You recently attended a cultural event in your town. Write a review for an English-language magazine describing the event, evaluating what worked and what did not, and saying whether you would recommend it. (220-260 words)'],
+  business:[
+    'You manage a team whose project deadline must move back two weeks because a supplier delayed delivery. Write a professional message to your client explaining the delay, its impact, and your recovery plan. (200-250 words)',
+    'Write a one-page proposal to your director recommending that the company adopt a hybrid working policy. Include the benefits, the risks, and a recommended next step. (200-300 words)',
+    'Write a concise executive summary of a quarterly report showing a 12% rise in sales but a 9% rise in customer complaints. Highlight the key finding and recommend two actions. (200-250 words)'],
+  email_letter:[
+    'Write a formal email to a hotel manager complaining that the sea-view room you booked was not available on arrival. State what happened, what you expect, and by when. (120-180 words)',
+    'Write a polite email to your professor asking for a two-day extension on an assignment because of a family emergency. Be brief and respectful, and propose a new deadline. (100-150 words)',
+    'Write a formal letter of application for a summer internship at an international company, explaining why you are a suitable candidate. (150-200 words)'],
+  sop:[
+    'Write a Statement of Purpose for a Master\'s programme in Applied Linguistics. Explain your academic background, why this programme, your relevant experience, and your future goals. (500-700 words)',
+    'Write a Statement of Purpose for an MSc in Computer Science (Artificial Intelligence). Describe your motivation, a project or experience that prepared you, why this university, and your career plans. (500-700 words)',
+    'Write a scholarship statement explaining a challenge you overcame, your academic and career goals, and how you will contribute to your community after your studies. (500-700 words)'],
+  lit_review:[
+    'Write a literature review section on how AI-powered feedback affects second-language writing. Group the research by theme, compare findings, and end with a research gap. Do not invent citations. (500+ words)',
+    'Write a literature review on the effects of social media use on adolescent wellbeing. Organise by theme (benefits, risks, moderating factors) and end with a gap in the research. Do not invent citations. (500+ words)',
+    'Write a literature review on remote work and productivity. Synthesise conflicting findings and end with a gap that motivates further research. Do not invent citations. (500+ words)'],
+  research_proposal:[
+    'Write a research proposal investigating whether practice with an AI chatbot improves EFL learners\' speaking fluency. Include background, research question(s), method, and expected contribution. (400+ words)',
+    'Write a research proposal on the effect of spaced-repetition apps on vocabulary retention in secondary school students. Include background, research question(s), method, and expected contribution. (400+ words)',
+    'Write a research proposal comparing direct and indirect teacher feedback on the accuracy of university students\' academic writing. Include background, research question(s), method, and expected contribution. (400+ words)'],
+  summary:[
+    'Summarise the passage in 60-80 words using your own words. PASSAGE: Urban green spaces such as parks and rooftop gardens do more than beautify cities. They lower summer temperatures by shading surfaces and releasing moisture, absorb rainwater that would otherwise overwhelm drains, and give residents places to exercise and relax. However, creating and maintaining them is costly, and they are often located in wealthier neighbourhoods, leaving other communities with fewer benefits.',
+    'Summarise the passage in 60-80 words using your own words. PASSAGE: Sleep plays a central role in memory. During deep sleep the brain replays recent experiences and moves important information into long-term storage, while less useful details fade. Students who sleep well after studying usually remember more than those who stay up to revise. Even short naps can help, but regularly sleeping too little weakens attention and makes new learning harder.',
+    'Paraphrase the passage in your own words, keeping the meaning but changing the vocabulary and sentence structure. PASSAGE: The invention of the printing press in the fifteenth century dramatically lowered the cost of books. As a result, literacy spread, ideas travelled faster across Europe, and scholars could compare and challenge each other\'s work more easily than ever before.']
+});
+TPLS.push('ielts_gt1','toefl_integrated','toefl_discussion','cambridge','business','email_letter','sop','lit_review','research_proposal','summary');
 const BDESC = {9:'Expert User',8.5:'Expert User',8:'Very Good User',7.5:'Good User',7:'Good User',6.5:'Competent User',6:'Competent User',5.5:'Modest User',5:'Modest User',4.5:'Limited User',4:'Limited User'};
 
 let currentCtx = 'ielts_t2', busy = false, lastBand = null, fm = false;
@@ -4852,18 +4927,49 @@ function goTo(id) {
 }
 
 /* -- SIDEBAR BUILDER -- */
+const CTX_GROUPS = [
+  ['Exams', ['ielts_t2','ielts_t1','ielts_gt1','toefl','toefl_integrated','toefl_discussion','cambridge']],
+  ['Academic', ['academic','research','lit_review','research_proposal','sop','summary']],
+  ['Professional', ['business','email_letter','report','article']],
+  ['Open', ['free']]
+];
 function buildTplList() {
   const list = document.getElementById('tplList');
   if (list.children.length > 0) return;
-  TPLS.forEach(id => {
-    const c = CTXS[id];
-    const el = document.createElement('div');
-    el.className = 'as-item' + (id === currentCtx ? ' active' : '');
-    el.id = 'tpl-' + id;
-    el.innerHTML = `<div class="as-dot" style="background:${c.color}"></div>${c.label}`;
-    el.onclick = () => { setCtx(id); document.getElementById('ctxSel').value = id; };
-    list.appendChild(el);
+  const groups = CTX_GROUPS.map(g => [g[0], g[1].filter(id => CTXS[id])]);
+  const rest = TPLS.filter(id => !groups.some(g => g[1].includes(id)));
+  if (rest.length) groups.push(['More', rest]);
+  groups.forEach(g => {
+    const grp = document.createElement('div');
+    grp.className = 'as-group' + (g[1].includes(currentCtx) ? ' open' : '');
+    const h = document.createElement('button');
+    h.type = 'button'; h.className = 'as-group-h';
+    h.setAttribute('aria-expanded', grp.classList.contains('open'));
+    h.innerHTML = '<span>' + g[0] + '</span><span class="as-chev" aria-hidden="true"></span>';
+    h.onclick = () => { const o = grp.classList.toggle('open'); h.setAttribute('aria-expanded', o); };
+    const body = document.createElement('div'); body.className = 'as-group-body';
+    g[1].forEach(id => {
+      const c = CTXS[id];
+      const el = document.createElement('div');
+      el.className = 'as-item' + (id === currentCtx ? ' active' : '');
+      el.id = 'tpl-' + id;
+      el.innerHTML = `<div class="as-dot" style="background:${c.color}"></div>${c.label}`;
+      el.onclick = () => { setCtx(id); document.getElementById('ctxSel').value = id; };
+      body.appendChild(el);
+    });
+    grp.appendChild(h); grp.appendChild(body); list.appendChild(grp);
   });
+  /* header dropdown: same ids/values, now grouped */
+  const sel = document.getElementById('ctxSel');
+  if (sel) {
+    sel.innerHTML = '';
+    groups.forEach(g => {
+      const og = document.createElement('optgroup'); og.label = g[0];
+      g[1].forEach(id => { const o = document.createElement('option'); o.value = id; o.textContent = CTXS[id].label; og.appendChild(o); });
+      sel.appendChild(og);
+    });
+    sel.value = currentCtx;
+  }
 }
 
 /* -- CONTEXT -- */
@@ -5154,7 +5260,7 @@ function showResults(r, wc, evolution) {
   const c = CTXS[currentCtx];
   const band = r.band;
   const maxVal = c.type === 'band' ? 9 : 10;
-  const sLabel = c.type === 'band' ? 'IELTS BAND' : c.type === 'toefl' ? 'TOEFL SCORE' : 'SCORE';
+  const sLabel = c.type === 'band' ? 'IELTS BAND' : c.type === 'toefl' ? 'TOEFL SCORE' : c.type === 'cambridge' ? 'CAMBRIDGE SCORE' : 'SCORE';
   const delta = lastBand !== null
     ? (band > lastBand ? '&#8593; +' + (band - lastBand).toFixed(1) + ' from last'
       : band < lastBand ? '&#8595; ' + (band - lastBand).toFixed(1) + ' from last' : '&#8212; same as last')
@@ -5938,7 +6044,7 @@ async function loadProfileData() {
     var ctxLabels = {ielts_t2:'IELTS Task 2',ielts_t1:'IELTS Task 1',toefl:'TOEFL',academic:'Academic Essay',research:'Research Abstract',report:'Report',article:'Article',free:'Free Writing'};
     histEl.innerHTML = sessions.slice(0,8).map(function(s) {
       var date = new Date(s.created_at).toLocaleDateString('en-GB', {day:'numeric',month:'short'});
-      var ctx = ctxLabels[s.ctx] || s.ctx;
+      var ctx = ctxLabels[s.ctx] || (CTXS[s.ctx] && CTXS[s.ctx].label) || s.ctx;
       return '<div class="session-item">' +
         '<div class="session-band">' + (s.band || '—') + '</div>' +
         '<div class="session-info">' +
@@ -6131,7 +6237,10 @@ function nvClearDraft() {
   var _nvBP = buildPrompt;
   buildPrompt = function(text, ctxId) {
     var out = _nvBP(text, ctxId);
-    if (typeof out !== 'string' || !currentUser) return out;
+    if (typeof out !== 'string') return out;
+    var _rb = (CTXS[ctxId] && CTXS[ctxId].rubric) ? '\n\nMODE-SPECIFIC ASSESSMENT GUIDANCE: ' + CTXS[ctxId].rubric : '';
+    if (!currentUser) return out + _rb;
+    out += _rb;
     var p = nvGetProfile(currentUser), bits = [];
     bits.push('write all feedback wording in ' + (p.lang === 'american' ? 'American' : 'British') + ' English spelling');
     if (p.detail === 'concise') bits.push('keep each feedback point to one short sentence');
@@ -6143,6 +6252,17 @@ function nvClearDraft() {
 })();
 
 /* ── SAVE SESSION TO SUPABASE ── */
+/* keep grouped mode list + header dropdown in sync with the active mode */
+(function(){
+  var _sc=setCtx;
+  setCtx=function(id){
+    _sc(id);
+    var it=document.getElementById('tpl-'+id);
+    if(it){var g=it.closest('.as-group');if(g&&!g.classList.contains('open')){g.classList.add('open');var h=g.querySelector('.as-group-h');if(h)h.setAttribute('aria-expanded','true');}}
+    var sel=document.getElementById('ctxSel');if(sel&&sel.value!==id)sel.value=id;
+  };
+})();
+
 async function saveSessionToSupabase(result, wc, ctxId) {
   if (!supabase || !currentUser) return;
   try {
@@ -7233,7 +7353,7 @@ function mobSync(){
 /* NIRVE: draft autosave, Ctrl/Cmd+Enter to analyze, exam timer */
 (function(){
   var ed=document.getElementById('editor'),tm=document.getElementById('examTimer'),K='nirve_draft',T,iv=null,left=0;
-  var MIN={ielts_t2:40,ielts_t1:20,toefl:30};
+  var MIN={ielts_t2:40,ielts_t1:20,toefl:30,ielts_gt1:20,toefl_integrated:20,toefl_discussion:10,cambridge:45,business:25,email_letter:15,sop:40,lit_review:45,research_proposal:40,summary:15};
   function draw(){var m=Math.floor(left/60),s=('0'+left%60).slice(-2);tm.textContent='\u23F1 '+m+':'+s;tm.classList.toggle('run',!!iv);tm.classList.toggle('over',left===0);}
   function stop(){clearInterval(iv);iv=null;}
   function reset(){stop();left=(MIN[currentCtx]||30)*60;draw();}
