@@ -3048,7 +3048,7 @@ html:not([data-theme="light"]) #landing .eyebrow{color:var(--teal3);}
 #app-view .ap-hdr{padding:18px 18px 14px;}
 #app-view .ap-title{font-size:.95rem;}
 #app-view .ap-body{padding:18px;}
-#app-view .ap-close,#mobResultsFab{display:none;}
+#app-view .ap-close,#mobResultsFab,.mob-tabs,.mob-more,.mob-empty,#mobFocusExit{display:none;}
 
 /* tablet */
 @media (min-width:769px) and (max-width:1100px){
@@ -3064,19 +3064,37 @@ html:not([data-theme="light"]) #landing .eyebrow{color:var(--teal3);}
   #app-view .app-top{height:auto;min-height:56px;padding:env(safe-area-inset-top,0px) 12px 0;gap:8px;overflow:visible;}
   #app-view .app-top > div:last-child{gap:6px;}
   #app-view .app-logo{width:32px;height:32px;}
-  #app-view .app-ai,#app-view .btn-focus,#app-view .app-ctx,#app-view #aBtn,#app-view .nav-user-name,#app-view .nav-user::after{display:none !important;}
+  #app-view .app-top .app-ai,#app-view .btn-focus,#app-view .app-ctx,#app-view #aBtn,#app-view .nav-user-name,#app-view .nav-user::after{display:none !important;}
   #app-view .app-top .theme-toggle{width:38px;height:38px;}
   #app-view #appNavUser .nav-user{padding:3px !important;border-radius:999px;min-height:0;}
   #app-view .btn-back{font-size:0;padding:0;width:38px;height:38px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;}
   #app-view .btn-back::before{content:'\2190';font-size:17px;letter-spacing:0;}
 
-  /* modes → horizontal chips */
-  #app-view .app-sidebar{display:flex !important;flex-direction:row;align-items:center;gap:8px;padding:10px 12px;border-right:none;border-bottom:1px solid var(--border);overflow-x:auto;overflow-y:hidden;flex-shrink:0;background:var(--bg) !important;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
-  #app-view .app-sidebar::-webkit-scrollbar{display:none;}
-  #app-view .sidebar-section-title,#app-view .as-founder,#app-view .app-sidebar .wme-panel{display:none !important;}
-  #app-view #tplList{display:flex;gap:8px;}
-  #app-view .as-item{flex-shrink:0;padding:9px 15px;border-radius:999px;border:1px solid var(--border);background:var(--bg1);font-size:13px;}
+  /* tabs + expandable panels (all features reachable) */
+  .mob-tabs{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0;position:relative;z-index:2;}
+  .mob-tabs button{flex:1;min-width:0;padding:9px 2px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--t2);font-family:var(--sans);font-size:11.5px;font-weight:600;cursor:pointer;position:relative;white-space:nowrap;}
+  .mob-tabs button.on{color:var(--teal2);background:rgba(26,155,138,.14);border-color:var(--border2);}
+  body.has-results .mob-tabs [data-t="results"]::after{content:'';position:absolute;top:6px;right:7px;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+  #app-view .app-sidebar{display:none !important;}
+  body[class*="mob-t-"] #app-view .app-sidebar{display:flex !important;flex-direction:column;gap:8px;padding:12px;max-height:56vh;max-height:56dvh;overflow-y:auto;border-right:none;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg1) !important;}
+  #app-view .app-sidebar > *{display:none !important;}
+  body.mob-t-modes #app-view .sidebar-section-title,body.mob-t-modes #app-view #tplList{display:block !important;}
+  body.mob-t-memory #app-view .wme-panel{display:block !important;margin:0;}
+  body.mob-t-memory #app-view .app-sidebar:not(:has(.wme-panel)) .mob-empty{display:block !important;}
+  body.mob-t-more #app-view .as-founder{display:block !important;margin:0;}
+  body.mob-t-more #app-view .mob-more{display:grid !important;}
+  .mob-empty{padding:18px 14px;border:1px dashed var(--border2);border-radius:14px;color:var(--t2);font-size:13px;line-height:1.6;text-align:center;}
+  .mob-more{grid-template-columns:1fr 1fr;gap:8px;}
+  .mob-more .app-ai{grid-column:1/-1;justify-content:center;display:flex !important;}
+  .mob-act{padding:13px 10px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--t0);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;}
+  .mob-act:active{background:rgba(26,155,138,.16);}
+  #app-view .as-item{padding:12px 14px;border-radius:12px;font-size:14px;margin-bottom:4px;}
   #app-view .as-item.active{border-color:var(--border3);background:rgba(26,155,138,.16);}
+  #mobFocusExit{display:none;}
+  body.fm #app-view .mob-tabs,body.fm #app-view .ae-brief,body.fm #app-view .app-sidebar{display:none !important;}
+  body.fm #mobFocusExit{display:inline-flex;position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px;z-index:90;padding:8px 14px;border-radius:999px;border:1px solid var(--border2);background:var(--bg2);color:var(--teal2);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;}
+  body.fm #app-view .app-top{display:none;}
+  body.fm #app-view #editor{padding-top:56px;}
 
   /* editor */
   #app-view .app-main{display:flex;flex-direction:column;}
@@ -3099,16 +3117,14 @@ html:not([data-theme="light"]) #landing .eyebrow{color:var(--teal3);}
   #app-view .ap-hdr::before{display:none !important;}
   #app-view .ap-title{font-size:.82rem;letter-spacing:.04em;white-space:nowrap;}
   #app-view .ap-body{padding:14px 14px calc(24px + env(safe-area-inset-bottom,0px));}
-  #app-view .ap-sub{display:none;}
   #app-view .ap-close{display:inline-flex;width:34px;height:34px;align-items:center;justify-content:center;border-radius:50%;border:1px solid var(--border);background:var(--bg2);color:var(--t1);font-size:14px;cursor:pointer;}
   body.panel-open #app-view::after{content:'';position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:100;}
   body.panel-open #app-view .app-top{z-index:1;}
-  #mobResultsFab{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:90;padding:12px 18px;border:none;border-radius:999px;background:linear-gradient(135deg,var(--teal3),var(--teal));color:#031412;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.06em;box-shadow:0 10px 28px -6px rgba(26,155,138,.7);}
-  body.has-results:not(.panel-open) #mobResultsFab{display:inline-flex;align-items:center;gap:6px;}
+  #mobResultsFab{display:none !important;position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:90;padding:12px 18px;border:none;border-radius:999px;background:linear-gradient(135deg,var(--teal3),var(--teal));color:#031412;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.06em;box-shadow:0 10px 28px -6px rgba(26,155,138,.7);}
+  
 }
 @media (max-width:380px){
   #app-view .app-name{font-size:12px;letter-spacing:.12em;}
-  #app-view .ae-btns .btn-clear{display:none;}
   #app-view #aBtn2{max-width:none;}
 }
 </style>
@@ -3395,6 +3411,14 @@ html:not([data-theme="light"]) #landing .eyebrow{color:var(--teal3);}
     </div>
   </div>
 
+    <div class="mob-tabs" id="mobTabs" role="tablist">
+    <button data-t="write" class="on">&#9998; Write</button>
+    <button data-t="modes">&#9776; Modes</button>
+    <button data-t="memory">&#129504; Memory</button>
+    <button data-t="results">&#9638; Results</button>
+    <button data-t="more">&#8943; More</button>
+  </div>
+  <button id="mobFocusExit" onclick="toggleFM()">EXIT FOCUS</button>
   <!-- APP BODY -->
   <button id="mobResultsFab" onclick="openMobPanel()">&#9650; RESULTS</button>
   <div class="app-main">
@@ -3403,6 +3427,15 @@ html:not([data-theme="light"]) #landing .eyebrow{color:var(--teal3);}
     <div class="app-sidebar" id="appSidebar">
       <div class="sidebar-section-title">Writing Mode</div>
       <div id="tplList"></div>
+      <div class="mob-empty">No Weakness Memory yet. Analyze a few essays and NIRVE will track your recurring weaknesses and band trend here.</div>
+      <div class="mob-more">
+        <div class="app-ai"><div class="app-ai-dot"></div>AI ACTIVE</div>
+        <button class="mob-act" onclick="mobTab('write');toggleFM()">&#9673; Focus mode</button>
+        <button class="mob-act" onclick="toggleTheme()">&#127763; Theme</button>
+        <button class="mob-act" onclick="openUserMenu()">&#9786; Account</button>
+        <button class="mob-act" onclick="clearEd();mobTab('write')">&#10005; Clear text</button>
+        <button class="mob-act" style="grid-column:1/-1" onclick="showLanding()">&#8592; Home</button>
+      </div>
       <div class="as-founder">
         <div class="asf-label">FOUNDER</div>
         <div class="asf-name">Dr. Niki Majidi</div>
@@ -6973,6 +7006,31 @@ function closeMobPanel(){document.getElementById('appPanel').classList.remove('p
   var tl=document.getElementById('tplList');
   if(tl)tl.addEventListener('click',function(){setTimeout(function(){var a=tl.querySelector('.as-item.active');if(a&&a.scrollIntoView)a.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});},50);});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('panel-open'))closeMobPanel();});
+})();
+</script>
+<script>
+/* NIRVE mobile tabs */
+function mobTab(t){
+  var b=document.body;
+  ['modes','memory','more'].forEach(function(x){b.classList.remove('mob-t-'+x);});
+  var cur=b.classList.contains('panel-open')?'results':null;
+  if(t==='results'){ if(cur){closeMobPanel();} else {openMobPanel();} return; }
+  closeMobPanel();
+  if(t!=='write')b.classList.add('mob-t-'+t);
+  mobSync();
+}
+function mobSync(){
+  var b=document.body,on='write';
+  if(b.classList.contains('panel-open'))on='results';
+  else ['modes','memory','more'].forEach(function(x){if(b.classList.contains('mob-t-'+x))on=x;});
+  document.querySelectorAll('#mobTabs button').forEach(function(btn){btn.classList.toggle('on',btn.getAttribute('data-t')===on);});
+}
+(function(){
+  var tabs=document.getElementById('mobTabs');
+  if(tabs)tabs.addEventListener('click',function(e){var btn=e.target.closest('button');if(!btn)return;var t=btn.getAttribute('data-t'),b=document.body;mobTab(b.classList.contains('mob-t-'+t)?'write':t);});
+  var tl=document.getElementById('tplList');
+  if(tl)tl.addEventListener('click',function(){setTimeout(function(){mobTab('write');},120);});
+  new MutationObserver(mobSync).observe(document.body,{attributes:true,attributeFilter:['class']});
 })();
 </script>
 </body>
