@@ -6354,7 +6354,11 @@ function openUserMenu(ev) {
   var panel = document.createElement('div');
   if (isDesktop) {
     // compact dropdown anchored under the user chip
-    var chip = document.querySelector('#appNavUser .nav-user') || document.querySelector('#navActions .nav-user') || document.querySelector('.nav-user');
+    var chip = null;
+    document.querySelectorAll('.nav-user').forEach(function(el) {
+      var b = el.getBoundingClientRect();
+      if (!chip && b.width > 0 && b.height > 0) chip = el;
+    });
     var r = chip ? chip.getBoundingClientRect() : { bottom: 60, right: window.innerWidth - 24 };
     panel.style.cssText = 'position:fixed;top:' + (r.bottom + 8) + 'px;right:' + Math.max(12, window.innerWidth - r.right) + 'px;width:200px;background:var(--bg1);border:0.5px solid var(--border2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.35);overflow:hidden;z-index:9001;padding:4px 0';
   } else {
