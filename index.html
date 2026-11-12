@@ -5843,7 +5843,7 @@ function updateNavForUser(user) {
   var avatarUrl = user.user_metadata && user.user_metadata.avatar_url ? user.user_metadata.avatar_url : null;
   var initials = name.charAt(0).toUpperCase();
   var toggleBtn = '<button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" style="flex-shrink:0">🌙</button>';
-  var chip = '<div class="nav-user" onclick="openUserMenu()">' +
+  var chip = '<div class="nav-user" onclick="event.stopPropagation();openUserMenu(event)">' +
     '<div class="nav-avatar">' + (avatarUrl ? '<img src="' + avatarUrl + '">' : initials) + '</div>' +
     '<span class="nav-user-name">' + name + '</span>' +
     '</div>';
@@ -6339,32 +6339,47 @@ function toggleNavMenu(e) {
 }
 
 
-function openUserMenu() {
+function openUserMenu(ev) {
   var existing = document.getElementById('userMenuSheet');
   if (existing) { existing.remove(); return; }
+  var isDesktop = window.innerWidth > 768;
   var sheet = document.createElement('div');
   sheet.id = 'userMenuSheet';
+  function close() { sheet.remove(); document.removeEventListener('keydown', onKey); }
+  function onKey(e) { if (e.key === 'Escape') close(); }
+  document.addEventListener('keydown', onKey);
   var backdrop = document.createElement('div');
-  backdrop.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.5)';
-  backdrop.onclick = function() { sheet.remove(); };
+  backdrop.style.cssText = 'position:fixed;inset:0;z-index:9000;background:' + (isDesktop ? 'transparent' : 'rgba(0,0,0,0.5)');
+  backdrop.onclick = close;
   var panel = document.createElement('div');
-  panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:0.5px solid var(--border2);border-radius:16px 16px 0 0;padding:8px 0 32px;z-index:9001';
-  var handle = document.createElement('div');
-  handle.style.cssText = 'width:36px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 16px';
-  var btnProfile = document.createElement('button');
-  btnProfile.style.cssText = 'display:flex;align-items:center;width:100%;padding:14px 24px;background:none;border:none;color:var(--t0);font-family:var(--sans);font-size:15px;cursor:pointer;text-align:left';
-  btnProfile.textContent = 'My Profile';
-  btnProfile.onclick = function() { sheet.remove(); showProfile(); };
+  if (isDesktop) {
+    // compact dropdown anchored under the user chip
+    var chip = document.querySelector('#appNavUser .nav-user') || document.querySelector('#navActions .nav-user') || document.querySelector('.nav-user');
+    var r = chip ? chip.getBoundingClientRect() : { bottom: 60, right: window.innerWidth - 24 };
+    panel.style.cssText = 'position:fixed;top:' + (r.bottom + 8) + 'px;right:' + Math.max(12, window.innerWidth - r.right) + 'px;width:200px;background:var(--bg1);border:0.5px solid var(--border2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.35);overflow:hidden;z-index:9001;padding:4px 0';
+  } else {
+    // mobile bottom sheet
+    panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:0.5px solid var(--border2);border-radius:16px 16px 0 0;padding:8px 0 calc(24px + env(safe-area-inset-bottom,0px));z-index:9001';
+    var handle = document.createElement('div');
+    handle.style.cssText = 'width:36px;height:4px;background:var(--border2);border-radius:2px;margin:6px auto 12px';
+    panel.appendChild(handle);
+  }
+  var pad = isDesktop ? '10px 16px' : '14px 24px';
+  var fs = isDesktop ? '14px' : '15px';
+  function mkBtn(label, color, hoverBg, fn) {
+    var b = document.createElement('button');
+    b.style.cssText = 'display:flex;align-items:center;width:100%;padding:' + pad + ';background:none;border:none;color:' + color + ';font-family:var(--sans);font-size:' + fs + ';cursor:pointer;text-align:left;transition:background .15s';
+    b.textContent = label;
+    b.onmouseenter = function() { b.style.background = hoverBg; };
+    b.onmouseleave = function() { b.style.background = 'none'; };
+    b.onclick = function(e) { e.stopPropagation(); close(); fn(); };
+    return b;
+  }
   var divider = document.createElement('div');
   divider.style.cssText = 'height:0.5px;background:var(--border);margin:4px 0';
-  var btnSignOut = document.createElement('button');
-  btnSignOut.style.cssText = 'display:flex;align-items:center;width:100%;padding:14px 24px;background:none;border:none;color:var(--red);font-family:var(--sans);font-size:15px;cursor:pointer;text-align:left';
-  btnSignOut.textContent = 'Sign Out';
-  btnSignOut.onclick = function() { sheet.remove(); signOut(); };
-  panel.appendChild(handle);
-  panel.appendChild(btnProfile);
+  panel.appendChild(mkBtn('My Profile', 'var(--t0)', 'var(--bg2)', function() { showProfile(); }));
   panel.appendChild(divider);
-  panel.appendChild(btnSignOut);
+  panel.appendChild(mkBtn('Sign Out', 'var(--red)', 'var(--bg2)', function() { signOut(); }));
   sheet.appendChild(backdrop);
   sheet.appendChild(panel);
   document.body.appendChild(sheet);
@@ -6607,36 +6622,6 @@ function toggleNavMenu(e) {
 }
 
 
-function openUserMenu() {
-  var existing = document.getElementById('userMenuSheet');
-  if (existing) { existing.remove(); return; }
-  var sheet = document.createElement('div');
-  sheet.id = 'userMenuSheet';
-  var backdrop = document.createElement('div');
-  backdrop.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.5)';
-  backdrop.onclick = function() { sheet.remove(); };
-  var panel = document.createElement('div');
-  panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:0.5px solid var(--border2);border-radius:16px 16px 0 0;padding:8px 0 32px;z-index:9001';
-  var handle = document.createElement('div');
-  handle.style.cssText = 'width:36px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 16px';
-  var btnProfile = document.createElement('button');
-  btnProfile.style.cssText = 'display:flex;align-items:center;width:100%;padding:14px 24px;background:none;border:none;color:var(--t0);font-family:var(--sans);font-size:15px;cursor:pointer;text-align:left';
-  btnProfile.textContent = 'My Profile';
-  btnProfile.onclick = function() { sheet.remove(); showProfile(); };
-  var divider = document.createElement('div');
-  divider.style.cssText = 'height:0.5px;background:var(--border);margin:4px 0';
-  var btnSignOut = document.createElement('button');
-  btnSignOut.style.cssText = 'display:flex;align-items:center;width:100%;padding:14px 24px;background:none;border:none;color:var(--red);font-family:var(--sans);font-size:15px;cursor:pointer;text-align:left';
-  btnSignOut.textContent = 'Sign Out';
-  btnSignOut.onclick = function() { sheet.remove(); signOut(); };
-  panel.appendChild(handle);
-  panel.appendChild(btnProfile);
-  panel.appendChild(divider);
-  panel.appendChild(btnSignOut);
-  sheet.appendChild(backdrop);
-  sheet.appendChild(panel);
-  document.body.appendChild(sheet);
-}
 buildTplList();
 initIntro();
 // Fallback: ensure hero is visible even if animations fail
@@ -6702,36 +6687,6 @@ function toggleNavMenu(e) {
 }
 
 
-function openUserMenu() {
-  var existing = document.getElementById('userMenuSheet');
-  if (existing) { existing.remove(); return; }
-  var sheet = document.createElement('div');
-  sheet.id = 'userMenuSheet';
-  var backdrop = document.createElement('div');
-  backdrop.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.5)';
-  backdrop.onclick = function() { sheet.remove(); };
-  var panel = document.createElement('div');
-  panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:0.5px solid var(--border2);border-radius:16px 16px 0 0;padding:8px 0 32px;z-index:9001';
-  var handle = document.createElement('div');
-  handle.style.cssText = 'width:36px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 16px';
-  var btnProfile = document.createElement('button');
-  btnProfile.style.cssText = 'display:flex;align-items:center;width:100%;padding:14px 24px;background:none;border:none;color:var(--t0);font-family:var(--sans);font-size:15px;cursor:pointer;text-align:left';
-  btnProfile.textContent = 'My Profile';
-  btnProfile.onclick = function() { sheet.remove(); showProfile(); };
-  var divider = document.createElement('div');
-  divider.style.cssText = 'height:0.5px;background:var(--border);margin:4px 0';
-  var btnSignOut = document.createElement('button');
-  btnSignOut.style.cssText = 'display:flex;align-items:center;width:100%;padding:14px 24px;background:none;border:none;color:var(--red);font-family:var(--sans);font-size:15px;cursor:pointer;text-align:left';
-  btnSignOut.textContent = 'Sign Out';
-  btnSignOut.onclick = function() { sheet.remove(); signOut(); };
-  panel.appendChild(handle);
-  panel.appendChild(btnProfile);
-  panel.appendChild(divider);
-  panel.appendChild(btnSignOut);
-  sheet.appendChild(backdrop);
-  sheet.appendChild(panel);
-  document.body.appendChild(sheet);
-}
 buildTplList();
 initIntro();
 // Fallback: ensure hero is visible even if animations fail
