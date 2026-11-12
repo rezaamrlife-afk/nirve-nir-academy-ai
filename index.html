@@ -3195,8 +3195,13 @@ html:not([data-theme="light"]) #landing .eyebrow{color:var(--teal3);}
     <a class="mm-link" href="https://niracademy.com" target="_blank"><span class="mm-icon">&#9670;</span>NIR Academy</a>
   </div>
   <div class="mm-footer">
-    <button class="mm-cta" onclick="showApp();toggleMenu()">Start Writing Free &rarr;</button>
-    <button class="mm-cta" style="background:transparent;border:0.5px solid var(--border2);color:var(--t1);margin-top:8px" onclick="openAuth();toggleMenu()">Sign In</button>
+    <button class="mm-cta" id="mmCta" onclick="showApp();toggleMenu()">Start Writing Free &rarr;</button>
+    <button class="mm-cta" id="mmGuestBtn" style="background:transparent;border:0.5px solid var(--border2);color:var(--t1);margin-top:8px" onclick="openAuth();toggleMenu()">Sign In</button>
+    <div id="mmUser" style="display:none;margin-top:8px">
+      <div id="mmUserName" style="text-align:center;font-size:13px;color:var(--t2);margin-bottom:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+      <button class="mm-cta" style="background:transparent;border:0.5px solid var(--border2);color:var(--t1)" onclick="toggleMenu();showProfile()">My Profile</button>
+      <button class="mm-cta" style="background:transparent;border:0.5px solid var(--border2);color:var(--red);margin-bottom:0" onclick="toggleMenu();signOut()">Sign Out</button>
+    </div>
     <div class="mm-note">Pedagogy First &middot; AI Enhanced &middot; Future Ready<br>Dr. Niki Majidi &middot; niracademy.com</div>
   </div>
 </div>
@@ -5987,6 +5992,8 @@ async function signOut() {
 /* Single place where the UI reacts to auth changes (no duplicate onUserLoggedIn calls) */
 function initAuthStateHandling() {
   supabase.auth.onAuthStateChange(function(event, session) {
+    if (event === 'SIGNED_OUT') { syncMobileMenuAuth(null); }
+    else if (session && session.user && event !== 'PASSWORD_RECOVERY' && event !== 'AUTH_LINK_ERROR') { syncMobileMenuAuth(session.user); }
     if (event === 'SIGNED_OUT') {
       _uiUserId = null;
       onUserLoggedOut();
@@ -6030,7 +6037,36 @@ function onUserLoggedOut() {
   updateNavForGuest();
 }
 
+/* Mobile hamburger menu + CTA: single sync point, driven by the Supabase session user (null = guest) */
+function syncMobileMenuAuth(user) {
+  var guestBtn = document.getElementById('mmGuestBtn');
+  var box = document.getElementById('mmUser');
+  var cta = document.getElementById('mmCta');
+  if (!guestBtn || !box) return;
+  if (user) {
+    var nm = (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name : (user.email || '');
+    var nameEl = document.getElementById('mmUserName');
+    if (nameEl) nameEl.textContent = nm;
+    guestBtn.style.display = 'none';
+    box.style.display = 'block';
+    if (cta) cta.innerHTML = 'Open Writing Studio &rarr;';
+  } else {
+    guestBtn.style.display = '';
+    box.style.display = 'none';
+    if (cta) cta.innerHTML = 'Start Writing Free &rarr;';
+  }
+}
+/* Re-read the real session (bfcache restore / tab wake) and resync */
+window.addEventListener('pageshow', function() {
+  if (!supabase || !supabase.auth) return;
+  supabase.auth.getSession().then(function(r) {
+    var u = r && r.data && r.data.session ? r.data.session.user : null;
+    syncMobileMenuAuth(u);
+  }).catch(function() {});
+});
+
 function updateNavForUser(user) {
+  syncMobileMenuAuth(user);
   var name = (user.user_metadata && user.user_metadata.full_name)
     ? user.user_metadata.full_name.split(' ')[0] : user.email.split('@')[0];
   var avatarUrl = user.user_metadata && user.user_metadata.avatar_url ? user.user_metadata.avatar_url : null;
@@ -6048,6 +6084,7 @@ function updateNavForUser(user) {
 }
 
 function updateNavForGuest() {
+  syncMobileMenuAuth(null);
   var existingChip = document.getElementById('navUserChip');
   if (existingChip) existingChip.remove();
   var a = document.getElementById('navActions');
