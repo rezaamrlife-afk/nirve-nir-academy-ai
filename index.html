@@ -1421,6 +1421,43 @@ body.fm .app-sidebar{display:none;}
 }
 .profile-back:hover { color: var(--teal2); }
 
+/* ── PROFILE: settings sections ── */
+.profile-card.pf-wide { grid-column: 1 / -1; }
+.pf-section-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--t2); margin: 28px 0 12px; }
+.pf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.pf-hint { font-size: 12px; color: var(--t2); line-height: 1.55; margin-top: 6px; }
+select.auth-input { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 34px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--t2) 50%), linear-gradient(135deg, var(--t2) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+.auth-input[readonly] { opacity: .75; cursor: not-allowed; }
+.pf-seg { display: flex; gap: 6px; flex-wrap: wrap; }
+.pf-seg button, .pf-chip { padding: 9px 14px; border-radius: 9px; border: 0.5px solid var(--border); background: var(--bg2);
+  color: var(--t1); font-family: var(--sans); font-size: 13px; cursor: pointer; transition: all .18s; }
+.pf-seg button:hover, .pf-chip:hover { border-color: var(--border2); }
+.pf-seg button.on, .pf-chip.on { background: rgba(26,155,138,0.14); border-color: var(--teal); color: var(--teal2); font-weight: 600; }
+.pf-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.pf-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.pf-btn { padding: 10px 18px; border-radius: 9px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.07em; cursor: pointer; transition: all .2s; }
+.pf-btn.primary { background: var(--teal); border: none; color: var(--on-accent); font-weight: 600; }
+.pf-btn.primary:hover { background: var(--teal2); }
+.pf-btn.primary:disabled { opacity: .55; cursor: default; }
+.pf-btn.ghost { background: transparent; border: 0.5px solid var(--border2); color: var(--t1); }
+.pf-btn.ghost:hover { border-color: var(--teal); color: var(--teal2); }
+.pf-btn.danger { background: transparent; border: 0.5px solid var(--border); color: var(--t2); }
+.pf-btn.danger:hover { border-color: var(--red); color: var(--red); }
+.pf-status { font-size: 12px; color: var(--t2); font-family: var(--mono); }
+.pf-status.ok { color: var(--green); }
+.pf-status.err { color: var(--red); }
+.pf-draft { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--bg2); border: 0.5px solid var(--border); border-radius: 10px; font-size: 13px; color: var(--t1); line-height: 1.5; }
+.pf-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--t2); flex-shrink: 0; }
+.pf-dot.on { background: var(--teal); box-shadow: 0 0 8px rgba(26,155,138,.6); }
+@media (max-width: 768px) {
+  .pf-row { grid-template-columns: 1fr; }
+  .pf-actions .pf-btn { flex: 1 1 100%; min-height: 44px; }
+  .pf-seg button { flex: 1; }
+  .profile-header-actions { flex-wrap: wrap; justify-content: center; }
+}
+
 @media (max-width: 768px) {
   .profile-grid { grid-template-columns: 1fr; }
   .profile-wrap { padding: 70px 16px 40px; }
@@ -3535,6 +3572,145 @@ html:not([data-theme="light"]) #landing .eyebrow{color:var(--teal3);}
 </div><!-- /app-view -->
 
 
+<!-- ═══════════════════════════════ PROFILE -->
+<div id="profile-view" style="display:none">
+  <div class="profile-wrap">
+    <button class="profile-back" onclick="showLanding()">&larr; BACK</button>
+
+    <div class="profile-header">
+      <div class="profile-avatar-big" id="profileAvatar"></div>
+      <div class="profile-info">
+        <div class="profile-name" id="profileName"></div>
+        <div class="profile-email" id="profileEmail"></div>
+        <div class="profile-since" id="profileSince"></div>
+      </div>
+      <div class="profile-header-actions">
+        <button class="pf-btn primary" onclick="showApp()">OPEN WRITING STUDIO</button>
+        <button class="btn-signout" onclick="signOut()">SIGN OUT</button>
+      </div>
+    </div>
+
+    <div class="profile-grid">
+      <!-- PERSONAL INFORMATION -->
+      <div class="profile-card pf-wide">
+        <div class="profile-card-title">PERSONAL INFORMATION</div>
+        <div class="pf-row">
+          <div class="auth-field">
+            <label class="auth-label" for="pfName">DISPLAY NAME</label>
+            <input class="auth-input" id="pfName" type="text" maxlength="50" autocomplete="name" placeholder="Your name">
+          </div>
+          <div class="auth-field">
+            <label class="auth-label" for="pfEmail">ACCOUNT EMAIL</label>
+            <input class="auth-input" id="pfEmail" type="email" readonly autocomplete="email">
+            <div class="pf-hint">Your email is your sign-in identity and can&rsquo;t be changed here.</div>
+          </div>
+        </div>
+        <div class="pf-actions">
+          <button class="pf-btn primary" data-pf-save onclick="nvSaveProfile()">SAVE CHANGES</button>
+          <span class="pf-status" data-pf-status></span>
+        </div>
+      </div>
+
+      <!-- WRITING PREFERENCES -->
+      <div class="profile-card">
+        <div class="profile-card-title">WRITING PREFERENCES</div>
+        <div class="auth-field">
+          <label class="auth-label" for="pfBand">TARGET IELTS BAND</label>
+          <select class="auth-input" id="pfBand"></select>
+        </div>
+        <div class="auth-field">
+          <span class="auth-label">ENGLISH VARIANT</span>
+          <div class="pf-seg" id="pfLang" data-pf-seg>
+            <button type="button" data-v="british">British</button>
+            <button type="button" data-v="american">American</button>
+          </div>
+        </div>
+        <div class="auth-field">
+          <label class="auth-label" for="pfMode">DEFAULT WRITING MODE</label>
+          <select class="auth-input" id="pfMode"></select>
+        </div>
+        <div class="auth-field">
+          <span class="auth-label">FEEDBACK DETAIL</span>
+          <div class="pf-seg" id="pfDetail" data-pf-seg>
+            <button type="button" data-v="concise">Concise</button>
+            <button type="button" data-v="standard">Standard</button>
+            <button type="button" data-v="detailed">Detailed</button>
+          </div>
+        </div>
+        <div class="pf-actions">
+          <button class="pf-btn primary" data-pf-save onclick="nvSaveProfile()">SAVE PREFERENCES</button>
+          <span class="pf-status" data-pf-status></span>
+        </div>
+      </div>
+
+      <!-- LEARNING GOALS -->
+      <div class="profile-card">
+        <div class="profile-card-title">LEARNING GOALS</div>
+        <div class="auth-field">
+          <label class="auth-label" for="pfTarget">TARGET SCORE</label>
+          <input class="auth-input" id="pfTarget" type="text" maxlength="24" placeholder="e.g. IELTS 7.5 overall">
+        </div>
+        <div class="auth-field">
+          <span class="auth-label">WRITING IMPROVEMENT GOALS</span>
+          <div class="pf-chips" id="pfGoals"></div>
+          <div class="pf-hint">Pick as many as you like.</div>
+        </div>
+        <div class="pf-actions">
+          <button class="pf-btn primary" data-pf-save onclick="nvSaveProfile()">SAVE GOALS</button>
+          <span class="pf-status" data-pf-status></span>
+        </div>
+      </div>
+
+      <!-- ACCOUNT & SECURITY -->
+      <div class="profile-card">
+        <div class="profile-card-title">ACCOUNT &amp; SECURITY</div>
+        <div class="pf-hint" style="margin:0 0 14px">Set or change your password, or have a reset link sent to your account email.</div>
+        <div class="pf-actions" style="margin-top:0">
+          <button class="pf-btn ghost" onclick="openAuth();authTab('recovery')">SET / CHANGE PASSWORD</button>
+          <button class="pf-btn ghost" id="pfResetBtn" onclick="nvSendReset()">EMAIL RESET LINK</button>
+          <button class="pf-btn danger" onclick="signOut()">SIGN OUT</button>
+        </div>
+        <div class="pf-status" id="pfResetStatus" style="margin-top:12px"></div>
+      </div>
+
+      <!-- PRIVACY & DATA -->
+      <div class="profile-card">
+        <div class="profile-card-title">PRIVACY &amp; DATA</div>
+        <div class="pf-draft"><span class="pf-dot" id="pfDraftDot"></span><span id="pfDraftTxt">Checking draft&hellip;</span></div>
+        <div class="pf-hint">Drafts are auto-saved only in this browser. They are never uploaded unless you run an analysis.</div>
+        <div class="pf-actions">
+          <button class="pf-btn danger" id="pfClearDraft" onclick="nvClearDraft()">CLEAR LOCAL DRAFT</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pf-section-label">YOUR PROGRESS</div>
+    <div class="profile-grid">
+      <div class="profile-card">
+        <div class="profile-card-title">STATISTICS</div>
+        <div class="stats-grid">
+          <div class="stat-item"><div class="stat-num" id="statCurrent">&mdash;</div><div class="stat-lbl">Current band</div></div>
+          <div class="stat-item"><div class="stat-num" id="statBest">&mdash;</div><div class="stat-lbl">Best band</div></div>
+          <div class="stat-item"><div class="stat-num" id="statSessions">0</div><div class="stat-lbl">Sessions</div></div>
+          <div class="stat-item"><div class="stat-num" id="statStreak">0</div><div class="stat-lbl">This week</div></div>
+        </div>
+      </div>
+      <div class="profile-card">
+        <div class="profile-card-title">WRITING DNA</div>
+        <div id="profileDNA"><div class="profile-empty">Complete a few analyses to build your writing profile.</div></div>
+      </div>
+      <div class="profile-card">
+        <div class="profile-card-title">WEAKNESS MEMORY</div>
+        <div id="profileWeaknesses"><div class="profile-empty">No recurring weaknesses yet.</div></div>
+      </div>
+      <div class="profile-card">
+        <div class="profile-card-title">RECENT SESSIONS</div>
+        <div id="profileHistory"><div class="profile-empty">No sessions yet. Write and analyse an essay to see it here.</div></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /profile-view -->
+
 <!-- ═══════════════════════════════ AUTH MODAL -->
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-modal" style="position:relative">
@@ -4569,7 +4745,7 @@ function navigate(page) {
       var nav = document.getElementById('mainNav');
       if (nav) nav.style.display = 'none';
       buildTplList();
-      setCtx('ielts_t2');
+      setCtx((currentUser && CTXS[nvGetProfile(currentUser).mode]) ? nvGetProfile(currentUser).mode : 'ielts_t2');
       setTimeout(function(){ renderWMEPanel(); bpRenderPrediction(); dnaRender(); }, 200);
       break;
 
@@ -4581,6 +4757,7 @@ function navigate(page) {
       if (nav) nav.style.display = 'flex';
       var nl = document.getElementById('navLinks');
       if (nl) nl.style.display = 'none';
+      nvInitProfileForm();
       loadProfileData();
       break;
   }
@@ -5731,6 +5908,164 @@ async function loadProfileData() {
   }
 }
 
+/* ── PROFILE PAGE: settings (stored in Supabase user_metadata via updateUser) ── */
+var NV_GOALS = [
+  ['task','Task response'],['coherence','Coherence & cohesion'],['vocab','Vocabulary range'],
+  ['grammar','Grammar accuracy'],['argument','Critical thinking & argument'],['academic','Academic tone'],
+  ['planning','Planning & structure'],['timing','Timing & speed']
+];
+var NV_PROFILE_DEFAULTS = { band: '7.0', lang: 'british', mode: 'ielts_t2', detail: 'standard', target: '', goals: [] };
+
+function nvGetProfile(user) {
+  var u = user || currentUser, m = (u && u.user_metadata) || {};
+  var p = m.nirve_profile && typeof m.nirve_profile === 'object' ? m.nirve_profile : {};
+  var out = Object.assign({}, NV_PROFILE_DEFAULTS, p);
+  if (!Array.isArray(out.goals)) out.goals = [];
+  if (typeof CTXS !== 'undefined' && !CTXS[out.mode]) out.mode = NV_PROFILE_DEFAULTS.mode;
+  return out;
+}
+
+function nvBuildProfileControls() {
+  var band = document.getElementById('pfBand');
+  if (band && !band.options.length) {
+    for (var b = 5; b <= 9.001; b += 0.5) { var o = document.createElement('option'); o.value = o.textContent = b.toFixed(1); band.appendChild(o); }
+  }
+  var mode = document.getElementById('pfMode');
+  if (mode && !mode.options.length) {
+    TPLS.forEach(function(id) { var o = document.createElement('option'); o.value = id; o.textContent = CTXS[id].label; mode.appendChild(o); });
+  }
+  var gl = document.getElementById('pfGoals');
+  if (gl && !gl.children.length) {
+    NV_GOALS.forEach(function(g) {
+      var c = document.createElement('button'); c.type = 'button'; c.className = 'pf-chip'; c.dataset.v = g[0]; c.textContent = g[1];
+      c.onclick = function() { c.classList.toggle('on'); };
+      gl.appendChild(c);
+    });
+  }
+  document.querySelectorAll('#profile-view [data-pf-seg]').forEach(function(seg) {
+    if (seg._nvBound) return; seg._nvBound = true;
+    seg.addEventListener('click', function(e) {
+      var btn = e.target.closest('button'); if (!btn) return;
+      seg.querySelectorAll('button').forEach(function(x) { x.classList.toggle('on', x === btn); });
+    });
+  });
+}
+
+function nvSetSeg(id, val) {
+  document.querySelectorAll('#' + id + ' button').forEach(function(b) { b.classList.toggle('on', b.dataset.v === val); });
+}
+function nvGetSeg(id, def) {
+  var b = document.querySelector('#' + id + ' button.on'); return b ? b.dataset.v : def;
+}
+function nvPfStatus(msg, cls) {
+  document.querySelectorAll('#profile-view [data-pf-status]').forEach(function(el) { el.textContent = msg || ''; el.className = 'pf-status' + (cls ? ' ' + cls : ''); });
+}
+
+function nvInitProfileForm() {
+  if (!currentUser) return;
+  nvBuildProfileControls();
+  var m = currentUser.user_metadata || {};
+  var p = nvGetProfile(currentUser);
+  var nameEl = document.getElementById('pfName');
+  if (nameEl) nameEl.value = m.full_name || (currentUser.email || '').split('@')[0];
+  var em = document.getElementById('pfEmail'); if (em) em.value = currentUser.email || '';
+  var band = document.getElementById('pfBand'); if (band) band.value = p.band;
+  var mode = document.getElementById('pfMode'); if (mode) mode.value = p.mode;
+  var tg = document.getElementById('pfTarget'); if (tg) tg.value = p.target || '';
+  nvSetSeg('pfLang', p.lang); nvSetSeg('pfDetail', p.detail);
+  document.querySelectorAll('#pfGoals .pf-chip').forEach(function(c) { c.classList.toggle('on', p.goals.indexOf(c.dataset.v) > -1); });
+  nvPfStatus('');
+  nvRefreshDraftStatus();
+}
+
+async function nvSaveProfile() {
+  if (!supabase || !currentUser) { openAuth(); return; }
+  var name = (document.getElementById('pfName').value || '').replace(/[<>]/g, '').replace(/\s+/g, ' ').trim();
+  if (!name) { nvPfStatus('Please enter a display name.', 'err'); return; }
+  var goals = [];
+  document.querySelectorAll('#pfGoals .pf-chip.on').forEach(function(c) { goals.push(c.dataset.v); });
+  var prof = Object.assign({}, nvGetProfile(currentUser), {
+    band: document.getElementById('pfBand').value || NV_PROFILE_DEFAULTS.band,
+    lang: nvGetSeg('pfLang', 'british'),
+    mode: document.getElementById('pfMode').value || NV_PROFILE_DEFAULTS.mode,
+    detail: nvGetSeg('pfDetail', 'standard'),
+    target: (document.getElementById('pfTarget').value || '').replace(/[<>]/g, '').trim().slice(0, 24),
+    goals: goals
+  });
+  var btns = document.querySelectorAll('#profile-view [data-pf-save]');
+  btns.forEach(function(b) { b.disabled = true; });
+  nvPfStatus('Saving…');
+  try {
+    var res = await supabase.auth.updateUser({ data: { full_name: name, nirve_profile: prof } });
+    if (res && res.error) { nvPfStatus((res.error.message || 'Could not save. Please try again.'), 'err'); showToast('Could not save profile', 'error', 3000); return; }
+    var u = (res && res.data && res.data.user) || currentUser;
+    document.getElementById('pfName').value = name;
+    var pn = document.getElementById('profileName'); if (pn) pn.textContent = name;
+    var av = document.getElementById('profileAvatar');
+    if (av && !(u.user_metadata && u.user_metadata.avatar_url)) av.textContent = name.charAt(0).toUpperCase();
+    updateNavForUser(u);            // header, hamburger menu and app chip
+    nvPfStatus('Saved ✓', 'ok');
+    showToast('Profile saved', 'success', 2200);
+  } catch (e) {
+    nvPfStatus('Could not save. Check your connection and try again.', 'err');
+  } finally {
+    btns.forEach(function(b) { b.disabled = false; });
+  }
+}
+
+async function nvSendReset() {
+  var st = document.getElementById('pfResetStatus'), btn = document.getElementById('pfResetBtn');
+  if (!supabase || !currentUser || !currentUser.email) return;
+  btn.disabled = true; st.className = 'pf-status'; st.textContent = 'Sending…';
+  try {
+    var res = await supabase.auth.resetPasswordForEmail(currentUser.email, { redirectTo: _authRedirectUrl() });
+    if (res && res.error) { st.className = 'pf-status err'; st.textContent = res.error.message || 'Could not send the email.'; }
+    else { st.className = 'pf-status ok'; st.textContent = 'Reset link sent to ' + currentUser.email + '.'; }
+  } catch (e) { st.className = 'pf-status err'; st.textContent = 'Could not send the email.'; }
+  btn.disabled = false;
+}
+
+function nvRefreshDraftStatus() {
+  var dot = document.getElementById('pfDraftDot'), txt = document.getElementById('pfDraftTxt'), btn = document.getElementById('pfClearDraft');
+  if (!dot || !txt) return;
+  var d = null;
+  try { d = JSON.parse(localStorage.getItem('nirve_draft') || 'null'); } catch (e) {}
+  if (d && d.x) {
+    var words = d.x.trim().split(/\s+/).filter(Boolean).length;
+    var label = (typeof CTXS !== 'undefined' && CTXS[d.c]) ? CTXS[d.c].label : 'Writing';
+    dot.classList.add('on'); txt.textContent = 'Draft saved on this device: ' + label + ', ' + words + ' word' + (words === 1 ? '' : 's') + '.';
+    if (btn) btn.disabled = false;
+  } else {
+    dot.classList.remove('on'); txt.textContent = 'No saved draft on this device.';
+    if (btn) btn.disabled = true;
+  }
+}
+
+function nvClearDraft() {
+  if (!confirm('Clear the locally saved draft? This also empties the writing editor.')) return;
+  try { localStorage.removeItem('nirve_draft'); } catch (e) {}
+  var ed = document.getElementById('editor');
+  if (ed && ed.innerText.trim()) { ed.innerText = ''; if (typeof updateWC === 'function') updateWC(); }
+  nvRefreshDraftStatus();
+  showToast('Local draft cleared', 'success', 2200);
+}
+
+/* Apply saved preferences to AI feedback wording (scoring rules and JSON shape untouched) */
+(function() {
+  var _nvBP = buildPrompt;
+  buildPrompt = function(text, ctxId) {
+    var out = _nvBP(text, ctxId);
+    if (typeof out !== 'string' || !currentUser) return out;
+    var p = nvGetProfile(currentUser), bits = [];
+    bits.push('write all feedback wording in ' + (p.lang === 'american' ? 'American' : 'British') + ' English spelling');
+    if (p.detail === 'concise') bits.push('keep each feedback point to one short sentence');
+    else if (p.detail === 'detailed') bits.push('explain each feedback point fully with a brief example');
+    if (p.band) bits.push('the learner is aiming for IELTS band ' + p.band);
+    if (p.goals.length) bits.push('learner focus areas: ' + p.goals.map(function(g) { var f = NV_GOALS.filter(function(x) { return x[0] === g; })[0]; return f ? f[1] : ''; }).filter(Boolean).join(', '));
+    return out + '\n\nLEARNER PREFERENCES (affect feedback wording only; do not change the scoring rules or the required JSON output format): ' + bits.join('; ') + '.';
+  };
+})();
+
 /* ── SAVE SESSION TO SUPABASE ── */
 async function saveSessionToSupabase(result, wc, ctxId) {
   if (!supabase || !currentUser) return;
@@ -6033,6 +6368,7 @@ function onUserLoggedIn(user) {
 
 function onUserLoggedOut() {
   currentUser = null;
+  var _pv = document.getElementById('profile-view'); if (_pv && _pv.style.display !== 'none') navigate('landing');   // leave the profile page when the session ends
   var _w = document.getElementById('welcomeOverlay'); if (_w) _w.classList.remove('open');   // don't leave the welcome card over the sign-in form
   updateNavForGuest();
 }
