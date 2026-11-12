@@ -3134,6 +3134,18 @@ html:not([data-theme="light"]) #landing .eyebrow{color:var(--teal3);}
   #app-view .app-name{font-size:12px;letter-spacing:.12em;}
   #app-view #aBtn2{max-width:none;}
 }
+#examTimer{cursor:pointer;font-family:inherit;color:var(--t1);white-space:nowrap;}
+#examTimer.run{color:var(--teal2);border-color:var(--border3);}
+#examTimer.over{color:var(--red);}
+@media (max-width:768px){
+  #examTimer{padding:6px 8px !important;font-size:10.5px !important;}
+  #app-view .ae-footer{gap:6px !important;padding-left:8px !important;padding-right:8px !important;}
+  #app-view .ae-wc{padding:6px 8px !important;font-size:10.5px !important;letter-spacing:0 !important;}
+  #app-view .ae-btns{gap:6px !important;}
+  #app-view .w-long{display:none;}
+  #app-view .btn-clear{padding:11px 9px !important;font-size:10.5px !important;}
+  #app-view #aBtn2{padding:12px 8px !important;font-size:10.5px !important;letter-spacing:.02em !important;max-width:none !important;}
+}
 </style>
 </head>
 <body>
@@ -3475,9 +3487,10 @@ html:not([data-theme="light"]) #landing .eyebrow{color:var(--teal3);}
           <span class="wc-low" id="wcn">0</span>
           <span id="wcTarget" style="color:var(--t2)">/ 250 min</span>
         </div>
+        <button class="ae-wc" id="examTimer" type="button" title="Click: start / pause · Double-click: reset"></button>
         <div class="ae-btns">
           <button class="btn-clear" onclick="clearEd()">CLEAR</button>
-          <button class="btn-analyze" id="aBtn2" disabled onclick="doAnalyze()">&#9654; ANALYZE WRITING</button>
+          <button class="btn-analyze" id="aBtn2" disabled onclick="doAnalyze()">&#9654; ANALYZE<span class="w-long"> WRITING</span></button>
         </div>
       </div>
     </div>
@@ -6765,6 +6778,30 @@ function mobSync(){
   var tl=document.getElementById('tplList');
   if(tl)tl.addEventListener('click',function(){setTimeout(function(){mobTab('write');},120);});
   new MutationObserver(mobSync).observe(document.body,{attributes:true,attributeFilter:['class']});
+})();
+</script>
+<script>
+/* NIRVE: draft autosave, Ctrl/Cmd+Enter to analyze, exam timer */
+(function(){
+  var ed=document.getElementById('editor'),tm=document.getElementById('examTimer'),K='nirve_draft',T,iv=null,left=0;
+  var MIN={ielts_t2:40,ielts_t1:20,toefl:30};
+  function draw(){var m=Math.floor(left/60),s=('0'+left%60).slice(-2);tm.textContent='\u23F1 '+m+':'+s;tm.classList.toggle('run',!!iv);tm.classList.toggle('over',left===0);}
+  function stop(){clearInterval(iv);iv=null;}
+  function reset(){stop();left=(MIN[currentCtx]||30)*60;draw();}
+  tm.onclick=function(){
+    if(iv)stop();
+    else if(left>0)iv=setInterval(function(){if(--left<=0){left=0;stop();showToast("Time is up!",'info',4000);}draw();},1000);
+    draw();
+  };
+  tm.ondblclick=reset;
+  var _uw=updateWC;updateWC=function(){_uw();clearTimeout(T);T=setTimeout(function(){try{var x=ed.innerText.trim();if(x)localStorage.setItem(K,JSON.stringify({c:currentCtx,x:x}));else localStorage.removeItem(K);}catch(e){}},500);};
+  var _sc=setCtx;setCtx=function(id){var ch=id!==currentCtx;_sc(id);if(ch)reset();};
+  var _ce=clearEd;clearEd=function(){_ce();reset();};
+  try{var d=JSON.parse(localStorage.getItem(K)||'null');if(d&&d.x&&!ed.innerText.trim()){ed.innerText=d.x;if(CTXS[d.c])setCtx(d.c);updateWC();showToast('Draft restored','info',2000);}}catch(e){}
+  reset();
+  document.addEventListener('keydown',function(e){
+    if((e.ctrlKey||e.metaKey)&&e.key==='Enter'&&getComputedStyle(document.getElementById('app-view')).display!=='none'){e.preventDefault();document.getElementById('aBtn2').click();}
+  });
 })();
 </script>
 </body>
