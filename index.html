@@ -3401,13 +3401,22 @@ html:not([data-theme="light"]) #landing .eyebrow{color:var(--teal3);}
 
       <div class="auth-field">
         <label class="auth-label">EMAIL ADDRESS</label>
-        <input class="auth-input" type="email" id="auth-email" placeholder="your@email.com" autocomplete="email">
+        <input class="auth-input" type="email" id="auth-email" placeholder="your@email.com" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false">
       </div>
 
       <div class="auth-field" style="position:relative">
         <label class="auth-label">PASSWORD</label>
         <input class="auth-input" type="password" id="auth-password" placeholder="Your password" autocomplete="current-password">
         <button type="button" onclick="toggleAuthPassword()" style="position:absolute;right:12px;bottom:11px;background:none;border:none;cursor:pointer;color:var(--t2);font-size:16px;padding:0;line-height:1" id="auth-eye-btn">👁</button>
+      </div>
+
+      <div class="auth-field" id="auth-confirm-field" style="display:none">
+        <label class="auth-label">CONFIRM PASSWORD</label>
+        <input class="auth-input" type="password" id="auth-password2" placeholder="Repeat new password" autocomplete="new-password">
+      </div>
+
+      <div id="auth-forgot-row" style="text-align:right;margin:-4px 0 14px">
+        <button type="button" class="auth-switch-btn" onclick="handleForgotPassword()">Forgot password?</button>
       </div>
 
       <button class="auth-submit" id="auth-submit-btn" onclick="handleAuthSubmit()">Sign In</button>
@@ -5051,101 +5060,335 @@ var currentUser = null;
 var authMode = 'signin';
 var _session = null;
 
-/* ── CUSTOM SUPABASE CLIENT ── */
+/* ── AUTH CORE: helpers, session store, events (single shared instance) ── */
+var SESSION_KEY = 'nirve_session';
+var _authListeners = [];
+var _authEpoch = 0;          // bumped on every sign-in/out: invalidates in-flight async results (race guard)
+var _refreshP = null;        // single-flight refresh
+var _refreshTimer = null;
+var _bootP = null;
+var _authLogBuf = [];
+var _lastAuthError = null;
+var _uiUserId = null;
+var _manualSignOut = false;
+
+/* Safe diagnostics: only event names, HTTP status and error codes. Never emails, passwords or tokens. */
+function _authLog(evt, info) {
+  var e = { t: new Date().toISOString(), evt: String(evt) };
+  if (info) {
+    if (info.status != null) e.status = info.status;
+    if (info.code) e.code = String(info.code).slice(0, 60);
+  }
+  _authLogBuf.push(e);
+  if (_authLogBuf.length > 40) _authLogBuf.shift();
+  try { if (localStorage.getItem('nirve_auth_debug') === '1') console.info('[NIRVE][auth]', e.evt, e.status || '', e.code || ''); } catch (_) {}
+}
+function _normEmail(v) { return String(v == null ? '' : v).trim().toLowerCase(); }
+function _authRedirectUrl() { return window.location.href.split('#')[0].split('?')[0]; }
+
+async function _authFetch(path, method, body, token) {
+  var h = { 'Content-Type': 'application/json', 'apikey': SUPA_KEY };
+  if (token) h['Authorization'] = 'Bearer ' + token;
+  try {
+    var r = await fetch(SUPA_URL + '/auth/v1' + path, { method: method, headers: h, body: body ? JSON.stringify(body) : undefined });
+    var txt = await r.text(), d = {};
+    try { d = txt ? JSON.parse(txt) : {}; } catch (_) {}
+    return { ok: r.ok, status: r.status, d: d || {} };
+  } catch (e) {
+    return { ok: false, status: 0, d: { error_code: 'network_error' } };
+  }
+}
+
+function _friendlyAuthError(code, status, msg, ctx) {
+  var c = String(code || '').toLowerCase(), m = String(msg || '').toLowerCase();
+  if (c === 'invalid_credentials' || m.indexOf('invalid login credentials') > -1)
+    return 'Incorrect email or password. If you signed up with Google, use "Continue with Google". Otherwise tap "Forgot password?".';
+  if (c === 'email_not_confirmed' || m.indexOf('email not confirmed') > -1)
+    return 'Please confirm your email first. Check your inbox (and spam) for the confirmation link.';
+  if (c === 'user_already_exists' || c === 'email_exists' || m.indexOf('already registered') > -1)
+    return 'This email is already registered. Sign in, or tap "Forgot password?" to reset it.';
+  if (c === 'weak_password') return msg || 'Password is too weak. Use a longer password with letters and numbers.';
+  if (c === 'same_password') return 'Your new password must be different from the current one.';
+  if (c === 'signup_disabled') return 'New sign-ups are currently disabled.';
+  if (c === 'email_address_invalid' || c === 'validation_failed' || m.indexOf('invalid email') > -1 || m.indexOf('unable to validate email') > -1)
+    return 'Please enter a valid email address.';
+  if (c === 'otp_expired' || c === 'session_not_found' || c === 'session_expired' || c === 'bad_jwt' || c === 'no_authorization')
+    return 'This link or session has expired. Please request a new reset link.';
+  if (status === 429 || c.indexOf('rate_limit') > -1) return 'Too many attempts. Please wait a minute and try again.';
+  if (status === 0 || c === 'network_error') return 'Network error. Check your connection and try again.';
+  if (status >= 500) return 'Server error. Please try again shortly.';
+  return (ctx === 'signup' ? 'Could not create the account' : 'Authentication failed') + ' (code: ' + (c || status) + ').';
+}
+function _fail(res, ctx) {
+  var d = res.d || {};
+  var code = d.error_code || (typeof d.code === 'string' ? d.code : '') || d.error || '';
+  var msg = d.msg || d.error_description || d.message || '';
+  _lastAuthError = { ctx: ctx, status: res.status, code: String(code).slice(0, 60), t: new Date().toISOString() };
+  _authLog('fail:' + ctx, { status: res.status, code: code });
+  return { data: null, error: { code: code, status: res.status, message: _friendlyAuthError(code, res.status, msg, ctx) } };
+}
+
+function _normSession(d) {
+  if (!d || !d.access_token) return null;
+  var now = Math.floor(Date.now() / 1000);
+  return {
+    access_token: d.access_token,
+    refresh_token: d.refresh_token || null,
+    token_type: d.token_type || 'bearer',
+    user: d.user || null,
+    expires_at: d.expires_at || (now + (parseInt(d.expires_in, 10) || 3600))
+  };
+}
+function _persist(s) {
+  try { if (s) localStorage.setItem(SESSION_KEY, JSON.stringify(s)); else localStorage.removeItem(SESSION_KEY); } catch (_) {}
+}
+function _emit(ev, session) {
+  _authLog('event:' + ev);
+  _authListeners.slice().forEach(function (cb) {
+    try { cb(ev, session); } catch (e) { console.error('[NIRVE][auth] listener error:', e && e.message); }
+  });
+}
+function _applySession(s, ev, noPersist) {
+  _session = s; currentUser = s ? s.user : null;
+  if (!noPersist) _persist(s);
+  _scheduleRefresh();
+  if (ev) _emit(ev, s);
+}
+function _scheduleRefresh() {
+  clearTimeout(_refreshTimer);
+  if (!_session || !_session.refresh_token) return;
+  var ms = Math.max(5, _session.expires_at - Math.floor(Date.now() / 1000) - 60) * 1000;
+  _refreshTimer = setTimeout(function () { _refreshSession(); }, Math.min(ms, 2147000000));
+}
+function _refreshSession() {
+  if (_refreshP) return _refreshP;
+  var sess = _session;
+  if (!sess || !sess.refresh_token) return Promise.resolve(null);
+  var epoch = _authEpoch;
+  _refreshP = (async function () {
+    var res = await _authFetch('/token?grant_type=refresh_token', 'POST', { refresh_token: sess.refresh_token });
+    if (epoch !== _authEpoch) return null;                       // signed out / signed in again meanwhile: drop result
+    if (res.ok && res.d.access_token) {
+      var ns = _normSession(res.d);
+      if (!ns.user) ns.user = sess.user;
+      _applySession(ns, 'TOKEN_REFRESHED');
+      return ns;
+    }
+    _authLog('refresh_fail', { status: res.status, code: res.d.error_code || res.d.error });
+    if (res.status === 400 || res.status === 401 || res.status === 403) {   // refresh token revoked/used: session is stale
+      _authEpoch++;
+      _applySession(null, 'SIGNED_OUT');
+    }
+    return null;                                                  // network error: keep session, retry later
+  })().then(function (v) { _refreshP = null; return v; }, function (e) { _refreshP = null; return null; });
+  return _refreshP;
+}
+async function _ensureFresh() {
+  if (_bootP) await _bootP;
+  if (!_session) return null;
+  if (_session.expires_at - Math.floor(Date.now() / 1000) < 60) await _refreshSession();
+  return _session;
+}
+
+function _parseAuthHash() {
+  var h = window.location.hash || '';
+  var q = window.location.search || '';
+  var src = null;
+  if (h.indexOf('access_token=') > -1 || h.indexOf('error=') > -1 || h.indexOf('error_code=') > -1) src = h.substring(1);
+  else if (q.indexOf('error_code=') > -1) src = q.substring(1);
+  if (!src) return null;
+  var p = new URLSearchParams(src);
+  return {
+    access_token: p.get('access_token'), refresh_token: p.get('refresh_token'), expires_in: p.get('expires_in'),
+    type: p.get('type'), error: p.get('error'), error_code: p.get('error_code')
+  };
+}
+function _cleanUrl() {
+  try { window.history.replaceState(null, '', window.location.pathname); } catch (_) { window.location.hash = ''; }
+}
+
+/* Runs once at startup: handles email-link / OAuth return, then restores a stored session. */
+function _bootAuth() {
+  if (_bootP) return _bootP;
+  _bootP = (async function () {
+    var parsed = _parseAuthHash();
+    if (parsed) _cleanUrl();                                      // remove tokens from the address bar immediately
+    if (parsed && parsed.access_token) {
+      var epoch = ++_authEpoch;
+      var ures = await _authFetch('/user', 'GET', null, parsed.access_token);
+      if (epoch === _authEpoch && ures.ok && ures.d && ures.d.id) {
+        var s = _normSession({ access_token: parsed.access_token, refresh_token: parsed.refresh_token, expires_in: parsed.expires_in, user: ures.d });
+        if (parsed.type === 'recovery') {
+          _applySession(s, null, true);                           // held in memory only until a new password is saved
+          setTimeout(function () { _emit('PASSWORD_RECOVERY', s); }, 0);
+        } else {
+          _applySession(s, null);
+          setTimeout(function () { _emit('SIGNED_IN', s); }, 0);
+        }
+        return;
+      }
+      _authLog('hash_token_invalid', { status: ures.status });
+      setTimeout(function () { _emit('AUTH_LINK_ERROR', { code: 'otp_expired' }); }, 0);
+    } else if (parsed && (parsed.error || parsed.error_code)) {
+      _authLog('hash_error', { code: parsed.error_code || parsed.error });
+      var ec = parsed.error_code || parsed.error;
+      setTimeout(function () { _emit('AUTH_LINK_ERROR', { code: ec }); }, 0);
+    }
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch (_) {}
+    var ns = saved && saved.access_token ? _normSession(saved) : null;
+    if (ns && !ns.user) ns = null;
+    if (ns && ns.expires_at - Math.floor(Date.now() / 1000) < 30 && !ns.refresh_token) { ns = null; _persist(null); }   // expired, cannot refresh
+    _session = ns; currentUser = ns ? ns.user : null;
+    if (_session && _session.expires_at - Math.floor(Date.now() / 1000) < 60) {
+      await _refreshSession();
+    }
+    _scheduleRefresh();
+    setTimeout(function () { _emit('INITIAL_SESSION', _session); }, 0);
+  })();
+  return _bootP;
+}
+
+/* Safe diagnostics, callable from the browser console:  nirveAuthDiag(true) */
+async function nirveAuthDiag(checkServer) {
+  var now = Math.floor(Date.now() / 1000), u = currentUser || {};
+  var out = {
+    supabaseHost: SUPA_URL.replace('https://', ''),
+    keyType: SUPA_KEY.indexOf('sb_publishable_') === 0 ? 'publishable' : (SUPA_KEY.split('.').length === 3 ? 'jwt-anon' : 'unknown'),
+    clientInstances: 1,
+    pageOrigin: window.location.origin,
+    redirectUsedForEmails: _authRedirectUrl(),
+    online: navigator.onLine,
+    hasSession: !!_session,
+    secondsToExpiry: _session ? _session.expires_at - now : null,
+    hasRefreshToken: !!(_session && _session.refresh_token),
+    userProviders: (u.app_metadata && u.app_metadata.providers) || null,
+    emailConfirmed: u.id ? !!u.email_confirmed_at : null,
+    lastError: _lastAuthError,
+    recentEvents: _authLogBuf.slice(-15)
+  };
+  if (checkServer) {
+    try {
+      var r = await fetch(SUPA_URL + '/auth/v1/settings', { headers: { 'apikey': SUPA_KEY } });
+      var d = await r.json();
+      out.serverSettings = {
+        status: r.status,
+        emailProviderEnabled: d.external ? d.external.email : undefined,
+        googleEnabled: d.external ? d.external.google : undefined,
+        signupsDisabled: d.disable_signup,
+        emailAutoconfirm: d.mailer_autoconfirm
+      };
+    } catch (e) { out.serverSettings = { error: 'unreachable' }; }
+  }
+  return out;
+}
+window.nirveAuthDiag = nirveAuthDiag;
+
+/* ── CUSTOM SUPABASE CLIENT (one shared instance; initSupabase() is idempotent) ── */
 function initSupabase() {
+  if (supabase) return supabase;
   supabase = {
     _url: SUPA_URL,
     _key: SUPA_KEY,
     _headers: function() {
-      var h = {
+      return {
         'Content-Type': 'application/json',
         'apikey': SUPA_KEY,
         'Authorization': 'Bearer ' + (_session ? _session.access_token : SUPA_KEY)
       };
-      return h;
     },
     auth: {
+      _ensureFresh: _ensureFresh,
+      _boot: _bootAuth,
+
       signUp: async function(opts) {
-        try {
-          var r = await fetch(SUPA_URL + '/auth/v1/signup', {
-            method: 'POST',
-            headers: {'Content-Type':'application/json','apikey':SUPA_KEY},
-            body: JSON.stringify({email: opts.email, password: opts.password, data: opts.options && opts.options.data ? opts.options.data : {}})
-          });
-          var d = await r.json();
-          if (!r.ok || d.error || d.msg) { console.error('[NIRVE] Signup error:', d); return {data: null, error: {message: d.error_description || d.msg || d.error || 'Signup failed (status ' + r.status + ')'}}; }
-          if (d.access_token) {
-            _session = d; currentUser = d.user;
-            localStorage.setItem('nirve_session', JSON.stringify(d));
-            onUserLoggedIn(d.user);
-          } else if (d.user && d.user.id) {
-            // Supabase returned user but no token yet - sign them in
-            currentUser = d.user;
-            onUserLoggedIn(d.user);
-          } else if (d.id && d.email) {
-            // Direct user object returned
-            currentUser = d;
-            onUserLoggedIn(d);
-          }
-          return {data: d, error: null};
-        } catch(e) { return {data: null, error: {message: e.message}}; }
+        opts = opts || {};
+        var email = _normEmail(opts.email);
+        var password = opts.password == null ? '' : String(opts.password);      // password is never trimmed or altered
+        var data = (opts.options && opts.options.data) || {};
+        var redirect = (opts.options && opts.options.emailRedirectTo) || _authRedirectUrl();
+        if (!email || !password) return _fail({ status: 0, d: { error_code: 'validation_failed' } }, 'signup');
+        var res = await _authFetch('/signup?redirect_to=' + encodeURIComponent(redirect), 'POST', { email: email, password: password, data: data });
+        if (!res.ok || res.d.error || res.d.error_code) return _fail(res, 'signup');
+        var d = res.d;
+        var session = _normSession(d);
+        if (session) {                                                           // email confirmation OFF: signed in immediately
+          _authEpoch++;
+          _applySession(session, 'SIGNED_IN');
+          return { data: { user: session.user, session: session }, error: null };
+        }
+        var user = d.user || (d.id ? d : null);                                  // email confirmation ON: user created, no session yet
+        if (user && Array.isArray(user.identities) && user.identities.length === 0) {
+          _authLog('signup_existing_email');                                     // Supabase hides duplicates by returning a user with no identities
+          return { data: null, error: { code: 'user_already_exists', status: 200, message: _friendlyAuthError('user_already_exists', 200, '', 'signup') } };
+        }
+        _authLog('signup_needs_confirmation');
+        return { data: { user: user, session: null }, error: null, needsConfirmation: true };
       },
+
       signInWithPassword: async function(opts) {
-        try {
-          var r = await fetch(SUPA_URL + '/auth/v1/token?grant_type=password', {
-            method: 'POST',
-            headers: {'Content-Type':'application/json','apikey':SUPA_KEY},
-            body: JSON.stringify({email: opts.email, password: opts.password})
-          });
-          var d = await r.json();
-          if (!r.ok || d.error || d.error_description) { console.error('[NIRVE] Login error:', d); return {data: null, error: {message: d.error_description || d.error || 'Login failed (status ' + r.status + ')'}}; }
-          if (d.access_token) {
-            _session = d; currentUser = d.user;
-            localStorage.setItem('nirve_session', JSON.stringify(d));
-            onUserLoggedIn(d.user);
-          } else if (d.user && d.user.id) {
-            // Supabase returned user but no token yet - sign them in
-            currentUser = d.user;
-            onUserLoggedIn(d.user);
-          } else if (d.id && d.email) {
-            // Direct user object returned
-            currentUser = d;
-            onUserLoggedIn(d);
-          }
-          return {data: d, error: null};
-        } catch(e) { return {data: null, error: {message: e.message}}; }
+        opts = opts || {};
+        var email = _normEmail(opts.email);
+        var password = opts.password == null ? '' : String(opts.password);      // password is never trimmed or altered
+        if (!email || !password) return _fail({ status: 0, d: { error_code: 'validation_failed' } }, 'signin');
+        var res = await _authFetch('/token?grant_type=password', 'POST', { email: email, password: password });
+        if (!res.ok || !res.d.access_token) return _fail(res, 'signin');
+        var s = _normSession(res.d);
+        _authEpoch++;                                                            // invalidates any older in-flight refresh
+        _applySession(s, 'SIGNED_IN');
+        return { data: { user: s.user, session: s }, error: null };
       },
+
+      resetPasswordForEmail: async function(email, opts) {
+        var em = _normEmail(email);
+        if (!em) return _fail({ status: 0, d: { error_code: 'validation_failed' } }, 'recover');
+        var redirect = (opts && opts.redirectTo) || _authRedirectUrl();
+        var res = await _authFetch('/recover?redirect_to=' + encodeURIComponent(redirect), 'POST', { email: em });
+        if (!res.ok) return _fail(res, 'recover');
+        _authLog('recover_requested');
+        return { data: {}, error: null };
+      },
+
+      updateUser: async function(attrs) {
+        attrs = attrs || {};
+        await _ensureFresh();
+        if (!_session) return _fail({ status: 401, d: { error_code: 'session_not_found' } }, 'update');
+        var body = {};
+        if (attrs.password != null) body.password = String(attrs.password);
+        if (attrs.data) body.data = attrs.data;
+        var epoch = _authEpoch;
+        var res = await _authFetch('/user', 'PUT', body, _session.access_token);
+        if (!res.ok || !res.d.id) return _fail(res, 'update');
+        if (epoch !== _authEpoch || !_session) return _fail({ status: 401, d: { error_code: 'session_not_found' } }, 'update');
+        _applySession(Object.assign({}, _session, { user: res.d }), 'USER_UPDATED');   // persists the session now
+        return { data: { user: res.d }, error: null };
+      },
+
       signOut: async function() {
-        try {
-          await fetch(SUPA_URL + '/auth/v1/logout', {method:'POST', headers: supabase._headers()});
-        } catch(e) {}
-        _session = null; currentUser = null;
-        localStorage.removeItem('nirve_session');
-        onUserLoggedOut();
+        var tok = _session && _session.access_token;
+        _authEpoch++;
+        _applySession(null, 'SIGNED_OUT');                                       // clear locally first: never leave a stale session behind
+        if (tok) await _authFetch('/logout?scope=local', 'POST', null, tok);     // best effort; local sign-out already done
+        return { error: null };
       },
+
       signInWithOAuth: async function(opts) {
         var redirectTo = opts.options && opts.options.redirectTo ? opts.options.redirectTo : window.location.href;
-        var url = SUPA_URL + '/auth/v1/authorize?provider=' + opts.provider + '&redirect_to=' + encodeURIComponent(redirectTo);
-        window.location.href = url;
-        return {data: null, error: null};
+        window.location.href = SUPA_URL + '/auth/v1/authorize?provider=' + opts.provider + '&redirect_to=' + encodeURIComponent(redirectTo);
+        return { data: null, error: null };
       },
-      getSession: function() {
-        var saved = localStorage.getItem('nirve_session');
-        if (saved) {
-          try {
-            var sess = JSON.parse(saved);
-            // Check if token expired
-            if (sess.expires_at && Date.now() / 1000 > sess.expires_at) {
-              localStorage.removeItem('nirve_session');
-              return Promise.resolve({data: {session: null}, error: null});
-            }
-            _session = sess; currentUser = sess.user;
-            return Promise.resolve({data: {session: sess}, error: null});
-          } catch(e) {}
-        }
-        return Promise.resolve({data: {session: null}, error: null});
+
+      getSession: async function() {
+        await _ensureFresh();
+        return { data: { session: _session }, error: null };
       },
-      onAuthStateChange: function(cb) { /* handled manually */ }
+
+      onAuthStateChange: function(cb) {
+        _authListeners.push(cb);
+        return { data: { subscription: { unsubscribe: function() {
+          var i = _authListeners.indexOf(cb); if (i > -1) _authListeners.splice(i, 1);
+        } } } };
+      }
     },
     from: function(table) {
       return {
@@ -5160,6 +5403,7 @@ function initSupabase() {
         single: function() { this._single = true; return this._execute(); },
         _execute: async function() {
           try {
+            await _ensureFresh();   // never send an expired token
             var url = SUPA_URL + '/rest/v1/' + this._table + '?select=' + (this._cols || '*');
             if (this._filters.length) url += '&' + this._filters.join('&');
             if (this._order) url += '&order=' + this._order;
@@ -5173,6 +5417,7 @@ function initSupabase() {
         },
         insert: async function(obj) {
           try {
+            await _ensureFresh();   // never send an expired token
             var r = await fetch(SUPA_URL + '/rest/v1/' + this._table, {
               method: 'POST',
               headers: Object.assign({}, supabase._headers(), {'Prefer': 'return=minimal'}),
@@ -5184,6 +5429,7 @@ function initSupabase() {
         },
         update: async function(obj) {
           try {
+            await _ensureFresh();   // never send an expired token
             var url = SUPA_URL + '/rest/v1/' + this._table + '?';
             if (this._filters.length) url += this._filters.join('&');
             var r = await fetch(url, {
@@ -5199,37 +5445,27 @@ function initSupabase() {
     }
   };
 
-  console.log('[NIRVE] Custom Supabase client ready');
-
-  // Check existing session
-  supabase.auth.getSession().then(function(res) {
-    if (res.data && res.data.session) {
-      currentUser = res.data.session.user;
-      onUserLoggedIn(res.data.session.user);
+  /* Keep tabs in sync and refresh when the tab wakes up */
+  window.addEventListener('storage', function(e) {
+    if (e.key !== SESSION_KEY) return;
+    if (!e.newValue) {
+      if (_session) { _authEpoch++; _session = null; currentUser = null; clearTimeout(_refreshTimer); _emit('SIGNED_OUT', null); }
+      return;
     }
+    try {
+      var s = JSON.parse(e.newValue);
+      if (s && s.access_token && s.user && (!_session || s.access_token !== _session.access_token)) {
+        var had = !!_session;
+        _session = s; currentUser = s.user; _scheduleRefresh();
+        _emit(had ? 'TOKEN_REFRESHED' : 'SIGNED_IN', s);
+      }
+    } catch (_) {}
   });
+  document.addEventListener('visibilitychange', function() { if (!document.hidden && _session) _ensureFresh(); });
 
-  // Handle OAuth callback (Google login redirect)
-  var hash = window.location.hash;
-  if (hash && hash.includes('access_token')) {
-    var params = new URLSearchParams(hash.substring(1));
-    var accessToken = params.get('access_token');
-    var refreshToken = params.get('refresh_token');
-    var expiresIn = params.get('expires_in');
-    if (accessToken) {
-      fetch(SUPA_URL + '/auth/v1/user', {
-        headers: {'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + accessToken}
-      }).then(function(r) { return r.json(); }).then(function(user) {
-        _session = {access_token: accessToken, refresh_token: refreshToken, user: user, expires_at: Date.now()/1000 + parseInt(expiresIn||3600)};
-        currentUser = user;
-        localStorage.setItem('nirve_session', JSON.stringify(_session));
-        window.location.hash = '';
-        onUserLoggedIn(user);
-      }).catch(function(e) { console.error('OAuth callback failed:', e); });
-    }
-  }
+  console.log('[NIRVE] Supabase client ready (run nirveAuthDiag(true) in the console for safe auth diagnostics)');
+  return supabase;
 }
-
 
 /* ── PROFILE VIEW ── */
 async function loadProfileData() {
@@ -5388,19 +5624,40 @@ function closeAuth() {
   var overlay = document.getElementById('authOverlay');
   if (overlay) overlay.classList.remove('open');
   document.body.style.overflow = '';
-  clearAuthMessages();
+  clearAuthMessages();  if (authMode === 'recovery') authTab('signin');
 }
 
 function authTab(mode) {
   authMode = mode;
-  var si = document.getElementById('tab-signin');
-  var su = document.getElementById('tab-signup');
-  var nf = document.getElementById('signup-name-field');
-  var btn = document.getElementById('auth-submit-btn');
+  var ov = document.getElementById('authOverlay');
+  if (!ov) return;
+  var q = function(s) { return ov.querySelector(s); };
+  var hide = function(el, h) { if (el) el.style.display = h ? 'none' : ''; };
+  var rec = mode === 'recovery';
+  var si = document.getElementById('tab-signin'), su = document.getElementById('tab-signup');
   if (si) si.classList.toggle('active', mode === 'signin');
   if (su) su.classList.toggle('active', mode === 'signup');
-  if (nf) nf.style.display = mode === 'signup' ? '' : 'none';
-  if (btn) btn.textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+  hide(document.getElementById('signup-name-field'), mode !== 'signup');
+  var emailEl = document.getElementById('auth-email');
+  hide(q('.auth-tabs'), rec); hide(q('.auth-google-btn'), rec); hide(q('.auth-divider'), rec); hide(q('.auth-footer'), rec);
+  hide(emailEl ? emailEl.parentElement : null, rec);
+  hide(document.getElementById('auth-forgot-row'), mode !== 'signin');
+  hide(document.getElementById('auth-confirm-field'), !rec);
+  var pw = document.getElementById('auth-password');
+  if (pw) {
+    pw.setAttribute('autocomplete', mode === 'signin' ? 'current-password' : 'new-password');
+    pw.placeholder = rec ? 'New password' : 'Your password';
+    var lbl = pw.parentElement ? pw.parentElement.querySelector('.auth-label') : null;
+    if (lbl) lbl.textContent = rec ? 'NEW PASSWORD' : 'PASSWORD';
+  }
+  var btn = document.getElementById('auth-submit-btn');
+  if (btn) btn.textContent = rec ? 'Update Password' : (mode === 'signin' ? 'Sign In' : 'Create Account');
+  var t = q('.auth-modal-title'), s = q('.auth-modal-sub');
+  if (t && s) {
+    if (!t.dataset.orig) { t.dataset.orig = t.textContent; s.dataset.orig = s.textContent; }
+    t.textContent = rec ? 'Set a new password' : t.dataset.orig;
+    s.textContent = rec ? 'Choose a new password for your NIRVE account.' : s.dataset.orig;
+  }
   clearAuthMessages();
 }
 
@@ -5430,12 +5687,19 @@ async function signInWithGoogle() {
   await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
 }
 
+var _authBusy = false;
+var _forgotCooldownUntil = 0;
+
 async function handleAuthSubmit() {
+  if (authMode === 'recovery') { return handleUpdatePassword(); }
   if (!supabase) { showAuthError('Auth not ready. Please try again in a moment.'); return; }
-  var email = document.getElementById('auth-email').value.trim();
-  var password = document.getElementById('auth-password').value;
+  if (_authBusy) return;                                                 // ignore double clicks / Enter + click races
+  var email = _normEmail(document.getElementById('auth-email').value);
+  var password = document.getElementById('auth-password').value;        // never trimmed
   var btn = document.getElementById('auth-submit-btn');
   if (!email || !password) { showAuthError('Please enter your email and password.'); return; }
+  if (authMode === 'signup' && password.length < 6) { showAuthError('Password must be at least 6 characters.'); return; }
+  _authBusy = true;
   btn.disabled = true;
   btn.textContent = authMode === 'signin' ? 'Signing in...' : 'Creating account...';
   clearAuthMessages();
@@ -5444,41 +5708,114 @@ async function handleAuthSubmit() {
       var res = await supabase.auth.signInWithPassword({ email: email, password: password });
       if (res.error) { showAuthError(res.error.message); }
       else {
-        closeAuth();
+        document.getElementById('auth-password').value = '';
+        closeAuth();                                                     // onAuthStateChange(SIGNED_IN) updates the UI once
         showToast('Welcome back!', 'success', 2000);
-        if (res.data && res.data.user) { onUserLoggedIn(res.data.user); }
-        else if (currentUser) { onUserLoggedIn(currentUser); }
       }
     } else {
       var name = document.getElementById('auth-name') ? document.getElementById('auth-name').value.trim() : '';
-      var res = await supabase.auth.signUp({ email: email, password: password, options: { data: { full_name: name || email.split('@')[0] } } });
-      if (res.error) { showAuthError(res.error.message); }
-      else {
+      var res2 = await supabase.auth.signUp({ email: email, password: password, options: { data: { full_name: name || email.split('@')[0] } } });
+      if (res2.error) { showAuthError(res2.error.message); }
+      else if (res2.data && res2.data.session) {
+        document.getElementById('auth-password').value = '';
         showAuthSuccess('Account created! Welcome to NIRVE.');
-        setTimeout(function() {
-          closeAuth();
-          if (res.data && res.data.user) { onUserLoggedIn(res.data.user); }
-          else if (currentUser) { onUserLoggedIn(currentUser); }
-        }, 1800);
+        setTimeout(closeAuth, 1200);
+      } else {
+        document.getElementById('auth-password').value = '';
+        authTab('signin');
+        showAuthSuccess('Account created. We sent a confirmation link to ' + email + '. Confirm it, then sign in.');
       }
     }
-  } catch(e) { showAuthError(e.message); }
+  } catch (e) {
+    _authLog('ui_exception');
+    showAuthError('Something went wrong. Please try again.');
+  }
+  _authBusy = false;
   btn.disabled = false;
-  btn.textContent = authMode === 'signin' ? 'Sign In' : 'Create Account';
+  if (authMode === 'signin') btn.textContent = 'Sign In';
+  else if (authMode === 'signup') btn.textContent = 'Create Account';
+  else btn.textContent = 'Update Password';
+}
+
+async function handleForgotPassword() {
+  if (!supabase) { showAuthError('Auth not ready. Please try again in a moment.'); return; }
+  var email = _normEmail(document.getElementById('auth-email').value);
+  if (!email || email.indexOf('@') < 1) { showAuthError('Enter your email above, then tap "Forgot password?".'); return; }
+  var wait = Math.ceil((_forgotCooldownUntil - Date.now()) / 1000);
+  if (wait > 0) { showAuthError('Please wait ' + wait + 's before requesting another reset email.'); return; }
+  _forgotCooldownUntil = Date.now() + 60000;
+  clearAuthMessages();
+  var res = await supabase.auth.resetPasswordForEmail(email, { redirectTo: _authRedirectUrl() });
+  if (res.error) {
+    if (res.error.status !== 429) _forgotCooldownUntil = 0;
+    showAuthError(res.error.message);
+  } else {
+    // Same message whether or not the account exists (no account enumeration)
+    showAuthSuccess('If an account exists for ' + email + ', a password reset link is on its way. Check your inbox and spam folder.');
+  }
+}
+
+async function handleUpdatePassword() {
+  if (!supabase) { showAuthError('Auth not ready. Please try again in a moment.'); return; }
+  if (_authBusy) return;
+  var p1 = document.getElementById('auth-password').value;
+  var p2 = document.getElementById('auth-password2').value;
+  var btn = document.getElementById('auth-submit-btn');
+  if (!p1 || p1.length < 6) { showAuthError('Password must be at least 6 characters.'); return; }
+  if (p1 !== p2) { showAuthError('The two passwords do not match.'); return; }
+  _authBusy = true; btn.disabled = true; btn.textContent = 'Updating...';
+  clearAuthMessages();
+  try {
+    var res = await supabase.auth.updateUser({ password: p1 });
+    if (res.error) { showAuthError(res.error.message); }
+    else {
+      document.getElementById('auth-password').value = '';
+      document.getElementById('auth-password2').value = '';
+      var u = res.data.user;
+      authTab('signin');
+      closeAuth();
+      showToast('Password updated. You are signed in.', 'success', 3000);
+      if (u && _uiUserId !== u.id) { _uiUserId = u.id; onUserLoggedIn(u); }
+    }
+  } catch (e) {
+    _authLog('ui_exception');
+    showAuthError('Something went wrong. Please try again.');
+  }
+  _authBusy = false; btn.disabled = false;
+  if (authMode === 'recovery') btn.textContent = 'Update Password';
 }
 
 async function signOut() {
+  _manualSignOut = true;
   try {
-    if (supabase) {
-      await supabase.auth.signOut();
-    }
-  } catch(e) { console.error('[NIRVE] signOut error:', e); }
-  currentUser = null;
-  if (supabase) supabase._session = null;
-  localStorage.removeItem('nirve_session');
-  // nav already updated by supabase.auth.signOut() → onUserLoggedOut()
+    if (supabase) await supabase.auth.signOut();                         // clears session + localStorage, emits SIGNED_OUT
+  } catch (e) { _authLog('signout_exception'); }
+  _manualSignOut = false;
   showToast('You have been signed out', 'info', 2500);
   navigate('landing');
+}
+
+/* Single place where the UI reacts to auth changes (no duplicate onUserLoggedIn calls) */
+function initAuthStateHandling() {
+  supabase.auth.onAuthStateChange(function(event, session) {
+    if (event === 'SIGNED_OUT') {
+      _uiUserId = null;
+      onUserLoggedOut();
+      if (!_manualSignOut) { showToast('Your session expired. Please sign in again.', 'info', 3500); }
+      return;
+    }
+    if (event === 'PASSWORD_RECOVERY') { openAuth(); authTab('recovery'); return; }
+    if (event === 'AUTH_LINK_ERROR') {
+      openAuth(); authTab('signin');
+      showAuthError('This link has expired or was already used. Enter your email and tap "Forgot password?" to get a new one.');
+      return;
+    }
+    if (event === 'USER_UPDATED') { if (session && session.user && _uiUserId === session.user.id) updateNavForUser(session.user); return; }
+    if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && session.user) {
+      if (_uiUserId !== session.user.id) { _uiUserId = session.user.id; onUserLoggedIn(session.user); }
+    }
+  });
+  supabase.auth._boot();
 }
 
 function onUserLoggedIn(user) {
@@ -6422,6 +6759,7 @@ function initPanelListener() {
 initPanelListener();
 updateNavForGuest();
 initSupabase();
+initAuthStateHandling();
 initAuthListeners();
 buildTplList();
 initIntro();
