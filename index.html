@@ -259,6 +259,36 @@ footer{padding:48px 52px;border-top:0.5px solid var(--border);position:relative;
 #editor{min-height:100%;padding:24px 28px;font-family:Georgia,serif;font-size:18px;line-height:1.9;color:var(--ink-doc);outline:none;caret-color:var(--teal3);}
 #editor:empty::before{content:attr(data-placeholder);color:var(--t2);font-style:italic;pointer-events:none;}
 .ae-footer{padding:10px 22px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-top:0.5px solid var(--border);}
+
+/* Smart writing tools panel */
+#nirve-smart{flex-shrink:0;margin:0 22px 8px;color:inherit;font:inherit}
+#nirve-smart .ns-panel{border:0.5px solid var(--border);border-radius:var(--r);padding:10px 12px;background:var(--bg1)}
+#nirve-smart .ns-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
+#nirve-smart .ns-status{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--t2);letter-spacing:.04em}
+#nirve-smart .ns-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0}
+#nirve-smart .ns-dot.saving{background:var(--amber)}
+#nirve-smart .ns-dot.error{background:var(--red)}
+#nirve-smart .ns-streak strong{color:var(--teal2)}
+#nirve-smart #ns-toggle{margin-left:auto}
+#nirve-smart button{border:0.5px solid var(--border);border-radius:8px;background:transparent;color:var(--t1);padding:7px 10px;font-family:var(--sans);font-size:12px;cursor:pointer;transition:background .2s,border-color .2s}
+#nirve-smart button:hover{border-color:var(--teal);background:rgba(26,155,138,.08)}
+#nirve-smart button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+#nirve-smart button:disabled{opacity:.45;cursor:not-allowed}
+#nirve-smart .ns-active{background:rgba(26,155,138,.16);border-color:var(--teal);color:var(--teal2)}
+#nirve-smart .ns-body{margin-top:10px}
+#nirve-smart .ns-panel.ns-collapsed .ns-body{display:none}
+#nirve-smart .ns-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+#nirve-smart .ns-stat{min-width:0;padding:8px 6px;border:0.5px solid var(--border);border-radius:10px;text-align:center}
+#nirve-smart .ns-stat strong{display:block;font-family:var(--serif);font-size:17px;font-weight:600;color:var(--teal2)}
+#nirve-smart .ns-stat small{display:block;margin-top:2px;font-size:10px;color:var(--t2)}
+#nirve-smart .ns-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:10px}
+#nirve-smart .ns-tools{display:flex;flex-wrap:wrap;gap:6px}
+#nirve-smart #ns-message{margin-top:8px;min-height:14px}
+body.fm #nirve-smart{display:none}
+.ns-success{animation:nsSuccess .7s ease}
+@keyframes nsSuccess{0%{box-shadow:inset 0 0 0 0 rgba(26,155,138,0)}40%{box-shadow:inset 0 0 0 2px rgba(26,155,138,.55)}100%{box-shadow:inset 0 0 0 0 rgba(26,155,138,0)}}
+@media(prefers-reduced-motion:reduce){.ns-success{animation:none}}
+@media(max-width:768px){#nirve-smart{margin:0 14px 6px}#nirve-smart .ns-stats{grid-template-columns:repeat(3,minmax(0,1fr))}#nirve-smart .ns-tools button{min-height:36px}}
 .ae-wc{font-family:var(--mono);font-size:12px;color:var(--t2);display:flex;align-items:center;gap:6px;}
 .wc-ok{color:var(--green)!important;} .wc-warn{color:var(--amber)!important;} .wc-low{color:var(--t2)!important;}
 .ae-btns{display:flex;gap:8px;}
@@ -3523,6 +3553,38 @@ html:not([data-theme="light"]) #landing .eyebrow{color:var(--teal3);}
              oninput="onInput()"
              spellcheck="true"></div>
       </div>
+      <section id="nirve-smart" aria-label="NIRVE writing tools">
+        <div class="ns-panel" id="ns-panel">
+          <div class="ns-toolbar">
+            <span class="ns-status" id="ns-save"><span class="ns-dot" id="ns-save-dot"></span><span id="ns-save-txt">Ready</span></span>
+            <span class="ns-status" id="ns-network">Checking connection&hellip;</span>
+            <span class="ns-status ns-streak" id="ns-streak">&#128293; <strong>0</strong> day streak</span>
+            <button type="button" id="ns-toggle" aria-expanded="true" aria-controls="ns-body">&#9662; Tools</button>
+          </div>
+          <div class="ns-body" id="ns-body">
+            <div class="ns-stats" aria-live="off">
+              <div class="ns-stat"><strong id="ns-words">0</strong><small>Words</small></div>
+              <div class="ns-stat"><strong id="ns-sentences">0</strong><small>Sentences</small></div>
+              <div class="ns-stat"><strong id="ns-paragraphs">0</strong><small>Paragraphs</small></div>
+              <div class="ns-stat"><strong id="ns-average">0</strong><small>Words / sentence</small></div>
+              <div class="ns-stat"><strong id="ns-reading">0 min</strong><small>Reading time</small></div>
+            </div>
+            <div class="ns-bottom">
+              <div class="ns-tools">
+                <button type="button" id="ns-dictate" aria-pressed="false">&#127908; Dictate</button>
+                <button type="button" id="ns-read">&#128266; Read aloud</button>
+                <button type="button" id="ns-stop">&#9632; Stop</button>
+                <button type="button" id="ns-share">&#8599; Share</button>
+              </div>
+              <div class="ns-tools">
+                <button type="button" id="ns-smaller" aria-label="Decrease editor font size">A&minus;</button>
+                <button type="button" id="ns-larger" aria-label="Increase editor font size">A+</button>
+              </div>
+            </div>
+          </div>
+          <div class="ns-status" id="ns-message" role="status" aria-live="polite"></div>
+        </div>
+      </section>
       <div class="ae-footer">
         <div class="ae-wc">
           WORDS &nbsp;
@@ -5059,6 +5121,7 @@ async function doAnalyze() {
     var expBtn = document.getElementById('exportReportBtn');
     if (expBtn) expBtn.style.display = 'inline-flex';
     showToast('Analysis complete — Band ' + (result.band || ''), 'success');
+    document.dispatchEvent(new CustomEvent('nirve:analysis-complete'));
   } catch(e) {
     showToast('Analysis error — please try again', 'error');
     document.getElementById('apBody').innerHTML = `
@@ -7167,7 +7230,7 @@ function mobSync(){
     draw();
   };
   tm.ondblclick=reset;
-  var _uw=updateWC;updateWC=function(){_uw();clearTimeout(T);T=setTimeout(function(){try{var x=ed.innerText.trim();if(x)localStorage.setItem(K,JSON.stringify({c:currentCtx,x:x}));else localStorage.removeItem(K);}catch(e){}},500);};
+  var _uw=updateWC;updateWC=function(){_uw();clearTimeout(T);document.dispatchEvent(new Event('nirve:save-start'));T=setTimeout(function(){try{var x=ed.innerText.trim();if(x)localStorage.setItem(K,JSON.stringify({c:currentCtx,x:x}));else localStorage.removeItem(K);document.dispatchEvent(new Event('nirve:save-success'));}catch(e){document.dispatchEvent(new Event('nirve:save-error'));}},500);};
   var _sc=setCtx;setCtx=function(id){var ch=id!==currentCtx;_sc(id);if(ch)reset();};
   var _ce=clearEd;clearEd=function(){_ce();reset();};
   try{var d=JSON.parse(localStorage.getItem(K)||'null');if(d&&d.x&&!ed.innerText.trim()){ed.innerText=d.x;if(CTXS[d.c])setCtx(d.c);updateWC();showToast('Draft restored','info',2000);}}catch(e){}
@@ -7175,6 +7238,171 @@ function mobSync(){
   document.addEventListener('keydown',function(e){
     if((e.ctrlKey||e.metaKey)&&e.key==='Enter'&&getComputedStyle(document.getElementById('app-view')).display!=='none'){e.preventDefault();document.getElementById('aBtn2').click();}
   });
+})();
+</script>
+<script>
+/* NIRVE smart writing tools: stats, real save status, dictation, read aloud, share, streak, theme, swipe tabs, font size */
+(function(){
+'use strict';
+var ROOT=document.getElementById('nirve-smart'),ED=document.getElementById('editor');
+if(!ROOT||!ED||ROOT.dataset.ready)return;
+ROOT.dataset.ready='1';
+function $(id){return document.getElementById(id);}
+var store={
+  get:function(k,d){try{var v=localStorage.getItem('nirve_smart_'+k);return v===null?d:v;}catch(e){return d;}},
+  set:function(k,v){try{localStorage.setItem('nirve_smart_'+k,String(v));}catch(e){}}
+};
+var msgTimer=null;
+function message(t){var m=$('ns-message');m.textContent=t;clearTimeout(msgTimer);msgTimer=setTimeout(function(){m.textContent='';},3500);}
+function lang(){try{var p=nvGetProfile(currentUser);return p.lang==='american'?'en-US':'en-GB';}catch(e){return 'en-US';}}
+
+/* collapse (default collapsed on phones to save editor space) */
+var panel=$('ns-panel'),tg=$('ns-toggle');
+function setCollapsed(c){panel.classList.toggle('ns-collapsed',c);tg.setAttribute('aria-expanded',String(!c));tg.innerHTML=(c?'&#9656;':'&#9662;')+' Tools';store.set('collapsed',c?'1':'0');}
+setCollapsed(store.get('collapsed',window.innerWidth<=768?'1':'0')==='1');
+tg.addEventListener('click',function(){setCollapsed(!panel.classList.contains('ns-collapsed'));});
+/* keep editor selection when pressing toolbar buttons */
+ROOT.addEventListener('mousedown',function(e){if(e.target.closest('button'))e.preventDefault();});
+
+/* 3. live statistics (existing updateWC fires nirve:save-start on every text change, so no extra input listener) */
+function stats(){
+  var t=(typeof getText==='function'?getText():ED.innerText.trim());
+  var words=t?t.split(/\s+/).filter(Boolean).length:0;
+  var sent=(t.match(/[.!?]+(?=\s|$)/g)||[]).length;
+  if(t&&!/[.!?]["')\]]*$/.test(t))sent++;
+  var paras=t?t.split(/\n+/).filter(function(x){return x.trim();}).length:0;
+  $('ns-words').textContent=words;$('ns-sentences').textContent=sent;$('ns-paragraphs').textContent=paras;
+  $('ns-average').textContent=sent?(words/sent).toFixed(1):'0';
+  $('ns-reading').textContent=(words?Math.max(1,Math.ceil(words/200)):0)+' min';
+}
+/* 2. real save status */
+function setSave(st){
+  var d=$('ns-save-dot'),tx=$('ns-save-txt');
+  d.className='ns-dot'+(st==='saving'?' saving':st==='error'?' error':'');
+  tx.textContent=({saving:'Saving…',saved:'Saved ✓',error:'Could not save draft',ready:'Ready'})[st]||st;
+}
+document.addEventListener('nirve:save-start',function(){setSave('saving');stats();});
+document.addEventListener('nirve:save-success',function(){setSave('saved');});
+document.addEventListener('nirve:save-error',function(){setSave('error');message('Draft could not be saved on this device (storage full or blocked).');});
+stats();
+
+/* 6. streak (counts a day after 3s of real writing, or a completed analysis) */
+function streakInfo(){
+  var today=new Date().toLocaleDateString('en-CA'),y=new Date();y.setDate(y.getDate()-1);
+  var last=store.get('lastWritingDay'),n=Number(store.get('streak','0'))||0;
+  return {today:today,yest:y.toLocaleDateString('en-CA'),last:last,n:n};
+}
+function showStreak(){var i=streakInfo(),n=(i.last===i.today||i.last===i.yest)?i.n:0;$('ns-streak').innerHTML='&#128293; <strong>'+n+'</strong> day streak';}
+function bumpStreak(){
+  var i=streakInfo();if(i.last===i.today)return;
+  var n=(i.last===i.yest)?i.n+1:1;store.set('lastWritingDay',i.today);store.set('streak',n);showStreak();
+}
+showStreak();
+var stTimer=null;
+ED.addEventListener('input',function(){if(!ED.innerText.trim())return;clearTimeout(stTimer);stTimer=setTimeout(bumpStreak,3000);});
+
+/* 4. dictation (contenteditable-safe, follows British/American preference) */
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition,rec=null,dBtn=$('ns-dictate');
+function insertText(txt){
+  ED.focus();
+  var sel=window.getSelection();
+  if(!sel.rangeCount||!ED.contains(sel.anchorNode)){var r=document.createRange();r.selectNodeContents(ED);r.collapse(false);sel.removeAllRanges();sel.addRange(r);}
+  var ok=false;try{ok=document.execCommand('insertText',false,txt);}catch(e){}
+  if(!ok){ED.appendChild(document.createTextNode(txt));}
+  ED.dispatchEvent(new Event('input',{bubbles:true}));   // runs the editor's own oninput -> onInput() -> updateWC()
+}
+function stopDictation(){if(rec){try{rec.stop();}catch(e){}}}
+dBtn.addEventListener('click',function(){
+  if(!SR){message('Dictation is not supported in this browser.');return;}
+  if(rec){stopDictation();return;}
+  try{
+    var r=new SR();rec=r;r.lang=lang();r.continuous=true;r.interimResults=false;
+    r.onstart=function(){dBtn.classList.add('ns-active');dBtn.setAttribute('aria-pressed','true');message('Listening…');};
+    r.onresult=function(ev){var out='';for(var i=ev.resultIndex;i<ev.results.length;i++){if(ev.results[i].isFinal)out+=ev.results[i][0].transcript+' ';}if(out)insertText(out);};
+    r.onerror=function(ev){message(ev.error==='not-allowed'||ev.error==='service-not-allowed'?'Microphone permission was denied.':'Dictation stopped.');};
+    r.onend=function(){if(rec===r)rec=null;dBtn.classList.remove('ns-active');dBtn.setAttribute('aria-pressed','false');};
+    r.start();
+  }catch(e){rec=null;message('Unable to start dictation.');}
+});
+
+/* 5. read aloud (chunked: long texts are cut off by some browsers otherwise) */
+function chunks(t){var out=[],parts=t.match(/[^.!?\n]+[.!?]*\s*/g)||[t],cur='';
+  parts.forEach(function(p){if((cur+p).length>200&&cur){out.push(cur);cur=p;}else cur+=p;});if(cur.trim())out.push(cur);return out;}
+$('ns-read').addEventListener('click',function(){
+  if(!window.speechSynthesis){message('Read aloud is not supported in this browser.');return;}
+  var sel=window.getSelection(),t=(sel&&!sel.isCollapsed&&ED.contains(sel.anchorNode))?sel.toString().trim():getText();
+  if(!t){message('Write something first.');return;}
+  speechSynthesis.cancel();
+  chunks(t).forEach(function(c){var u=new SpeechSynthesisUtterance(c);u.lang=lang();speechSynthesis.speak(u);});
+  message('Reading your text…');
+});
+$('ns-stop').addEventListener('click',function(){stopDictation();if(window.speechSynthesis)speechSynthesis.cancel();message('Stopped.');});
+window.addEventListener('pagehide',function(){stopDictation();if(window.speechSynthesis)speechSynthesis.cancel();});
+
+/* 7. share the real analysis output */
+$('ns-share').addEventListener('click',async function(){
+  var body=$('apBody'),txt=(document.body.classList.contains('has-results')&&body)?body.innerText.trim():'';
+  if(!txt){message('Run an analysis first, then share the result.');return;}
+  var data={title:'NIRVE Writing Analysis',text:'My NIRVE Writing Analysis\n\n'+txt};
+  try{
+    if(navigator.share){await navigator.share(data);message('Analysis shared.');}
+    else if(navigator.clipboard){await navigator.clipboard.writeText(data.text);message('Analysis copied to clipboard.');}
+    else message('Sharing is unavailable in this browser.');
+  }catch(e){if(e&&e.name!=='AbortError')message('Unable to share analysis.');}
+});
+
+/* 8. success feedback: fired only by doAnalyze() after a successful analysis */
+document.addEventListener('nirve:analysis-complete',function(){
+  var r=$('apBody');if(r){r.classList.remove('ns-success');void r.offsetWidth;r.classList.add('ns-success');}
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(navigator.vibrate&&!reduce)navigator.vibrate(35);
+  bumpStreak();message('Analysis completed successfully.');
+});
+
+/* 9. connection status */
+function net(){var n=$('ns-network'),on=navigator.onLine;n.textContent=on?'● Online':'● Offline';n.style.color=on?'var(--teal)':'var(--red)';
+  if(!on)message('You are offline. Drafts still save on this device; analysis needs a connection.');}
+window.addEventListener('online',net);window.addEventListener('offline',net);net();
+
+/* 1. theme: follow the system until the user picks a theme with NIRVE's own toggle */
+(function(){
+  if(typeof applyTheme!=='function')return;
+  var mq=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
+  var hadSaved=false;try{hadSaved=!!localStorage.getItem('nirve_theme');}catch(e){}
+  if(hadSaved&&store.get('autoTheme')!=='1')store.set('manualTheme','1');
+  function follow(){if(!mq||store.get('manualTheme')==='1')return;store.set('autoTheme','1');var t=mq.matches?'dark':'light';if(t!==_theme)applyTheme(t);}
+  follow();
+  if(mq&&mq.addEventListener)mq.addEventListener('change',follow);
+  var _tt=toggleTheme;toggleTheme=function(){store.set('manualTheme','1');_tt();};
+})();
+
+/* 10. swipe between the mobile app tabs (Write / Modes / Memory / Results / More) */
+(function(){
+  var sx=null,sy=null;
+  document.addEventListener('touchstart',function(e){
+    var av=$('app-view');sx=null;
+    if(window.innerWidth>768||!av||av.style.display==='none'||!av.contains(e.target))return;
+    if(e.target.closest('#editor,#nirve-smart,textarea,input,select,button,[contenteditable="true"],#tplList,#mobTabs,.auth-overlay'))return;
+    if(document.getElementById('authOverlay')&&document.getElementById('authOverlay').classList.contains('open'))return;
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(sx===null)return;var dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;sx=null;
+    if(Math.abs(dx)<90||Math.abs(dx)<Math.abs(dy)*1.4)return;
+    var btns=[].slice.call(document.querySelectorAll('#mobTabs button')),cur=btns.findIndex(function(b){return b.classList.contains('on');});
+    if(cur<0||typeof mobTab!=='function')return;
+    var nx=cur+(dx<0?1:-1);if(nx<0||nx>=btns.length)return;
+    mobTab(btns[nx].getAttribute('data-t'));
+  },{passive:true});
+})();
+
+/* 11. editor font size (keeps the app's responsive default until changed) */
+var fs=Number(store.get('font','0'))||0;
+function applyFont(){if(!fs)return;fs=Math.max(12,Math.min(26,fs));ED.style.fontSize=fs+'px';store.set('font',fs);}
+function curFont(){return fs||parseFloat(getComputedStyle(ED).fontSize)||16;}
+$('ns-larger').addEventListener('click',function(){fs=Math.round(curFont())+1;applyFont();message('Font size '+fs+'px');});
+$('ns-smaller').addEventListener('click',function(){fs=Math.round(curFont())-1;applyFont();message('Font size '+fs+'px');});
+applyFont();
 })();
 </script>
 </body>
