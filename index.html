@@ -2804,6 +2804,31 @@ nav{box-shadow:0 1px 0 rgba(26,155,138,0.08),0 8px 24px rgba(0,0,0,0.12);}
   img,svg,video{max-width:100%;}
 }
 
+/* ============ HEADER v2 (NIRON-style, visual only) ============ */
+@media screen and (min-width:769px){
+  nav{height:68px;}
+  .nav-logo{width:44px;height:44px;border-radius:12px;padding:3px;box-shadow:0 0 0 1px var(--border2),0 6px 20px rgba(26,155,138,0.18);}
+  .nav-brand{gap:13px;}
+  .nav-name{font-size:19px;letter-spacing:0.24em;}
+  .nav-sub{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;opacity:0.85;margin-top:4px;}
+  .nav-links{gap:2px;padding:4px;border-radius:999px;background:var(--bg2);border:0.5px solid var(--border);box-shadow:var(--sh1);}
+  .nav-link{padding:9px 18px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--t1);transition:background-color .2s,color .2s;}
+  .nav-link::after{display:none;}
+  .nav-link:hover{background:var(--teal-g);color:var(--t0);}
+  .nav-actions{gap:8px;}
+  .nav-actions .btn-ghost,.nav-actions .theme-toggle,nav .nav-user{
+    height:40px;border-radius:999px;background:var(--bg2);border:0.5px solid var(--border);box-shadow:var(--sh1);
+    display:inline-flex;align-items:center;justify-content:center;transition:border-color .2s,background-color .2s,transform .2s var(--ease);
+  }
+  .nav-actions .btn-ghost{padding:0 20px;font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;}
+  .nav-actions .theme-toggle{width:40px;padding:0;}
+  .nav-actions .btn-ghost:hover,.nav-actions .theme-toggle:hover,nav .nav-user:hover{border-color:var(--border3);background:var(--teal-g);}
+  .nav-actions .btn-nav-cta{height:40px;padding:0 24px;border-radius:999px;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;display:inline-flex;align-items:center;}
+  nav .nav-user{padding:0 14px 0 5px;gap:9px;}
+  nav .nav-user-name{font-size:13px;font-weight:600;color:var(--teal2);}
+  nav .nav-user::after{content:'';width:6px;height:6px;border-right:1.5px solid var(--teal2);border-bottom:1.5px solid var(--teal2);transform:rotate(45deg) translateY(-2px);margin-left:2px;opacity:.8;}
+}
+
 /* -- Respect reduced motion */
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important;}
