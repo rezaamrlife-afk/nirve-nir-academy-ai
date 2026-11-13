@@ -3234,6 +3234,46 @@ html:not([data-theme="light"]){
 }
 html[data-theme="light"] .nav-sub{opacity:1;}
 html[data-theme="light"] ::placeholder{color:var(--t3);opacity:1;}
+
+/* ===== NIRVE task generator ===== */
+#briefBody{max-height:52vh;overflow-y:auto;padding-right:4px}
+#briefTxt{white-space:pre-line}
+.ae-brief-header{gap:10px}
+.nvt-meta{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--t2);letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52%}
+.nvt-new{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;padding:3px 9px;border-radius:7px;border:1px solid var(--border2);background:transparent;color:var(--teal);cursor:pointer}
+.nvt-new:hover{background:rgba(26,155,138,.12)}
+.nvt-note{font-size:12.5px;color:var(--t2);border-left:2px solid var(--amber,#D4A017);padding:2px 0 2px 8px;margin-bottom:8px;line-height:1.5}
+.nvt-vis{margin:12px 0 4px;padding:12px;border:1px solid var(--border2);border-radius:10px;background:var(--bg1)}
+.nvt-cap{font-weight:600;font-size:14px;margin-bottom:8px;color:var(--t1)}
+.nvt-svg{display:block;width:100%;height:auto;max-width:700px;margin:0 auto}
+.nvt-tscroll{overflow-x:auto}
+.nvt-table{border-collapse:collapse;width:100%;font-size:14px}
+.nvt-table th,.nvt-table td{border:1px solid var(--border2);padding:7px 10px;text-align:center}
+.nvt-table th[scope=row]{text-align:left;font-weight:600}
+.nvt-table thead th{background:rgba(26,155,138,.10)}
+.nvt-flow{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:12px 30px;counter-reset:s}
+.nvt-flow li{position:relative;display:flex;gap:8px;align-items:flex-start;flex:1 1 190px;max-width:260px;padding:10px 12px;border:1px solid var(--border2);border-radius:10px;background:rgba(26,155,138,.06);font-size:14px;line-height:1.4}
+.nvt-flow li:not(:last-child)::after{content:'\2192';position:absolute;right:-24px;top:50%;transform:translateY(-50%);color:var(--teal);font-weight:700;font-size:18px}
+.nvt-n{flex:0 0 22px;height:22px;border-radius:50%;background:var(--teal);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.nvt-bul{margin:8px 0 8px 20px;padding:0}.nvt-bul li{margin:3px 0}
+.nvt-foot{margin:8px 0 0;font-size:14px;color:var(--t2);line-height:1.6}
+.nvt-card{margin:10px 0;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;background:var(--bg1)}
+.nvt-card-h{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--teal);font-weight:600}
+.nvt-card-h span{color:var(--t2);font-weight:400;letter-spacing:.02em;margin-left:8px;text-transform:none}
+.nvt-reading{margin:6px 0 0;font-size:15px;line-height:1.65;white-space:normal}
+.nvt-actions{display:flex;gap:8px;margin:8px 0}
+.nvt-btn{font-family:var(--mono);font-size:12px;letter-spacing:.06em;padding:6px 12px;border-radius:8px;border:1px solid var(--teal);background:var(--teal);color:#fff;cursor:pointer}
+.nvt-btn.ghost{background:transparent;color:var(--teal)}
+.nvt-trans summary{cursor:pointer;font-size:13px;color:var(--t2)}
+.nvt-forum{margin:10px 0;border:1px solid var(--border2);border-radius:10px;overflow:hidden;background:var(--bg1)}
+.nvt-fh{padding:7px 14px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--t2);border-bottom:1px solid var(--border2);background:rgba(26,155,138,.06)}
+.nvt-post{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border2)}.nvt-post:last-child{border-bottom:0}
+.nvt-post.prof{background:rgba(26,155,138,.05)}
+.nvt-av{flex:0 0 34px;height:34px;border-radius:50%;background:var(--teal);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.nvt-post:not(.prof) .nvt-av{background:#5B7FD1}
+.nvt-pn{font-weight:600;font-size:14px}.nvt-pn span{font-weight:400;color:var(--t2);font-size:12px;margin-left:6px}
+.nvt-pb p{margin:3px 0 0;font-size:14.5px;line-height:1.55}
+@media(max-width:560px){.nvt-meta{display:none}.nvt-flow li{max-width:none;flex-basis:100%}.nvt-flow li:not(:last-child)::after{content:'\2193';right:auto;left:50%;top:auto;bottom:-20px;transform:translateX(-50%)}.nvt-flow{gap:26px}}
 </style>
 </head>
 <body>
@@ -3509,7 +3549,7 @@ html[data-theme="light"] ::placeholder{color:var(--t3);opacity:1;}
       <div class="app-ai"><div class="app-ai-dot"></div>AI ACTIVE</div>
       <select class="app-ctx" id="ctxSel" onchange="setCtx(this.value)">
         <option value="ielts_t2">IELTS Task 2</option>
-        <option value="ielts_t1">IELTS Task 1</option>
+        <option value="ielts_t1">IELTS Academic Task 1</option>
         <option value="toefl">TOEFL Independent</option>
         <option value="academic">Academic Essay</option>
         <option value="research">Research Abstract</option>
@@ -3561,10 +3601,14 @@ html[data-theme="light"] ::placeholder{color:var(--t3);opacity:1;}
       <div class="ae-brief" id="aeBrief">
         <div class="ae-brief-header" onclick="toggleBrief()">
           <span class="ae-brief-label">TASK PROMPT</span>
+          <span class="nvt-meta" id="briefMeta"></span>
+          <button type="button" class="nvt-new" id="briefNew" onclick="event.stopPropagation();nvNewTask()" title="Generate a new task for this mode">&#8635; NEW TASK</button>
           <span class="ae-brief-toggle" id="briefToggle">&#9650; HIDE</span>
         </div>
         <div class="ae-brief-body" id="briefBody">
-          <span id="briefTxt">Some people believe universities should focus on academic knowledge. Others think universities should prepare students for employment. Discuss both views and give your opinion. Write at least 250 words.</span>
+          <div class="nvt-note" id="briefNote" style="display:none"></div>
+          <div id="briefTxt">Some people believe universities should focus on academic knowledge. Others think universities should prepare students for employment. Discuss both views and give your opinion. Write at least 250 words.</div>
+          <div id="briefVisual"></div>
         </div>
       </div>
       <div class="ae-wrap">
@@ -4169,7 +4213,7 @@ function dnaExtract(result) {
   dna.academic = Math.min(100, Math.round((ws / 10 * 50 + regScore / 9 * 50)));
 
   // Persuasive = TR score + argument quality
-  var trScore = scores['TR'] || scores['Argument'] || scores['Task Response'] || band;
+  var trScore = scores['TR'] || scores['TA'] || scores['Argument'] || scores['Task Response'] || band;
   dna.persuasive = Math.min(100, Math.round((trScore / 9 * 60 + (cog.reasoning || 5) / 10 * 40)));
 
   // Structural = CC score + structure cognitive
@@ -4846,6 +4890,826 @@ Object.assign(PROMPT_BANKS, {
     'Paraphrase the passage in your own words, keeping the meaning but changing the vocabulary and sentence structure. PASSAGE: The invention of the printing press in the fifteenth century dramatically lowered the cost of books. As a result, literacy spread, ideas travelled faster across Europe, and scholars could compare and challenge each other\'s work more easily than ever before.']
 });
 TPLS.push('ielts_gt1','toefl_integrated','toefl_discussion','cambridge','business','email_letter','sop','lit_review','research_proposal','summary');
+/* ═══════════════════════════════════════════════════════════════
+   NIRVE TASK GENERATOR
+   Produces authentic, format-specific tasks for every writing mode.
+   Each task = { text, brief, visualText, html, minW, minutes, hint, kind, rubric }
+     text        student-facing instruction shown in the Task Prompt panel
+     html        rendered material (chart / map / process / reading / lecture / forum / bullets)
+     brief       full plain-text version (sent to the AI examiner, used in reports)
+     visualText  data behind a visual, so the examiner can check accuracy
+   ═══════════════════════════════════════════════════════════════ */
+var NVT = (function () {
+  'use strict';
+  var PAL = ['#1A9B8A', '#D4A017', '#D94F4F', '#5B7FD1', '#8E6CC9', '#E07B39'];
+
+  /* ---------- helpers ---------- */
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function rint(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+  function shuffle(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function ls(k, v) {
+    try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {}
+    return null;
+  }
+  /* pick an item, never the same one twice in a row for this mode */
+  function pickFresh(id, arr, tag) {
+    var key = 'nirve_last_' + (tag || 'item') + '_' + id;
+    var last = parseInt(ls(key) || '-1', 10);
+    var idx = [];
+    for (var i = 0; i < arr.length; i++) if (i !== last) idx.push(i);
+    var n = idx.length ? pick(idx) : 0;
+    ls(key, String(n));
+    return arr[n];
+  }
+  function pickKind(id, kinds) {
+    var key = 'nirve_last_kind_' + id, last = ls(key) || '';
+    var pool = kinds.filter(function (k) { return k !== last; });
+    var k = pick(pool.length ? pool : kinds);
+    ls(key, k);
+    return k;
+  }
+  function fmt(n, dec) {
+    var s = (dec ? n.toFixed(dec) : String(Math.round(n)));
+    return s.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+  function niceAxis(maxV) {
+    var best = null;
+    [1, 2, 2.5, 5].forEach(function (m) {
+      for (var p = -1; p <= 4; p++) {
+        var step = m * Math.pow(10, p), n = Math.ceil(maxV / step);
+        if (n >= 4 && n <= 7) { var c = { step: step, max: n * step }; if (!best || c.max < best.max) best = c; }
+      }
+    });
+    if (!best) { var st = Math.ceil(maxV / 5); best = { step: st, max: st * 5 }; }
+    return best;
+  }
+  function svgWrap(w, h, inner, label) {
+    return '<svg class="nvt-svg" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' + esc(label) +
+      '" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, Arial, sans-serif">' + inner + '</svg>';
+  }
+  function visBox(inner, cap) {
+    return '<figure class="nvt-vis">' + (cap ? '<figcaption class="nvt-cap">' + esc(cap) + '</figcaption>' : '') + inner + '</figure>';
+  }
+  function txt(x, y, s, o) {
+    o = o || {};
+    return '<text x="' + x + '" y="' + y + '" fill="' + (o.fill || 'var(--t1)') + '" font-size="' + (o.size || 11) +
+      '"' + (o.anchor ? ' text-anchor="' + o.anchor + '"' : '') + (o.bold ? ' font-weight="600"' : '') +
+      (o.rot ? ' transform="rotate(' + o.rot + ' ' + x + ' ' + y + ')"' : '') + '>' + esc(s) + '</text>';
+  }
+  function legend(items, x0, y0, maxW) {
+    var x = x0, y = y0, out = '';
+    items.forEach(function (it) {
+      var w = 26 + it.label.length * 6.4;
+      if (x + w > x0 + maxW) { x = x0; y += 18; }
+      out += '<rect x="' + x + '" y="' + (y - 9) + '" width="12" height="12" rx="2" fill="' + it.color + '"/>' +
+        txt(x + 17, y + 1, it.label, { size: 11 });
+      x += w;
+    });
+    return { svg: out, bottom: y };
+  }
+  function finish(id, o) {
+    o.id = id;
+    o.minutes = o.minutes || 0;
+    o.visualText = o.visualText || '';
+    o.html = o.html || '';
+    o.rubric = o.rubric || '';
+    return o;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     IELTS ACADEMIC TASK 1 — charts, tables, process, maps
+     ════════════════════════════════════════════════════════════ */
+  var T1_STEM = ' Summarise the information by selecting and reporting the main features, and make comparisons where relevant.';
+  var T1_FOOT = 'Write at least 150 words.';
+
+  /* ---------- line graph ---------- */
+  var LINE_TOPICS = [
+    { t: 'the percentage of households with a broadband internet connection in four countries', cap: 'Households with broadband internet (%)', y: '%', cats: ['Canada', 'Brazil', 'Poland', 'South Korea', 'Turkey', 'Mexico'], lo: 6, hi: 96, years: [2000, 2005, 2010, 2015, 2020], dec: 0 },
+    { t: 'the proportion of household waste that was recycled in four cities', cap: 'Household waste recycled (%)', y: '%', cats: ['Oslo', 'Leeds', 'Seoul', 'Denver', 'Brisbane', 'Lyon'], lo: 8, hi: 78, years: [1995, 2000, 2005, 2010, 2015, 2020], dec: 0 },
+    { t: 'the number of international tourists visiting four countries', cap: 'International tourist arrivals (millions)', y: ' million', cats: ['Spain', 'Thailand', 'Egypt', 'Peru', 'Portugal', 'Japan'], lo: 2, hi: 60, years: [1990, 2000, 2010, 2020], dec: 0 },
+    { t: 'the average number of hours per week that teenagers spent on four leisure activities', cap: 'Hours per week', y: ' hours', cats: ['Watching TV', 'Video games', 'Reading', 'Playing sport', 'Social media'], lo: 1, hi: 21, years: [2000, 2005, 2010, 2015, 2020], dec: 1 },
+    { t: 'the percentage of electricity generated from renewable sources in four countries', cap: 'Electricity from renewables (%)', y: '%', cats: ['Denmark', 'Chile', 'India', 'Australia', 'Kenya', 'Spain'], lo: 4, hi: 85, years: [2000, 2005, 2010, 2015, 2020], dec: 0 },
+    { t: 'the number of passengers using four types of public transport in a European capital', cap: 'Passengers per year (millions)', y: ' million', cats: ['Metro', 'Bus', 'Tram', 'Suburban rail', 'River boat'], lo: 15, hi: 240, years: [1990, 2000, 2010, 2020], dec: 0 }
+  ];
+  function genSeries(n, lo, hi, dec) {
+    var shapes = ['rise', 'fall', 'peak', 'dip', 'fluct', 'rise', 'fall'];
+    var shape = pick(shapes), a = rnd(0.06, 0.32), b = rnd(0.6, 0.94), out = [], R = hi - lo;
+    for (var i = 0; i < n; i++) {
+      var t = n === 1 ? 0 : i / (n - 1), base;
+      if (shape === 'rise') base = a + (b - a) * Math.pow(t, 0.85);
+      else if (shape === 'fall') base = b - (b - a) * Math.pow(t, 0.85);
+      else if (shape === 'peak') base = a + (b - a) * Math.sin(Math.PI * t) * 0.95 + (t > 0.5 ? -0.03 : 0.03);
+      else if (shape === 'dip') base = b - (b - a) * Math.sin(Math.PI * t) * 0.95;
+      else base = 0.5 + 0.28 * Math.sin(t * Math.PI * rnd(1.6, 3.2) + rnd(0, 3));
+      base = Math.max(0.04, Math.min(0.97, base + rnd(-0.035, 0.035)));
+      var v = lo + R * base;
+      out.push(dec ? Math.round(v * 10) / 10 : Math.round(v));
+    }
+    return { shape: shape, vals: out };
+  }
+  function genLine(id) {
+    var T = pick(LINE_TOPICS), n = T.cats.length > 4 ? 4 : T.cats.length;
+    var cats = shuffle(T.cats).slice(0, 4);
+    var series = cats.map(function (c) { return { name: c, vals: genSeries(T.years.length, T.lo, T.hi, T.dec).vals }; });
+    var mx = 0; series.forEach(function (s) { s.vals.forEach(function (v) { if (v > mx) mx = v; }); });
+    var ax = niceAxis(mx * 1.04), W = 640, H = 400, L = 62, R = 22, Tp = 50, Bt = 96;
+    var pw = W - L - R, ph = H - Tp - Bt, g = '';
+    g += txt(W / 2, 24, T.cap + ', ' + T.years[0] + '–' + T.years[T.years.length - 1], { anchor: 'middle', bold: true, size: 13 });
+    for (var v = 0; v <= ax.max + 1e-9; v += ax.step) {
+      var y = Tp + ph - (v / ax.max) * ph;
+      g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y + '" y2="' + y + '" stroke="var(--border2)" stroke-width="1"/>' +
+        txt(L - 8, y + 4, fmt(v, ax.step < 1 ? 1 : 0), { anchor: 'end', size: 11, fill: 'var(--t2)' });
+    }
+    g += '<line x1="' + L + '" x2="' + L + '" y1="' + Tp + '" y2="' + (Tp + ph) + '" stroke="var(--t2)"/>';
+    T.years.forEach(function (yr, i) {
+      var x = L + (T.years.length === 1 ? 0 : i * pw / (T.years.length - 1));
+      g += '<line x1="' + x + '" x2="' + x + '" y1="' + (Tp + ph) + '" y2="' + (Tp + ph + 5) + '" stroke="var(--t2)"/>' + txt(x, Tp + ph + 20, yr, { anchor: 'middle', size: 11 });
+    });
+    g += txt(16, Tp + ph / 2, T.cap.replace(/ \(.*\)/, '') + (T.y.trim() ? ' (' + T.y.trim() + ')' : ''), { anchor: 'middle', size: 11, fill: 'var(--t2)', rot: -90 });
+    series.forEach(function (s, si) {
+      var pts = s.vals.map(function (v, i) { return (L + i * pw / (T.years.length - 1)) + ',' + (Tp + ph - (v / ax.max) * ph); });
+      g += '<polyline fill="none" stroke="' + PAL[si] + '" stroke-width="2.6" stroke-linejoin="round" points="' + pts.join(' ') + '"/>';
+      s.vals.forEach(function (v, i) {
+        g += '<circle cx="' + (L + i * pw / (T.years.length - 1)) + '" cy="' + (Tp + ph - (v / ax.max) * ph) + '" r="3.6" fill="' + PAL[si] + '"/>';
+      });
+    });
+    var lg = legend(series.map(function (s, i) { return { label: s.name, color: PAL[i] }; }), L, Tp + ph + 46, pw);
+    g += lg.svg;
+    var span = T.years[0] + ' and ' + T.years[T.years.length - 1];
+    var vt = 'LINE GRAPH: ' + T.cap + '. Years: ' + T.years.join(', ') + '. ' +
+      series.map(function (s) { return s.name + ': ' + s.vals.join(', ') + (T.y === '%' ? ' (%)' : ''); }).join('. ') + '.';
+    return finish(id, {
+      kind: 'Line graph', minW: 150, minutes: 20,
+      text: 'You should spend about 20 minutes on this task.\n\nThe graph below shows ' + T.t + ' between ' + span + '.' + T1_STEM,
+      html: visBox(svgWrap(W, H, g, vt)), visualText: vt,
+      rubric: 'Visual type: LINE GRAPH. Check the overview describes overall trends (highest/lowest, biggest rise/fall, crossings) and that figures quoted match the data. Trend language (rise, fall, fluctuate, peak, plateau) and time prepositions should be accurate.'
+    });
+  }
+
+  /* ---------- grouped bar chart ---------- */
+  var BAR_TOPICS = [
+    { t: 'the average number of hours per week that adults spent on five leisure activities', cap: 'Hours per week spent on leisure activities', cats: ['Watching TV', 'Reading', 'Exercise', 'Socialising', 'Gaming'], g: [[2005, 2020]], lo: 2, hi: 22, y: ' hours' },
+    { t: 'the percentage of students who chose five subjects to study at university', cap: 'Students choosing each subject (%)', cats: ['Engineering', 'Medicine', 'Business', 'Arts', 'Law'], g: [[2000, 2020]], lo: 6, hi: 34, y: '%' },
+    { t: 'the amount of coffee consumed per person in five countries', cap: 'Coffee consumption (kg per person per year)', cats: ['Finland', 'Italy', 'Brazil', 'Japan', 'Turkey'], g: [[1995, 2015]], lo: 2, hi: 12, y: ' kg', dec: 1 },
+    { t: 'the number of visitors to five types of tourist attraction in a European country', cap: 'Visitors per year (thousands)', cats: ['Museums', 'Castles', 'Theme parks', 'National parks', 'Beaches'], g: [[2000, 2020]], lo: 120, hi: 940, y: ' thousand' },
+    { t: 'the percentage of the population who owned five household items in a city', cap: 'Ownership of household items (%)', cats: ['Car', 'Computer', 'Dishwasher', 'Smartphone', 'Bicycle'], g: [[2000, 2020]], lo: 12, hi: 95, y: '%' }
+  ];
+  function genBar(id) {
+    var T = pick(BAR_TOPICS), yrs = T.g[0], dec = T.dec || 0;
+    var d1 = [], d2 = [];
+    T.cats.forEach(function () {
+      var a = rnd(T.lo + (T.hi - T.lo) * 0.1, T.hi * 0.92), f = rnd(0.55, 1.65), b = Math.max(T.lo * 0.8, Math.min(T.hi, a * f));
+      d1.push(dec ? Math.round(a * 10) / 10 : Math.round(a)); d2.push(dec ? Math.round(b * 10) / 10 : Math.round(b));
+    });
+    var mx = Math.max.apply(null, d1.concat(d2)), ax = niceAxis(mx * 1.05);
+    var W = 640, H = 400, L = 62, R = 22, Tp = 50, Bt = 100, pw = W - L - R, ph = H - Tp - Bt, g = '';
+    g += txt(W / 2, 24, T.cap + ', ' + yrs[0] + ' and ' + yrs[1], { anchor: 'middle', bold: true, size: 13 });
+    for (var v = 0; v <= ax.max + 1e-9; v += ax.step) {
+      var y = Tp + ph - (v / ax.max) * ph;
+      g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y + '" y2="' + y + '" stroke="var(--border2)"/>' + txt(L - 8, y + 4, fmt(v, ax.step < 1 ? 1 : 0), { anchor: 'end', size: 11, fill: 'var(--t2)' });
+    }
+    var gw = pw / T.cats.length, bw = Math.min(34, gw * 0.34);
+    T.cats.forEach(function (c, i) {
+      var cx = L + gw * i + gw / 2;
+      [d1[i], d2[i]].forEach(function (val, k) {
+        var h = (val / ax.max) * ph, x = cx - bw + k * bw;
+        g += '<rect x="' + x + '" y="' + (Tp + ph - h) + '" width="' + (bw - 2) + '" height="' + h + '" fill="' + PAL[k] + '" rx="2"/>' +
+          txt(x + (bw - 2) / 2, Tp + ph - h - 5, fmt(val, dec), { anchor: 'middle', size: 10, fill: 'var(--t1)' });
+      });
+      g += txt(cx, Tp + ph + 18, c, { anchor: 'middle', size: 11 });
+    });
+    g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + (Tp + ph) + '" y2="' + (Tp + ph) + '" stroke="var(--t2)"/>';
+    g += legend([{ label: String(yrs[0]), color: PAL[0] }, { label: String(yrs[1]), color: PAL[1] }], L, Tp + ph + 56, pw).svg;
+    var vt = 'BAR CHART: ' + T.cap + '. ' + T.cats.map(function (c, i) { return c + ': ' + yrs[0] + ' = ' + d1[i] + ', ' + yrs[1] + ' = ' + d2[i]; }).join('; ') + '.';
+    return finish(id, {
+      kind: 'Bar chart', minW: 150, minutes: 20,
+      text: 'You should spend about 20 minutes on this task.\n\nThe chart below shows ' + T.t + ' in ' + yrs[0] + ' and ' + yrs[1] + '.' + T1_STEM,
+      html: visBox(svgWrap(W, H, g, vt)), visualText: vt,
+      rubric: 'Visual type: BAR CHART (two years). Check the overview identifies the main changes and the highest/lowest categories, comparisons between categories and between the two years are accurate, and figures match the data.'
+    });
+  }
+
+  /* ---------- two pie charts ---------- */
+  var PIE_TOPICS = [
+    { t: 'the main sources of energy used in one country', cap: 'Sources of energy', sl: ['Coal', 'Oil', 'Natural gas', 'Nuclear', 'Renewables'], y: [1990, 2020] },
+    { t: 'how an average household spent its monthly income', cap: 'Household spending', sl: ['Housing', 'Food', 'Transport', 'Leisure', 'Other'], y: [1985, 2020] },
+    { t: 'the occupations of university graduates six months after graduating', cap: 'Graduate destinations', sl: ['Business', 'Education', 'Health', 'Technology', 'Further study'], y: [2005, 2020] },
+    { t: 'the ways in which people travelled to work in a large city', cap: 'Commuting methods', sl: ['Car', 'Bus', 'Train', 'Bicycle', 'On foot'], y: [1995, 2020] }
+  ];
+  function partition100(n) {
+    var w = []; for (var i = 0; i < n; i++) w.push(rnd(0.6, 2.6));
+    var s = w.reduce(function (a, b) { return a + b; }, 0), p = w.map(function (x) { return Math.max(4, Math.round(x / s * 100)); });
+    var diff = 100 - p.reduce(function (a, b) { return a + b; }, 0), k = 0;
+    while (diff !== 0) { var i2 = k++ % n; if (diff > 0) { p[i2]++; diff--; } else if (p[i2] > 5) { p[i2]--; diff++; } }
+    return p;
+  }
+  function pie(cx, cy, r, vals) {
+    var a0 = -Math.PI / 2, out = '';
+    vals.forEach(function (v, i) {
+      var a1 = a0 + v / 100 * Math.PI * 2, large = (a1 - a0) > Math.PI ? 1 : 0;
+      var x0 = cx + r * Math.cos(a0), y0 = cy + r * Math.sin(a0), x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+      out += '<path d="M' + cx + ' ' + cy + ' L' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' A' + r + ' ' + r + ' 0 ' + large + ' 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' Z" fill="' + PAL[i] + '" stroke="var(--bg1)" stroke-width="1.5"/>';
+      var am = (a0 + a1) / 2, lr = v >= 12 ? r * 0.62 : r * 1.17;
+      out += txt((cx + lr * Math.cos(am)).toFixed(1), (cy + lr * Math.sin(am) + 4).toFixed(1), v + '%', { anchor: 'middle', size: 11, bold: true, fill: v >= 12 ? '#fff' : 'var(--t1)' });
+      a0 = a1;
+    });
+    return out;
+  }
+  function genPie(id) {
+    var T = pick(PIE_TOPICS), n = T.sl.length, p1 = partition100(n), p2 = p1.slice(), tries = 0;
+    do {
+      p2 = p1.map(function (v) { return Math.max(4, v + rint(-12, 12)); });
+      var s = p2.reduce(function (a, b) { return a + b; }, 0);
+      p2 = p2.map(function (v) { return Math.max(4, Math.round(v / s * 100)); });
+      var d = 100 - p2.reduce(function (a, b) { return a + b; }, 0), k = 0;
+      while (d !== 0) { var j = k++ % n; if (d > 0) { p2[j]++; d--; } else if (p2[j] > 5) { p2[j]--; d++; } }
+      tries++;
+    } while (tries < 20 && p1.every(function (v, i) { return Math.abs(v - p2[i]) < 4; }));
+    var W = 640, H = 330, g = '';
+    g += txt(W / 2, 22, T.cap, { anchor: 'middle', bold: true, size: 13 });
+    g += txt(165, 52, String(T.y[0]), { anchor: 'middle', bold: true, size: 13 }) + pie(165, 150, 85, p1);
+    g += txt(475, 52, String(T.y[1]), { anchor: 'middle', bold: true, size: 13 }) + pie(475, 150, 85, p2);
+    g += legend(T.sl.map(function (s, i) { return { label: s, color: PAL[i] }; }), 60, 292, 540).svg;
+    var vt = 'TWO PIE CHARTS: ' + T.cap + '. ' + T.y[0] + ': ' + T.sl.map(function (s, i) { return s + ' ' + p1[i] + '%'; }).join(', ') + '. ' +
+      T.y[1] + ': ' + T.sl.map(function (s, i) { return s + ' ' + p2[i] + '%'; }).join(', ') + '.';
+    return finish(id, {
+      kind: 'Pie charts', minW: 150, minutes: 20,
+      text: 'You should spend about 20 minutes on this task.\n\nThe pie charts below show ' + T.t + ' in ' + T.y[0] + ' and ' + T.y[1] + '.' + T1_STEM,
+      html: visBox(svgWrap(W, H, g, vt)), visualText: vt,
+      rubric: 'Visual type: TWO PIE CHARTS. Check the overview, accurate use of proportions language (a quarter, the majority, just over a third), and comparison of each category between the two years. Percentages should match the data.'
+    });
+  }
+
+  /* ---------- table ---------- */
+  var TABLE_TOPICS = [
+    { t: 'the percentage of people in five countries who visited a public library at least once a year, by age group', cap: 'People who visited a library at least once a year (%)', rows: ['Sweden', 'Japan', 'Brazil', 'Canada', 'Egypt', 'Germany'], cols: ['15–24', '25–44', '45–64', '65+'], lo: 12, hi: 78, mode: 'rand', unit: '%' },
+    { t: 'the number of international students (in thousands) studying at five universities in three different years', cap: 'International students (thousands)', rows: ['University A', 'University B', 'University C', 'University D', 'University E'], cols: ['2000', '2010', '2020'], lo: 2, hi: 18, mode: 'grow', unit: '' },
+    { t: 'average monthly expenditure (in US dollars) on four categories by households in five cities', cap: 'Average monthly household expenditure (US$)', rows: ['Lisbon', 'Prague', 'Toronto', 'Sydney', 'Nairobi'], cols: ['Housing', 'Food', 'Transport', 'Leisure'], lo: 60, hi: 1450, mode: 'rand', unit: '' },
+    { t: 'the results of a survey about how often employees in five industries worked from home', cap: 'Employees who worked from home (%)', rows: ['Finance', 'Education', 'Retail', 'Healthcare', 'Technology'], cols: ['Never', 'Sometimes', 'Most days'], lo: 5, hi: 60, mode: 'rand', unit: '%' }
+  ];
+  function genTable(id) {
+    var T = pick(TABLE_TOPICS), rows = shuffle(T.rows).slice(0, 5), data = [];
+    rows.forEach(function () {
+      var base = rnd(T.lo + 1, T.hi * 0.7), row = [];
+      T.cols.forEach(function (c, j) {
+        var v = T.mode === 'grow' ? base * (1 + j * rnd(0.15, 0.7)) : rnd(T.lo, T.hi);
+        row.push(Math.round(Math.max(T.lo * 0.7, Math.min(T.hi, v))));
+      });
+      data.push(row);
+    });
+    var tbl = '<div class="nvt-tscroll"><table class="nvt-table"><thead><tr><th></th>' + T.cols.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      rows.map(function (r, i) { return '<tr><th scope="row">' + esc(r) + '</th>' + data[i].map(function (v) { return '<td>' + fmt(v) + (T.unit || '') + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+    var vt = 'TABLE: ' + T.cap + '. Columns: ' + T.cols.join(' | ') + '. ' + rows.map(function (r, i) { return r + ': ' + data[i].join(' | '); }).join('. ') + '.';
+    return finish(id, {
+      kind: 'Table', minW: 150, minutes: 20,
+      text: 'You should spend about 20 minutes on this task.\n\nThe table below shows ' + T.t + '.' + T1_STEM,
+      html: visBox(tbl, T.cap), visualText: vt,
+      rubric: 'Visual type: TABLE. Check the writer groups and compares data instead of listing every figure, that the overview names the key highest/lowest values or patterns, and that all quoted numbers match the table.'
+    });
+  }
+
+  /* ---------- process diagrams ---------- */
+  var PROCESSES = [
+    { t: 'how bricks are made for the building industry', cap: 'The manufacture of bricks', steps: ['Clay is dug from the ground by a digger', 'The clay is crushed and passed through a metal grid to remove large stones', 'Sand and water are added and the mixture is combined', 'The mixture is shaped into bricks by a mould or a wire cutter', 'The bricks are dried in a drying oven for 24 to 48 hours', 'The bricks are fired in a kiln at a very high temperature', 'The bricks are cooled in a cooling chamber for two to three days', 'The finished bricks are packed and delivered by lorry'] },
+    { t: 'how plastic bottles are recycled', cap: 'Recycling plastic bottles', steps: ['Used bottles are collected from households and recycling points', 'The bottles are sorted by type and colour', 'The sorted bottles are compressed into large bales', 'The bales are shredded into small flakes', 'The flakes are washed to remove labels and dirt', 'The clean flakes are melted and formed into pellets', 'The pellets are used to make new products such as clothing fibre and containers'] },
+    { t: 'the water cycle in nature', cap: 'The water cycle', steps: ['The sun heats the surface of the sea and lakes', 'Water evaporates and rises into the air as vapour', 'The vapour cools at height and condenses into clouds', 'Water falls to the ground as rain, hail or snow (precipitation)', 'Some water runs off the land into rivers; some soaks into the ground', 'Rivers and underground water flow back to the sea, and the cycle begins again'] },
+    { t: 'how electricity is generated by a hydroelectric power station', cap: 'Generating hydroelectric power', steps: ['Rainwater and river water collect in a reservoir behind a dam', 'Water is released through an intake at the base of the dam', 'The water flows rapidly down a large pipe (the penstock)', 'The moving water turns the blades of a turbine', 'The turbine drives a generator that produces electricity', 'A transformer increases the voltage of the electricity', 'Power lines carry the electricity to homes and factories', 'The used water leaves through an outlet and returns to the river'] },
+    { t: 'how chocolate is produced from cocoa beans', cap: 'Chocolate production', steps: ['Cocoa pods are harvested and opened to remove the beans', 'The beans are fermented for several days, then dried in the sun', 'The dried beans are roasted and the shells are removed', 'The beans are ground into a thick paste called cocoa mass', 'Sugar and milk are mixed with the cocoa mass', 'The mixture is rolled and stirred (conched) until smooth', 'The chocolate is heated and cooled (tempered) and poured into moulds', 'The bars are wrapped and packed for sale'] },
+    { t: 'how waste paper is recycled', cap: 'Paper recycling', steps: ['Waste paper is collected and transported to a recycling plant', 'The paper is sorted and non-paper items are removed', 'The paper is mixed with water in a large tank to make pulp', 'The pulp is screened and cleaned to remove ink, glue and staples', 'The clean pulp is spread on a moving belt and pressed to remove water', 'The sheets are dried on heated rollers', 'The paper is wound into large reels and cut to size'] }
+  ];
+  function genProcess(id) {
+    var P = pickFresh(id, PROCESSES, 'proc');
+    var li = P.steps.map(function (s, i) { return '<li><span class="nvt-n">' + (i + 1) + '</span><span>' + esc(s) + '</span></li>'; }).join('');
+    var vt = 'PROCESS DIAGRAM: ' + P.cap + '. Stages in order: ' + P.steps.map(function (s, i) { return (i + 1) + ') ' + s; }).join('; ') + '.' +
+      (P.cap === 'The water cycle' ? ' This is a natural, continuous cycle.' : ' This is a linear process with a clear start and end.');
+    return finish(id, {
+      kind: 'Process diagram', minW: 150, minutes: 20,
+      text: 'You should spend about 20 minutes on this task.\n\nThe diagram below shows ' + P.t + '.' + T1_STEM,
+      html: visBox('<ol class="nvt-flow">' + li + '</ol>', P.cap), visualText: vt,
+      rubric: 'Visual type: PROCESS DIAGRAM. Check the overview states the number of stages and the start and end of the process, that stages are described in the correct order with sequencing language (first, then, after that, finally), and that passive voice is used appropriately. No stages should be missed or invented, and there should be no opinion.'
+    });
+  }
+
+  /* ---------- maps (two time periods) ---------- */
+  var SLOTS = {
+    NW: { x: 14, y: 14, w: 86, h: 62, n: 'north-west' }, N: { x: 107, y: 14, w: 86, h: 62, n: 'north' }, NE: { x: 200, y: 14, w: 86, h: 62, n: 'north-east' },
+    SW: { x: 14, y: 144, w: 86, h: 62, n: 'south-west' }, S: { x: 107, y: 144, w: 86, h: 62, n: 'south' }, SE: { x: 200, y: 144, w: 86, h: 62, n: 'south-east' }
+  };
+  var KIND = {
+    farmland: { c: '#e3d48f', l: 'Farmland' }, woodland: { c: '#8cc98a', l: 'Woodland', tree: 1 }, orchard: { c: '#b7d98a', l: 'Orchard', tree: 1 }, pond: { c: '#8ecae6', l: 'Pond' }, field: { c: '#cfe3a2', l: 'Playing field' },
+    houses: { c: '#dcbca6', l: 'Houses', house: 1 }, supermarket: { c: '#f2b8a2', l: 'Supermarket' }, school: { c: '#c3b8e6', l: 'School' }, carpark: { c: '#bcc0c6', l: 'Car park' }, playground: { c: '#f6d58e', l: 'Playground' }, community: { c: '#e6b8d4', l: 'Community centre' },
+    hotel: { c: '#f0c987', l: 'Hotel' }, restaurant: { c: '#f4a99b', l: 'Restaurant' }, beach: { c: '#f2e2a9', l: 'Beach' }, huts: { c: '#d9c2a0', l: 'Fishing huts', house: 1 }, pool: { c: '#7fd0e8', l: 'Swimming pool' }, shops: { c: '#f2b8a2', l: 'Shops' },
+    lawn: { c: '#cfe3a2', l: 'Lawn' }, library: { c: '#c3b8e6', l: 'Library' }, lecture: { c: '#b8c8ea', l: 'Lecture hall' }, residence: { c: '#dcbca6', l: 'Student housing', house: 1 }, cafe: { c: '#f4cf9b', l: 'Cafe' }, sports: { c: '#9fd8a8', l: 'Sports centre' },
+    market: { c: '#f0d79b', l: 'Open market' }, factory: { c: '#bcc0c6', l: 'Factory' }, cinema: { c: '#d9b4de', l: 'Cinema' }, mall: { c: '#f2b8a2', l: 'Shopping centre' }, apartments: { c: '#cfaaa6', l: 'Apartments', house: 1 }, park: { c: '#a5d9a0', l: 'Park', tree: 1 }, busstation: { c: '#b8d0e6', l: 'Bus station' }, offices: { c: '#b8c8ea', l: 'Offices' }
+  };
+  var MAP_THEMES = [
+    { places: ['the village of Millbrook', 'the village of Ashgrove', 'the village of Wetherby Green'], before: ['farmland', 'woodland', 'orchard', 'pond', 'field'], after: ['houses', 'supermarket', 'school', 'playground', 'community', 'carpark'] },
+    { places: ['the island of Marisol', 'the island of Karnos', 'the coastal village of Seabrook'], before: ['huts', 'beach', 'woodland', 'farmland'], after: ['hotel', 'restaurant', 'pool', 'carpark', 'shops'] },
+    { places: ['Westbrook College campus', 'Northfield University campus', 'Riverside College campus'], before: ['lawn', 'carpark', 'woodland', 'field'], after: ['lecture', 'residence', 'cafe', 'sports', 'library'] },
+    { places: ['the centre of the town of Aldwick', 'the centre of the town of Harlow Bridge', 'the town centre of Stannmore'], before: ['market', 'factory', 'cinema', 'houses'], after: ['mall', 'apartments', 'park', 'busstation', 'offices'] }
+  ];
+  function lines(label) {
+    if (label.length <= 12 || label.indexOf(' ') < 0) return [label];
+    var parts = label.split(' '), best = 1, diff = 99;
+    for (var i = 1; i < parts.length; i++) { var d = Math.abs(parts.slice(0, i).join(' ').length - parts.slice(i).join(' ').length); if (d < diff) { diff = d; best = i; } }
+    return [parts.slice(0, best).join(' '), parts.slice(best).join(' ')];
+  }
+  function drawMap(ox, slots, kinds, bypass, title) {
+    var g = '<g transform="translate(' + ox + ',30)">' + txt(150, -10, title, { anchor: 'middle', bold: true, size: 13 });
+    g += '<rect x="0" y="0" width="300" height="224" fill="rgba(150,190,130,.10)" stroke="var(--t2)" stroke-width="1" rx="4"/>';
+    g += '<rect x="0" y="94" width="300" height="24" fill="#a3a8ae"/><line x1="0" x2="300" y1="106" y2="106" stroke="#fff" stroke-dasharray="8 6" stroke-width="1.5"/>';
+    g += txt(150, 112, 'MAIN ROAD', { anchor: 'middle', size: 8.5, fill: '#fff', bold: true });
+    if (bypass) g += '<rect x="0" y="212" width="300" height="10" fill="#a3a8ae"/><line x1="0" x2="300" y1="217" y2="217" stroke="#fff" stroke-dasharray="6 5"/>';
+    Object.keys(SLOTS).forEach(function (k) {
+      var s = SLOTS[k], kd = KIND[kinds[k]];
+      g += '<rect x="' + s.x + '" y="' + s.y + '" width="' + s.w + '" height="' + s.h + '" rx="5" fill="' + kd.c + '" stroke="rgba(0,0,0,.25)"/>';
+      if (kd.tree) for (var i = 0; i < 4; i++) g += '<circle cx="' + (s.x + 14 + i * 20) + '" cy="' + (s.y + 12) + '" r="6" fill="rgba(40,110,60,.55)"/>';
+      if (kd.house) for (var j = 0; j < 4; j++) g += '<rect x="' + (s.x + 9 + j * 19) + '" y="' + (s.y + 7) + '" width="12" height="10" fill="rgba(120,70,50,.55)"/>';
+      var ls2 = lines(kd.l), y0 = s.y + s.h / 2 + (ls2.length === 1 ? 10 : 6);
+      ls2.forEach(function (ln, i) { g += txt(s.x + s.w / 2, y0 + i * 12, ln, { anchor: 'middle', size: 10, fill: '#1b2a33', bold: true }); });
+    });
+    g += txt(286, -10, 'N \u2191', { anchor: 'middle', size: 12, bold: true });
+    return g + '</g>';
+  }
+  function genMap(id) {
+    var th = pick(MAP_THEMES), place = pick(th.places), ys = pick([[1985, 2005], [1990, 2020], [1995, 2025], [1980, 2010]]);
+    var keys = shuffle(Object.keys(SLOTS)), nCh = rint(3, 4), b = {}, a = {}, pool = shuffle(th.before), pa = shuffle(th.after);
+    keys.forEach(function (k, i) {
+      b[k] = pool[i % pool.length];
+      if (i < nCh) { a[k] = pa[i % pa.length]; if (a[k] === b[k]) a[k] = pa[(i + 1) % pa.length]; } else a[k] = b[k];
+    });
+    var bypass = Math.random() < 0.5, W = 640, H = 278;
+    var g = drawMap(10, SLOTS, b, false, String(ys[0])) + drawMap(330, SLOTS, a, bypass, String(ys[1]));
+    var d1 = Object.keys(SLOTS).map(function (k) { return SLOTS[k].n + ': ' + KIND[b[k]].l.toLowerCase(); }).join('; ');
+    var d2 = Object.keys(SLOTS).map(function (k) { return SLOTS[k].n + ': ' + KIND[a[k]].l.toLowerCase(); }).join('; ');
+    var ch = Object.keys(SLOTS).filter(function (k) { return a[k] !== b[k]; }).map(function (k) { return SLOTS[k].n + ' ' + KIND[b[k]].l.toLowerCase() + ' → ' + KIND[a[k]].l.toLowerCase(); });
+    var un = Object.keys(SLOTS).filter(function (k) { return a[k] === b[k]; }).map(function (k) { return SLOTS[k].n + ' ' + KIND[a[k]].l.toLowerCase(); });
+    var vt = 'TWO MAPS of ' + place + ', ' + ys[0] + ' and ' + ys[1] + '. A main road runs east–west through the middle in both maps; north is at the top. ' +
+      ys[0] + ' — ' + d1 + '. ' + ys[1] + ' — ' + d2 + '. CHANGES: ' + ch.join('; ') + '. UNCHANGED: ' + un.join('; ') + '.' +
+      (bypass ? ' A new road was built along the southern edge by ' + ys[1] + '.' : ' No new roads were built.');
+    return finish(id, {
+      kind: 'Maps', minW: 150, minutes: 20,
+      text: 'You should spend about 20 minutes on this task.\n\nThe maps below show ' + place + ' in ' + ys[0] + ' and ' + ys[1] + '.' + T1_STEM,
+      html: visBox(svgWrap(W, H, g, vt)), visualText: vt,
+      rubric: 'Visual type: TWO MAPS (change over time). Check the overview summarises the overall development, changes are described with accurate compass/location language (in the north-west, next to, to the south of), past-to-present tenses and passive voice (was replaced by, has been built) are used correctly, and unchanged features are mentioned.'
+    });
+  }
+
+  var T1_GEN = { 'Line graph': genLine, 'Bar chart': genBar, 'Pie charts': genPie, 'Table': genTable, 'Process diagram': genProcess, 'Maps': genMap };
+  function genAcademicT1(id) {
+    var kind = pickKind(id, Object.keys(T1_GEN)), t = T1_GEN[kind](id);
+    t.brief = t.text.replace('You should spend about 20 minutes on this task.\n\n', '') + ' ' + T1_FOOT;
+    t.text += '\n\n' + T1_FOOT;
+    t.hint = 'aim 150–190';
+    return t;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     IELTS GENERAL TRAINING TASK 1 — letters (formal / semi-formal / informal)
+     ════════════════════════════════════════════════════════════ */
+  var GT_LETTERS = [
+    /* formal */
+    { tone: 'formal', s: 'You bought a laptop online two weeks ago. It arrived damaged and the company has not replied to your emails.', to: "the company's customer services manager", b: ['describe the damage and what you have already done to solve the problem', 'explain how the problem has affected you', 'say what you want the company to do'], sal: 'Dear Sir or Madam,' },
+    { tone: 'formal', s: 'You stayed in a hotel last weekend and were unhappy with the service.', to: 'the hotel manager', b: ['explain what was wrong with your room and the service', 'describe how the staff reacted when you complained', 'say what compensation you would like'], sal: 'Dear Sir or Madam,' },
+    { tone: 'formal', s: 'You have seen an advertisement for an evening photography course at a local college.', to: 'the course administrator', b: ['say why you are interested in the course', 'explain what experience you already have', 'ask for information about fees, dates and equipment'], sal: 'Dear Sir or Madam,' },
+    { tone: 'formal', s: 'You left a bag on a train yesterday. It contained some important documents.', to: "the railway company's lost property office", b: ['describe the bag and where you think you left it', 'explain what was inside and why it is important', 'say how and when you can collect it'], sal: 'Dear Sir or Madam,' },
+    { tone: 'formal', s: 'You would like to work as a volunteer at a local animal shelter.', to: 'the manager of the shelter', b: ['explain why you want to volunteer', 'describe any skills or experience that would be useful', 'say when you are available and ask what the work involves'], sal: 'Dear Sir or Madam,' },
+    { tone: 'formal', s: 'You have received a parking fine which you believe is unfair.', to: "the city council's parking department", b: ['explain what happened', 'say why you think the fine is wrong', 'ask what the council will do about it'], sal: 'Dear Sir or Madam,' },
+    /* semi-formal */
+    { tone: 'semi-formal', s: 'A neighbour has been playing loud music late at night.', to: 'your neighbour', b: ['describe the problem', 'explain how it affects you', 'suggest what could be done'], sal: 'Dear Mr/Ms ...,' },
+    { tone: 'semi-formal', s: 'The heating in the flat you rent has not worked for a week.', to: 'your landlord', b: ['describe the problem and when it started', 'explain how it is affecting you', 'suggest when someone could come to repair it'], sal: 'Dear Mr/Ms ...,' },
+    { tone: 'semi-formal', s: 'You would like to change your working hours for the next three months so that you can attend a course.', to: 'your manager', b: ['explain why you want to change your hours', 'suggest how your work could be covered', 'say when you would like to start'], sal: 'Dear Mr/Ms ...,' },
+    { tone: 'semi-formal', s: 'You missed an important class because you were ill and a coursework deadline is next week.', to: 'your tutor', b: ['explain why you missed the class', 'describe the problems this has caused', 'ask for an extension and some help'], sal: 'Dear Mr/Ms ...,' },
+    { tone: 'semi-formal', s: 'You are organising a leaving party for a colleague who is retiring.', to: 'the head of your department', b: ['explain what the occasion is', 'suggest a date and place for the party', 'ask for permission and some help with the cost'], sal: 'Dear Mr/Ms ...,' },
+    /* informal */
+    { tone: 'informal', s: 'A friend is moving to your city next month.', to: 'your friend', b: ['say how you feel about the news', 'suggest areas where they could live', 'offer to help with the move'], sal: 'Dear ...,' },
+    { tone: 'informal', s: 'You have recently moved to a new home in a different area.', to: 'a friend', b: ['describe your new home and the area', 'say what you like and dislike about it', 'invite your friend to visit'], sal: 'Dear ...,' },
+    { tone: 'informal', s: "You borrowed a friend's camera last month and accidentally broke it.", to: 'your friend', b: ['explain what happened', 'say how you feel about it', 'offer to repair or replace the camera'], sal: 'Dear ...,' },
+    { tone: 'informal', s: 'A friend is thinking of coming to study English in your country.', to: 'your friend', b: ['say what you think of the idea', 'suggest places to study and to stay', 'offer to help in other ways'], sal: 'Dear ...,' },
+    { tone: 'informal', s: 'You have just got a new job.', to: 'a friend who lives abroad', b: ['describe the job and how you got it', 'say what you think will be good and difficult about it', 'suggest a time to talk or meet'], sal: 'Dear ...,' }
+  ];
+  var CLOSING = { 'formal': "'Yours faithfully' (when the letter starts 'Dear Sir or Madam') or 'Yours sincerely' (when a name is used)", 'semi-formal': "'Yours sincerely' or 'Kind regards'", 'informal': "'Best wishes', 'All the best' or 'Love'" };
+  function genGT1(id) {
+    var L = pickFresh(id, GT_LETTERS, 'gt'), head = L.s + '\n\nWrite a letter to ' + L.to + '. In your letter,';
+    var foot = 'Write at least 150 words.\nYou do NOT need to write any addresses.\nBegin your letter as follows:\n' + L.sal;
+    var html = '<ul class="nvt-bul">' + L.b.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
+      '<p class="nvt-foot">' + esc('Write at least 150 words.') + '<br>' + esc('You do NOT need to write any addresses.') + '<br>' + esc('Begin your letter as follows:') + '<br><em>' + esc(L.sal) + '</em></p>';
+    return finish(id, {
+      kind: 'Letter (' + L.tone + ')', minW: 150, minutes: 20, hint: 'aim 150–200',
+      text: 'You should spend about 20 minutes on this task.\n\n' + head,
+      html: html, brief: head + '\n- ' + L.b.join('\n- ') + '\n' + foot,
+      rubric: 'REQUIRED REGISTER: ' + L.tone.toUpperCase() + ' (recipient: ' + L.to + '). Appropriate closing: ' + CLOSING[L.tone] + '. All three bullet points must be fully developed. The purpose should be clear early. Penalise mismatched tone (slang or contractions in a formal letter, stiff or impersonal language in an informal one) in Task Achievement and Lexical Resource. Criterion 1 is TASK ACHIEVEMENT (not Task Response). No essay-style argument is needed.'
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     IELTS TASK 2 — five real question types
+     ════════════════════════════════════════════════════════════ */
+  var T2 = {
+    'Opinion (agree/disagree)': { ask: 'To what extent do you agree or disagree?', c: 'OPINION ESSAY: the writer must state a clear position in the introduction and keep it consistent to the conclusion; partial agreement must be clearly explained.', q: [
+      'Some people think that governments should spend money on public transport rather than on building new roads.',
+      'University education should be free for everyone, paid for by taxes.',
+      'Many people believe that children should start learning a foreign language at primary school.',
+      'Some people argue that it is better to buy goods made in your own country than imported goods.',
+      'The best way to reduce crime is to give longer prison sentences.'] },
+    'Discussion + opinion': { ask: 'Discuss both these views and give your own opinion.', c: 'DISCUSSION ESSAY: BOTH views must be discussed with development, AND the writer must give a clear opinion.', q: [
+      'Some people think that museums and art galleries should be free for everyone. Others believe that visitors should pay an entrance fee.',
+      'Some people prefer to work for a large company. Others think it is better to work for a small business.',
+      'Some people believe that children should be taught to compete. Others think that teaching them to cooperate is more important.',
+      'Some people think that the best way to improve public health is to increase the number of sports facilities. Others believe that other measures are more effective.',
+      'Some people say that learning about the past has no value in today\'s world. Others believe that history is essential.'] },
+    'Problem and solution': { ask: 'What problems does this cause? What measures can be taken to solve these problems?', c: 'PROBLEM-SOLUTION ESSAY: both the problems AND the solutions must be addressed, with solutions that logically match the problems.', q: [
+      'In many cities, the number of cars on the road is increasing every year, which is causing serious traffic congestion and pollution.',
+      'Many people today spend very little time with their families because of long working hours.',
+      'The amount of plastic waste in the world\'s oceans is growing rapidly.',
+      'In many countries, young people are leaving rural areas to live and work in cities.',
+      'An increasing number of children are overweight and do little physical exercise.'] },
+    'Two-part question': { ask: '', c: 'TWO-PART QUESTION ESSAY: EVERY direct question must be answered fully (usually one paragraph each) with a clear answer to each.', q: [
+      'In some countries, a growing number of people are choosing to live alone. Why is this happening? Is this a positive or negative development?',
+      'More and more people are working from home instead of in an office. What are the reasons for this trend? What effects will it have on society?',
+      'Many young people now spend several hours a day on social media. Why do they do this? Is it a good thing or a bad thing?',
+      'Some people choose to continue studying after they finish university, while others start work. What are the reasons for each choice? Which do you think is better?',
+      'In many places, traditional skills such as cooking from scratch and sewing are disappearing. Why is this happening? Should anything be done about it?'] },
+    'Advantages and disadvantages': { ask: 'Do the advantages of this outweigh the disadvantages?', c: 'ADVANTAGES-DISADVANTAGES ESSAY: both advantages AND disadvantages must be discussed, with a clear judgement on which outweighs the other if the question asks for it.', q: [
+      'More and more people are choosing to study at universities in other countries.',
+      'Many companies now allow their employees to work flexible hours rather than fixed hours.',
+      'An increasing number of people are buying their groceries and other goods online rather than in shops.',
+      'In some countries, young people are encouraged to take a year off between school and university to travel or work.',
+      'Tourism has become a major source of income for many countries.'] }
+  };
+  function genT2(id) {
+    var kind = pickKind(id, Object.keys(T2)), D = T2[kind], q = pick(D.q);
+    var body = q + (D.ask ? '\n\n' + D.ask : '');
+    var text = 'You should spend about 40 minutes on this task.\n\nWrite about the following topic:\n\n' + body;
+    var foot = 'Give reasons for your answer and include any relevant examples from your own knowledge or experience.\n\nWrite at least 250 words.';
+    return finish(id, {
+      kind: kind, minW: 250, minutes: 40, hint: 'aim 250–320',
+      text: text + '\n\n' + foot, brief: 'Write about the following topic: ' + body + ' ' + foot.replace(/\n\n/g, ' '),
+      rubric: 'Question type: ' + kind.toUpperCase() + '. ' + D.c + ' Criterion 1 is TASK RESPONSE: relevant, developed ideas with examples; an essay under 250 words must be penalised.'
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     TOEFL INDEPENDENT (legacy essay task)
+     ════════════════════════════════════════════════════════════ */
+  var TOEFL_IND = [
+    { k: 'Agree / disagree', q: 'Do you agree or disagree with the following statement?\n\nIt is better to have broad knowledge of many subjects than to specialise in one.' },
+    { k: 'Agree / disagree', q: 'Do you agree or disagree with the following statement?\n\nThe most important qualities of a good leader are self-confidence and intelligence.' },
+    { k: 'Agree / disagree', q: 'Do you agree or disagree with the following statement?\n\nModern technology has made people\'s lives easier and more comfortable.' },
+    { k: 'Agree / disagree', q: 'Do you agree or disagree with the following statement?\n\nParents are the best teachers for their children.' },
+    { k: 'Preference', q: 'Some people prefer to spend their free time alone. Others prefer to spend it with friends. Which do you prefer? Use specific reasons and examples to support your answer.' },
+    { k: 'Preference', q: 'Some students prefer to study alone. Others prefer to study in groups. Which do you prefer, and why?' },
+    { k: 'Choice', q: 'If you could change one thing about your hometown, what would you change? Use specific reasons and details to support your answer.' },
+    { k: 'Choice', q: 'Is it better to take a job you enjoy that pays less, or a job you dislike that pays more? Use specific reasons and examples.' }
+  ];
+  var IND_NOTE = 'Legacy task: the live TOEFL iBT replaced this essay in 2023 and removed it in January 2026, but it is still excellent opinion-writing practice.';
+  function genTOEFLInd(id) {
+    var it = pickFresh(id, TOEFL_IND, 'ind'), dir = 'Directions: You have 30 minutes to plan and write your response. Your response will be judged on the quality of your writing: development, organisation and the appropriate use of language. Typically, an effective response will contain a minimum of 300 words.';
+    return finish(id, {
+      kind: 'Independent · ' + it.k, minW: 300, minutes: 30, hint: 'aim 300–400', note: IND_NOTE,
+      text: it.q + '\n\n' + dir, brief: it.q.replace(/\n\n/g, ' ') + ' (Minimum 300 words, 30 minutes.)',
+      rubric: 'This is the TOEFL Independent Writing essay. Apply the official 0–5 holistic rubric and convert to 0–10 (score x 2). Reward a clear thesis, well-developed specific reasons and examples, unity and progression, and syntactic variety with accurate word choice. Penalise vague generalities, memorised templates, and responses under about 300 words.'
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     TOEFL INTEGRATED — reading + lecture
+     ════════════════════════════════════════════════════════════ */
+  var INTEG = [
+    { topic: 'Four-day work week', pts: ['productivity', 'costs', 'wellbeing'],
+      read: 'Several governments and companies are experimenting with a four-day work week, and the evidence suggests it should be adopted widely. First, employees who work four days are more productive. With a longer weekend to rest, workers return refreshed, make fewer mistakes, and waste less time on unimportant tasks. Second, organisations save money. Offices that are closed one day a week spend less on electricity, heating and cleaning, and fewer commuting days mean lower transport costs for staff. Third, a shorter week improves employee wellbeing. Workers with three days off report less stress, take fewer sick days, and are more likely to stay with their employer, which reduces expensive recruitment and training.',
+      lect: "The reading makes the four-day week sound like a perfect solution, but the real picture is more complicated. Take productivity. The big gains in those studies came almost entirely from small companies with flexible, project-based work. In a hospital or a call centre, where someone must always be available, you simply can't do the same work in four days. Now, the savings on utilities. In many companies, staff just work ten-hour days to fit their hours into four, so the lights, heating and computers stay on just as long. And employees end up paying more for childcare on those long days. And wellbeing? Surveys did find less stress at first, but many people later reported exhaustion from the longer days, and some firms went back to five days because customers complained about reduced service." },
+    { topic: 'Electric cars', pts: ['emissions', 'oil dependence', 'running costs'],
+      read: 'Electric cars are widely seen as the best way to protect the environment, and three advantages explain why. First, they produce no exhaust gases, so they do not release the carbon dioxide and pollutants that make city air unhealthy. Second, they reduce dependence on oil. As more drivers switch to electricity, countries will need to import less oil and will be less affected by sudden price rises. Third, electric cars are cheaper to run and easier to maintain. Electricity costs less than petrol per kilometre, and electric motors have far fewer moving parts than combustion engines, so repairs are rare.',
+      lect: "I'd like to point out some problems with these claims. First, no tailpipe doesn't mean no pollution. In regions where most electricity is still generated by burning coal, charging a car just moves the emissions from the street to the power station. And building the battery is energy-intensive too; manufacturing one can release as much carbon as driving a petrol car for a couple of years. About oil: electric cars need lithium, cobalt and nickel, and a handful of countries control most of those, so we would be swapping one dependence for another. And cost? The battery is the weak point. It loses capacity over time, and replacing it can cost thousands of dollars, which wipes out the savings on fuel and repairs." },
+    { topic: 'Online universities', pts: ['cost', 'flexibility', 'access'],
+      read: 'Online universities are likely to replace traditional campuses within a few decades. First, they are much cheaper. Students avoid paying for accommodation, commuting and campus facilities, while universities can teach thousands of students with a single recorded lecture. Second, online study is flexible. Learners can watch lectures at any time and combine study with a job or family responsibilities, which is impossible with a fixed timetable. Third, online universities reach more people. Students in remote areas, or in countries without strong universities, can take courses from the best institutions in the world.',
+      lect: "The reading is far too optimistic, and I'll tell you why. Cheaper? Yes, tuition can be lower, but dropout rates are the hidden cost. In many online programmes fewer than one in ten students who enrol actually finish, so most of the money is wasted. As for flexibility, it's a double-edged sword. Without deadlines or classmates, many learners lose motivation. And some subjects, such as chemistry, engineering or medicine, need hands-on laboratory work that can't be done through a screen. Finally, access. Online degrees do reach more people, but in several fields employers still prefer applicants with a campus degree, partly because of the networks students build there. So graduates of online programmes sometimes find their degree is worth less." },
+    { topic: 'Green roofs', pts: ['energy use', 'flood control', 'wildlife habitat'],
+      read: 'City planners should require green roofs, roofs covered with soil and plants, on new buildings. To begin with, green roofs reduce energy use. The layer of vegetation insulates a building, keeping it cooler in summer and warmer in winter, so less air conditioning and heating is needed. Second, they help control flooding. Soil and plants absorb rainwater that would otherwise rush into overloaded drains during storms. Third, green roofs create habitats. In crowded cities with few parks, rooftop gardens provide food and shelter for insects, birds and other wildlife.',
+      lect: "Green roofs sound wonderful, but the evidence doesn't support all these claims. Energy first. The savings are real mainly for small, low buildings. On a tall tower the roof is a tiny part of the surface, so the effect on the building's total energy use is minimal, and heavy soil requires extra steel and concrete to support it, which is costly. As for flooding, the soil absorbs water only until it is saturated. In a long storm the roof fills up and then behaves like any other roof, and if the waterproof layer leaks, the damage inside the building can be serious. The wildlife argument is weak too. Rooftops are so isolated that most species can't reach them, so in practice only a few common insects and birds ever use them." },
+    { topic: 'Cultivated meat', pts: ['environment', 'animal welfare', 'price'],
+      read: 'Meat grown from animal cells in laboratories, known as cultivated meat, could replace conventional meat. One reason is its environmental benefit: it needs much less land and water than raising cattle, and it could cut the greenhouse gases that livestock produce. A second reason is animal welfare. Cells are taken from a living animal only once, so millions of animals would no longer be raised and slaughtered. Finally, cultivated meat will soon be cheaper and widely available. As production expands, costs will fall in the same way that they fell for other new technologies such as solar panels.',
+      lect: "Supporters are overly optimistic. Consider the environment. Growing cells requires bioreactors that use large amounts of electricity, and some studies suggest that if that power comes from fossil fuels, total emissions could even exceed those of poultry or pork. Then the claim about animals. The nutrient liquid the cells grow in has traditionally been made from calf blood, so animals are still involved, and finding a replacement that works at scale has proved really difficult. And the price? Solar panels are simple, but meat is complicated. To copy the texture of a steak you need cells to form muscle and fat, and that process is slow and expensive. Even optimistic estimates say prices comparable to ordinary meat are still decades away." }
+  ];
+  var INTEG_Q = 'Summarise the points made in the lecture, being sure to explain how they cast doubt on specific points made in the reading passage.';
+  var INTEG_NOTE = 'Legacy task: the live TOEFL iBT removed Integrated Writing in January 2026, but it remains a classic test of summary and source-to-source writing.';
+  function genTOEFLInt(id) {
+    var P = pickFresh(id, INTEG, 'int');
+    var html = '<div class="nvt-card"><div class="nvt-card-h">READING <span>Read for 3 minutes, then the passage disappears in the real test</span></div><p class="nvt-reading">' + esc(P.read) + '</p></div>' +
+      '<div class="nvt-card nvt-lect"><div class="nvt-card-h">LECTURE <span>Listen once, take notes</span></div>' +
+      '<div class="nvt-actions"><button type="button" class="nvt-btn" onclick="nvSpeak(this)" data-lect="' + esc(P.lect) + '">&#9654; Listen to lecture</button>' +
+      '<button type="button" class="nvt-btn ghost" onclick="nvSpeakStop()">&#9632; Stop</button></div>' +
+      '<details class="nvt-trans"><summary>Show lecture transcript</summary><p class="nvt-reading">' + esc(P.lect) + '</p></details></div>';
+    var dir = 'You have 20 minutes to plan and write your response. Your response is judged on the quality of your writing and on how well it presents the points in the lecture and their relationship to the reading passage. Typically, an effective response will be 150 to 225 words.';
+    return finish(id, {
+      kind: 'Integrated · ' + P.topic, minW: 150, minutes: 20, hint: 'target 150–225', note: INTEG_NOTE,
+      text: dir + '\n\n' + INTEG_Q, html: html,
+      brief: 'READING PASSAGE: ' + P.read + ' LECTURE: ' + P.lect + ' QUESTION: ' + INTEG_Q + ' (150-225 words, 20 minutes.)',
+      visualText: 'The lecture challenges these three points in the reading, in order: ' + P.pts.join('; ') + '. A strong response summarises each lecture point and links it to the matching reading point.',
+      rubric: 'This is TOEFL Integrated Writing. Apply the official 0–5 rubric and convert to 0–10 (score x 2). The response must summarise the LECTURE and explain how each lecture point challenges the matching READING point (' + P.pts.join(', ') + '). Penalise personal opinion, copying phrases from the reading, missing or inaccurate lecture points, and over-long responses. Length 150–225 words is typical.'
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     TOEFL ACADEMIC DISCUSSION — professor + two students
+     ════════════════════════════════════════════════════════════ */
+  var DISC = [
+    { cls: 'Education', p: ['Dr. Okafor', "This week we're looking at curriculum design. Many universities require every student to take at least one course outside their major, such as an art or science class for a business student. Supporters call this a broad education; critics call it a distraction. Should universities require students to take a course outside their major? Please explain your view."], s: [['Maya', "Yes. I'm a computer science major, and a philosophy course taught me to question assumptions, which helps me debug problems as well. Students often discover new interests that way."], ['Chen', "I disagree. Tuition is expensive, and students who already know their career path waste time and money on courses they don't need."]] },
+    { cls: 'Urban Studies', p: ['Professor Lindqvist', "Several European cities have started banning private cars from their downtown areas. The goals are cleaner air and safer streets, but some people worry about the effects on businesses and on people who can't walk far. Do you think cities should ban private cars from downtown areas?"], s: [['Ana', "I think they should. After our city closed its centre to cars, the air got cleaner and there were more people in the cafes, so businesses actually benefited."], ['Luka', "I'm not convinced. My grandmother uses a car because she can't walk long distances, and small shops depend on customers who drive in."]] },
+    { cls: 'Cognitive Psychology', p: ['Dr. Rahimi', "Research on learning has produced mixed results about taking notes during lectures. Some studies suggest that writing by hand helps memory, while others stress the advantages of typing. In your opinion, is it better for students to take lecture notes by hand or on a laptop?"], s: [['Sara', "By hand, because you can't write everything, so you have to summarise, and that helps me remember. Laptops also tempt me to check messages."], ['Dev', "I prefer a laptop. I capture more detail, I can search my notes later, and my handwriting is so bad that I can't read it afterwards."]] },
+    { cls: 'Economics', p: ['Professor Alvarez', "Some governments have introduced a tax on sugary drinks to reduce health problems such as obesity and diabetes. Critics argue that such taxes are unfair to low-income families. Should governments tax sugary drinks? Explain your position."], s: [['Priya', "Yes. A tax raises the price, so people buy less, and the money can pay for health care. Several countries saw a drop in sugar consumption after introducing one."], ['Tom', "I disagree. Poorer families spend a bigger share of their income on these drinks, so the tax hurts them most, and people can just switch to other unhealthy foods."]] },
+    { cls: 'Media Studies', p: ['Dr. Nakamura', "False information spreads quickly on social media. One proposal is that platforms should require users to verify their real identity before posting, in order to reduce fake accounts and abuse. Others fear it would limit free expression. Should social media platforms require identity verification?"], s: [['Elena', "I think so. People are more careful about what they say when their name is attached, and it would make it harder for bots to spread lies."], ['Marcus', "No. Activists and whistleblowers in some countries need to stay anonymous to be safe, and a database of real identities could be hacked."]] },
+    { cls: 'Public Health', p: ['Professor Adeyemi', "Many researchers argue that teenagers need more sleep than the early start times of most high schools allow. Some schools have moved their start time later. Do you think high schools should start later in the morning?"], s: [['Hana', "Definitely. When my school moved its start from 7:30 to 8:45, students were less tired in class, and I think grades improved."], ['Jonas', "I'm not sure. Later start times mean later finishes, which clash with sports practice and after-school jobs, and parents' work schedules."]] },
+    { cls: 'Technology and Society', p: ['Dr. Fischer', "Artificial intelligence tools can now write essays and solve problems. Some universities ban them in assignments; others encourage students to use them. What is your view: should students be allowed to use AI tools in their university assignments?"], s: [['Lina', "Yes, as long as they are open about it. These tools will be part of most jobs, so students should learn to use them well and check their results."], ['Omar', "I disagree. If the tool does the thinking, students don't develop their own skills, and it isn't fair to those who do the work themselves."]] }
+  ];
+  function genTOEFLDisc(id) {
+    var D = pickFresh(id, DISC, 'disc'), ini = function (n) { return n.replace(/^(Dr\.|Professor)\s+/, '').charAt(0); };
+    var post = function (name, role, text, cls) { return '<div class="nvt-post ' + cls + '"><div class="nvt-av">' + esc(ini(name)) + '</div><div class="nvt-pb"><div class="nvt-pn">' + esc(name) + ' <span>' + role + '</span></div><p>' + esc(text) + '</p></div></div>'; };
+    var html = '<div class="nvt-forum"><div class="nvt-fh">Online class discussion · ' + esc(D.cls) + '</div>' + post(D.p[0], 'Professor', D.p[1], 'prof') + post(D.s[0][0], 'Student', D.s[0][1], '') + post(D.s[1][0], 'Student', D.s[1][1], '') + '</div>';
+    var dir = 'Your professor is teaching a class on ' + D.cls.toLowerCase() + '. Write a post responding to the professor\'s question. In your response, you should express and support your opinion and contribute to the discussion in your own words. You have 10 minutes. An effective response will contain at least 100 words.';
+    return finish(id, {
+      kind: 'Academic Discussion · ' + D.cls, minW: 100, minutes: 10, hint: 'aim 100–140',
+      text: dir, html: html,
+      brief: 'PROFESSOR (' + D.p[0] + '): ' + D.p[1] + ' ' + D.s[0][0].toUpperCase() + ': ' + D.s[0][1] + ' ' + D.s[1][0].toUpperCase() + ': ' + D.s[1][1] + ' TASK: Write a post responding to the professor (at least 100 words, 10 minutes).',
+      rubric: 'This is the TOEFL Write for an Academic Discussion task. Apply the official 0–5 rubric and convert to 0–10 (score x 2). Judge: a clear opinion that answers the professor, engagement with at least one classmate by name (' + D.s[0][0] + ' or ' + D.s[1][0] + '), a NEW supported idea beyond the classmates, and natural, accurate language in a discussion-board register. Do not require essay structure or a long conclusion; roughly 100–150 words is ideal.'
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     Small helper for modes built from structured scenario objects
+     ════════════════════════════════════════════════════════════ */
+  function bullets(arr) { return '<ul class="nvt-bul">' + arr.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; }
+  function box(title, body) { return '<div class="nvt-card"><div class="nvt-card-h">' + esc(title) + '</div><p class="nvt-reading">' + esc(body) + '</p></div>'; }
+  function scen(id, o) {
+    /* o: kind, min, mins, lo, hi, intro, material[{h,t}], points[], extra, rubric */
+    var range = o.lo + '–' + o.hi + ' words';
+    var html = (o.material || []).map(function (m) { return box(m.h, m.t); }).join('') + (o.points ? bullets(o.points) : '');
+    var tail = (o.extra ? o.extra + ' ' : '') + 'Write ' + range + '.';
+    var brief = o.intro + (o.material ? ' ' + o.material.map(function (m) { return m.h + ': ' + m.t; }).join(' ') : '') + (o.points ? ' Include: ' + o.points.join('; ') + '.' : '') + ' ' + tail;
+    return finish(id, {
+      kind: o.kind, minW: o.min, minutes: o.mins, hint: 'target ' + o.lo + '–' + o.hi,
+      text: o.intro + '\n\n' + tail, html: html, brief: brief,
+      visualText: (o.material || []).map(function (m) { return m.h + ': ' + m.t; }).join(' '), rubric: o.rubric
+    });
+  }
+
+  /* ---------- Cambridge C1 Advanced / C2 Proficiency ---------- */
+  var CAM_R = 'Score each Cambridge criterion on the official 0–5 scale converted to 0–10 (x 2): Content, Communicative Achievement, Organisation, Language. ';
+  var CAMB = [
+    { k: 'Essay', intro: 'Your class has attended a panel discussion on whether governments should invest more in public transport than in new roads. You have made the notes below.', pts: ['Issues to discuss: 1. air quality  2. cost to taxpayers  3. your own idea'], extra: 'Write an essay for your tutor discussing TWO of the issues. You should explain which issue is more important and give reasons for your opinion. You may, if you wish, use the opinions expressed, but you should use your own words as far as possible. Panel opinions: "Roads bring jobs and freedom." / "Cheap trains would clear our cities of cars." / "Nobody will leave their car unless buses are reliable."', r: 'ESSAY: neutral/formal register, clear position, two points developed, own idea or opinions paraphrased rather than copied, balanced conclusion.' },
+    { k: 'Essay', intro: 'Your class has been discussing the role of technology in education. You have made the notes below.', pts: ['Issues to discuss: 1. cost  2. quality of learning  3. your own idea'], extra: 'Write an essay discussing TWO of the issues, saying which is more important and why. You should use your own words as far as possible.', r: 'ESSAY: neutral/formal register, clear organisation, two points developed with reasons, own words.' },
+    { k: 'Essay', intro: 'You have attended a lecture on how cities can become more environmentally friendly. You have made the notes below.', pts: ['Issues to discuss: 1. green spaces  2. energy use  3. your own idea'], extra: 'Write an essay discussing TWO of the issues, explaining which will have the greater effect and why.', r: 'ESSAY: neutral/formal register, two points developed, clear opinion.' },
+    { k: 'Proposal', intro: 'Your college principal wants to improve student wellbeing and has asked students for ideas.', pts: ['describe the current problems', 'suggest TWO realistic improvements', 'explain how they would benefit students'], extra: 'Write a proposal for the principal.', r: 'PROPOSAL: headings are expected, formal/semi-formal register, persuasive and realistic recommendations, clear benefits, polite and confident tone.' },
+    { k: 'Proposal', intro: 'A local council is planning to open a new community space in your area and has invited residents to submit proposals.', pts: ['say what kind of space is needed and why', 'suggest what activities it could offer', 'explain how it would help the community'], extra: 'Write a proposal for the council.', r: 'PROPOSAL: headings, formal register, persuasive and realistic suggestions.' },
+    { k: 'Report', intro: 'The manager of a local sports centre has asked you to write a report on the facilities, based on a survey of members.', pts: ['describe the strengths of the centre', 'identify the main complaints', 'recommend improvements'], extra: 'Write a report for the manager.', r: 'REPORT: headings, factual and objective tone, clear recommendations, formal/semi-formal register.' },
+    { k: 'Report', intro: 'Your company is considering offering free language classes to staff and has asked you to report on the opinions of employees.', pts: ['summarise what employees said', 'say which languages and times are most popular', 'recommend what the company should do'], extra: 'Write a report for the personnel director.', r: 'REPORT: headings, objective tone, summary of findings, clear recommendations.' },
+    { k: 'Review', intro: 'You recently attended a cultural event in your town, and an English-language magazine has invited readers to send in reviews.', pts: ['describe the event', 'evaluate what worked and what did not', 'say whether you would recommend it'], extra: 'Write a review for the magazine.', r: 'REVIEW: engaging, personal opinion, vivid description, a clear recommendation, semi-formal register suited to magazine readers; reward interesting vocabulary.' },
+    { k: 'Letter / email', intro: 'You have seen the following advertisement: "Volunteers wanted for the city\'s summer arts festival. Tell us why you would be a good volunteer and what experience you have."', pts: ['explain why you want to take part', 'describe relevant experience and skills', 'say what hours you can offer'], extra: 'Write a letter of application to the festival organiser.', r: 'LETTER: formal register, correct opening and closing, persuasive and well organised, covers all points.' }
+  ];
+  function genCambridge(id) {
+    var o = pickFresh(id, CAMB, 'cam'), t = scen(id, { kind: o.k, min: 220, mins: 45, lo: 220, hi: 260, intro: o.intro, points: o.pts, extra: o.extra, rubric: CAM_R + 'Genre: ' + o.r });
+    t.hint = 'target 220–260'; return t;
+  }
+
+  /* ---------- Business writing ---------- */
+  var BUS = [
+    { k: 'Client email', intro: 'You manage a project team. Your supplier has delayed delivery of key components, so you must move the delivery date to your client, Brightway Ltd, back by two weeks (from 12 March to 26 March).', pts: ['apologise and explain the delay briefly', 'state the impact and the new date', 'describe your recovery plan and offer a 5% discount'], r: 'CLIENT EMAIL: apology without over-explaining, new date stated early, concrete recovery plan, professional and reassuring tone.' },
+    { k: 'Proposal to director', intro: 'You think the company should adopt a hybrid working policy (three days in the office, two at home). Write a short proposal to your director.', pts: ['summarise the benefits (staff retention, lower office costs)', 'identify two risks and how to manage them', 'recommend a three-month trial as the next step'], r: 'PROPOSAL: recommendation in the opening lines, benefits and risks balanced, a clear next step and decision request.' },
+    { k: 'Executive summary', intro: 'Write the executive summary of a quarterly report. Data: sales rose 12% to $4.2 million; complaints rose 9%; 41% of complaints concern late delivery and 27% faulty products; customer retention fell from 88% to 84%.', pts: ['state the key finding in the first sentence', 'explain the cause of the problem', 'recommend two actions'], r: 'EXECUTIVE SUMMARY: concise, numbers used accurately and not invented, key message first, no unnecessary detail.' },
+    { k: 'Internal memo', intro: 'From 1 June the company is introducing a new expenses policy: all claims must be submitted within 30 days using the online portal, and receipts are required for every item above $20.', pts: ['state the change and the date in the first paragraph', 'explain the reason (faster payments, fewer errors)', 'tell staff what to do and who to contact'], r: 'MEMO: a memo header (To/From/Date/Subject) is expected, clear and concise, neutral-positive tone, action points clear.' },
+    { k: 'Persuasive team email', intro: 'You want your colleagues to attend a data-security workshop next Thursday at 2 p.m. (one hour, free, online).', pts: ['say why it matters now (recent phishing attempts)', 'say what they will learn', 'give a clear call to action (register by Tuesday)'], r: 'PERSUASIVE EMAIL: engaging subject line, benefit-focused, friendly but professional, strong call to action.' },
+    { k: 'Supplier negotiation', intro: 'Your company wants to order 5,000 units from a regular supplier, double the usual volume. The current price is $18 per unit.', pts: ['explain the order and the relationship', 'request a price of $15.50 per unit and justify it', 'propose terms (payment in 30 days) and a reply date'], r: 'NEGOTIATION EMAIL: polite but firm, a justified request, clear terms, relationship preserved.' },
+    { k: 'Customer complaint reply', intro: 'A customer, Ms Carter, wrote that her order arrived two weeks late and the box was damaged. You work in customer service.', pts: ['apologise sincerely and acknowledge her problem', 'explain what you are doing (replacement sent free by express delivery)', 'offer a discount code and ask her to contact you if needed'], r: 'COMPLAINT REPLY: empathy, ownership without blame, specific solution, warm professional closing.' },
+    { k: 'Meeting follow-up', intro: 'You chaired a meeting about the launch of a new mobile app. Decisions: launch date 15 September; marketing budget $20,000; design finishes by 1 August (Sara); testing by 25 August (Ali).', pts: ['thank the attendees and summarise the decisions', 'list who is responsible for what and by when', 'state the date of the next meeting'], r: 'FOLLOW-UP EMAIL: clear structure (a list is acceptable), accurate details, action owners and deadlines.' }
+  ];
+  function genBusiness(id) {
+    var o = pickFresh(id, BUS, 'bus');
+    return scen(id, { kind: o.k, min: 200, mins: 25, lo: 200, hi: 250, intro: o.intro, points: o.pts, rubric: 'Document type: ' + o.r + ' Do not penalise correct professional conventions; penalise filler, vague wording and missing details.' });
+  }
+
+  /* ---------- Email & letter ---------- */
+  var MAIL = [
+    { k: 'Formal complaint email', lo: 120, hi: 180, intro: 'The sea-view hotel room you booked was not available when you arrived. You were given a smaller room facing a car park. Write an email to the hotel manager.', pts: ['say what happened', 'explain what you expect the hotel to do', 'say by when you expect a reply'], r: 'FORMAL email; subject line, "Dear Mr/Ms ..." or "Dear Sir or Madam", "Yours sincerely/faithfully" or "Kind regards".' },
+    { k: 'Request to a professor', lo: 100, hi: 150, intro: 'You need a two-day extension for an assignment because of a family emergency. Write an email to your professor.', pts: ['explain the situation briefly', 'ask politely for the extension', 'propose a new deadline'], r: 'POLITE FORMAL email; correct title, brief and respectful, not over-explaining.' },
+    { k: 'Application letter', lo: 150, hi: 200, intro: 'You have seen an advertisement for a summer internship at an international company. Write a formal letter of application.', pts: ['say which internship and why you are interested', 'explain why you are a suitable candidate', 'mention your availability and thank the reader'], r: 'FORMAL application letter; persuasive, specific skills and evidence, formal closing.' },
+    { k: 'Enquiry to a language school', lo: 120, hi: 170, intro: 'You are interested in an intensive English course at a language school in another city. Write an email asking for information.', pts: ['say who you are and which course interests you', 'ask about dates, fees and accommodation', 'ask how to enrol'], r: 'FORMAL enquiry; clear numbered or well-ordered questions, polite requests ("Could you please...").' },
+    { k: 'Request for repairs', lo: 120, hi: 170, intro: 'The washing machine in your rented flat has stopped working. Write an email to your landlord.', pts: ['describe the problem and when it started', 'explain how it affects you', 'ask when someone can repair or replace it'], r: 'SEMI-FORMAL email; polite but direct, clear request and timing.' },
+    { k: 'Thank-you email after interview', lo: 100, hi: 150, intro: 'You had a job interview yesterday for the position of marketing assistant. Write an email to the interviewer.', pts: ['thank them for their time', 'mention one thing you learned and your enthusiasm', 'say you look forward to hearing from them'], r: 'FORMAL-POSITIVE email; concise, specific rather than generic, professional.' },
+    { k: 'Change of meeting', lo: 100, hi: 150, intro: 'A team meeting planned for Friday at 10 a.m. must move because the meeting room is unavailable. Write an email to your colleagues.', pts: ['give the new time and place (Monday, 2 p.m., Room 4)', 'explain the reason', 'ask them to confirm attendance'], r: 'SEMI-FORMAL email; key information first, brief reason, clear request.' },
+    { k: 'Reference request', lo: 120, hi: 170, intro: 'You are applying for a Master\'s programme and want your former teacher to write a recommendation letter. Write an email to the teacher.', pts: ['remind them who you are and what you studied', 'explain the programme and the deadline (30 April)', 'thank them and offer further information'], r: 'POLITE SEMI-FORMAL email; respectful, easy for the reader to say yes, deadline clear.' }
+  ];
+  function genMail(id) {
+    var o = pickFresh(id, MAIL, 'mail');
+    return scen(id, { kind: o.k, min: o.lo, mins: 15, lo: o.lo, hi: o.hi, intro: o.intro, points: o.pts, rubric: 'Format: ' + o.r + ' Check greeting, sign-off and register consistency, and that all three points are covered.' });
+  }
+
+  /* ---------- Statement of Purpose ---------- */
+  var SOPS = [
+    { k: 'MSc Computer Science (AI)', intro: 'You are applying for an MSc in Computer Science (Artificial Intelligence) at a research university.' },
+    { k: 'MA Applied Linguistics', intro: 'You are applying for a Master\'s programme in Applied Linguistics.' },
+    { k: 'MBA', intro: 'You are applying for a full-time MBA at an international business school.' },
+    { k: 'Public Health Master\'s', intro: 'You are applying for a Master\'s in Public Health and the admissions committee wants to understand your motivation.' },
+    { k: 'PhD (research fit)', intro: 'You are applying for a funded PhD position in education technology.' },
+    { k: 'Scholarship statement', intro: 'You are applying for a scholarship for international students.' }
+  ];
+  function genSOP(id) {
+    var o = pickFresh(id, SOPS, 'sop');
+    var pts = ['your academic and professional background', 'one specific project or experience that prepared you (with results)', 'why this programme and this university', 'your short- and long-term goals'];
+    if (o.k.indexOf('Scholarship') === 0) pts = ['a challenge you overcame and what you learned', 'your academic and career goals', 'how you will contribute to your community after your studies'];
+    return scen(id, { kind: o.k, min: 500, mins: 40, lo: 500, hi: 700, intro: o.intro + ' Write your Statement of Purpose.', points: pts, extra: 'Use concrete evidence, not general claims.', rubric: 'Programme: ' + o.k + '. Reward specificity and an authentic personal voice. Penalise clichés ("since childhood I have been passionate about..."), unsupported claims and any invented credentials.' });
+  }
+
+  /* ---------- Literature review (given sources, fictional) ---------- */
+  var LITREV = [
+    { k: 'AI feedback and L2 writing', src: [['Kovacs & Lind (2021)', '120 intermediate learners; the group using automated feedback improved grammatical accuracy by 14% over eight weeks compared with a control group, but showed no gain in content or organisation.'], ['Mensah (2022)', '45 learners; those who received AI feedback plus teacher comments improved organisation more than the AI-only group, and all learners reported higher motivation.'], ['Tanaka (2023)', 'Interviews with 20 students; many accepted suggestions without checking them and revised less when feedback was very frequent.']], gap: 'long-term effects and differences by proficiency level' },
+    { k: 'Social media and adolescent wellbeing', src: [['Rivera (2020)', 'A survey of 3,000 teenagers found that heavy use (over 4 hours daily) was associated with higher anxiety and poorer sleep.'], ['Okoye & Bell (2022)', 'A diary study of 150 teenagers found that using social media to keep in touch with close friends was linked to feeling less lonely.'], ['Haddad (2023)', 'A two-year study found effects depended on the type of use: passive scrolling predicted lower wellbeing, active communication did not.']], gap: 'causal direction and the role of parental guidance' },
+    { k: 'Remote work and productivity', src: [['Lindgren (2019)', 'In a call-centre experiment, remote workers completed 13% more calls than office workers and quit less often.'], ['Foster & Ng (2021)', 'A survey of 800 knowledge workers found productivity was unchanged on routine tasks but lower on tasks requiring team creativity.'], ['Bianchi (2022)', 'Interviews showed that new employees who worked remotely felt less connected and received less informal training.']], gap: 'long-term career effects and differences between roles' },
+    { k: 'Active learning in science courses', src: [['Whitaker (2018)', 'Students in active-learning physics classes scored 6 points higher on final exams than students in lecture-only classes.'], ['Duarte & Ali (2020)', 'A comparison of 40 biology courses found the benefit was larger for students from under-represented backgrounds.'], ['Schmidt (2022)', 'Instructors reported that active learning needs more preparation time and that students sometimes resisted it at first.']], gap: 'cost-effectiveness and effects in very large classes' }
+  ];
+  function genLitRev(id) {
+    var o = pickFresh(id, LITREV, 'lit');
+    var mat = o.src.map(function (s) { return { h: 'Source: ' + s[0], t: s[1] }; });
+    var t = scen(id, { kind: o.k, min: 500, mins: 45, lo: 500, hi: 700, intro: 'Write the literature review section of a research paper on "' + o.k + '", using ONLY the three (fictional, practice) sources below.', material: mat, points: ['group the sources by theme (do not describe them one by one)', 'compare and contrast their findings and methods', 'end by identifying a gap in the research'], extra: 'Cite sources as (Author, Year).', rubric: 'Sources are provided. Judge thematic synthesis, critical comparison, a justified research gap (a good gap is e.g. ' + o.gap + '), and correct (Author, Year) citation. Penalise source-by-source summary and any citation of studies not provided.' });
+    return t;
+  }
+
+  /* ---------- Research proposal ---------- */
+  var PROPS = [
+    'whether practice with an AI chatbot improves EFL learners\' speaking fluency',
+    'the effect of spaced-repetition apps on vocabulary retention in secondary school students',
+    'direct versus indirect teacher feedback on the accuracy of university students\' academic writing',
+    'whether a four-day school week affects student attendance and achievement',
+    'the impact of peer mentoring on first-year university students\' retention'
+  ];
+  function genProposal(id) {
+    var o = pickFresh(id, PROPS, 'prop');
+    return scen(id, { kind: 'Proposal', min: 400, mins: 40, lo: 400, hi: 600, intro: 'Write a research proposal investigating ' + o + '.', points: ['Background and rationale (with the gap)', 'Research question(s)', 'Methodology: design, participants, instruments, data analysis', 'Feasibility and ethical considerations', 'Expected contribution'], rubric: 'Judge a clear problem and gap, focused researchable questions aligned with the method, a justified design, realistic scope, ethics and expected contribution. Penalise vague methods and missing sections.' });
+  }
+
+  /* ---------- Summary & paraphrase ---------- */
+  var SUMS = [
+    { k: 'Summary', lo: 45, hi: 60, p: 'Urban green spaces such as parks, street trees and rooftop gardens do far more than make cities attractive. They lower summer temperatures by shading buildings and releasing moisture into the air, which reduces the heat island effect that makes cities several degrees hotter than the surrounding countryside. They also absorb heavy rainfall, easing pressure on drains and lowering flood risk. In addition, they offer residents places to exercise and relax, and research links regular contact with nature to lower stress. However, creating and maintaining green spaces is expensive, and land in city centres is scarce. Moreover, parks are often located in wealthier districts, so poorer communities, which are often the most exposed to heat and pollution, may benefit least. Planners therefore face the challenge of increasing green space in a way that is both affordable and fair.' },
+    { k: 'Summary', lo: 45, hi: 60, p: 'Sleep plays a central role in memory. During deep sleep the brain replays the day\'s experiences and moves important information into long-term storage, while less useful details fade away. As a result, students who sleep well after studying usually remember more than those who stay up late to revise. Even a short nap can help consolidate new information, although the effect is smaller than that of a full night. On the other hand, regularly sleeping too little weakens attention and slows down the brain\'s ability to take in new facts, so that learning in the following days becomes harder. Researchers therefore recommend that students protect their sleep during exam periods, rather than treating it as time that could be spent studying.' },
+    { k: 'Summary', lo: 45, hi: 60, p: 'Coral reefs cover less than one per cent of the ocean floor, yet they support about a quarter of all marine species. They protect coastlines from storms, provide food and income for hundreds of millions of people, and attract tourists. Reefs are, however, under pressure. Rising sea temperatures cause corals to expel the algae that give them colour and food, a process called bleaching; if the heat persists, the corals die. Ocean acidification, caused by the sea absorbing carbon dioxide, makes it harder for corals to build their skeletons, while pollution and overfishing add further stress. Some scientists are trying to breed heat-tolerant corals and restore damaged reefs, but they stress that such efforts can only succeed alongside a reduction in greenhouse gas emissions.' },
+    { k: 'Summary', lo: 45, hi: 60, p: 'The rapid growth of online shopping has changed how people buy almost everything. Customers enjoy the convenience of ordering at any hour, a wider choice of products and easy price comparison. Retailers can reach customers across the country without opening expensive shops. However, the shift has a cost. Many small high-street shops have closed because they cannot match online prices, leaving town centres emptier. Delivery vans add to traffic and emissions, and the packaging and returns that come with online orders create a great deal of waste. Some towns are now trying to attract shoppers back by offering experiences that cannot be delivered, such as markets, cafes and events, and some retailers have begun to charge for returns to discourage unnecessary orders.' },
+    { k: 'Paraphrase', lo: 55, hi: 80, p: 'The invention of the printing press in the fifteenth century dramatically lowered the cost of books. As a result, literacy spread, ideas travelled faster across Europe, and scholars could compare and challenge each other\'s work more easily than ever before.' },
+    { k: 'Paraphrase', lo: 55, hi: 80, p: 'Although many people believe that multitasking makes them more efficient, research suggests the opposite. When people switch between tasks, the brain needs time to refocus, which slows work down and increases mistakes. Those who concentrate on one task at a time generally finish sooner and with higher quality.' }
+  ];
+  function genSummary(id) {
+    var o = pickFresh(id, SUMS, 'sum'), n = o.p.split(/\s+/).length;
+    if (o.k === 'Paraphrase') { o = { k: o.k, p: o.p, lo: Math.round(n * 0.9), hi: Math.round(n * 1.3) }; }
+    var instr = o.k === 'Summary' ? 'Summarise the passage below in ' + o.lo + '–' + o.hi + ' words, using your own words. Include only the main ideas and add no opinions.' : 'Paraphrase the passage below in your own words (about ' + o.lo + '–' + o.hi + ' words), keeping the meaning but changing the vocabulary and sentence structure. Do not copy phrases of more than three words.';
+    var t = finish(id, {
+      kind: o.k + ' (passage ' + n + ' words)', minW: o.lo, minutes: 15, hint: 'target ' + o.lo + '–' + o.hi,
+      text: instr, html: box('PASSAGE (' + n + ' words)', o.p), brief: instr + ' PASSAGE: ' + o.p, visualText: 'Original passage (' + n + ' words): ' + o.p,
+      rubric: 'Task: ' + o.k.toUpperCase() + ' of the passage in the task prompt. Judge accuracy of the main ideas, ' + (o.k === 'Summary' ? 'concision and keeping within ' + o.lo + '–' + o.hi + ' words, ' : 'keeping the full meaning, ') + 'how far wording and structure differ from the source (penalise copied phrases), and cohesion. No new opinions.'
+    });
+    return t;
+  }
+
+  /* ---------- Academic essay ---------- */
+  var ACAD = [
+    { k: 'Argumentative', q: 'To what extent should governments intervene in the free market to reduce economic inequality? Develop a clear argument supported by evidence.' },
+    { k: 'Evaluative', q: 'Evaluate the claim that artificial intelligence poses a greater threat than benefit to modern society.' },
+    { k: 'Discussion', q: 'Is globalisation a force for positive change, or does it create more problems than it solves? Discuss with reference to at least two areas (e.g. economy, culture, environment).' },
+    { k: 'Argumentative', q: 'To what extent is climate change the most significant challenge facing humanity today?' },
+    { k: 'Critical', q: 'Critically evaluate the view that education systems prioritise conformity over creativity.' },
+    { k: 'Compare and contrast', q: 'Compare and contrast two approaches to reducing urban traffic congestion (for example congestion charging and investment in public transport), and argue which is more effective.' },
+    { k: 'Argumentative', q: 'Should university education be funded by the state or by students? Argue your position, considering equity and economic efficiency.' },
+    { k: 'Evaluative', q: 'Assess the extent to which social media has improved or damaged democratic debate.' }
+  ];
+  function genAcademic(id) {
+    var o = pickFresh(id, ACAD, 'acad');
+    return scen(id, { kind: o.k + ' essay', min: 500, mins: 50, lo: 500, hi: 800, intro: o.q, extra: 'Include a clear thesis, evidence-based paragraphs, a counter-argument and a conclusion. Use formal academic register and real, well-known evidence only; do not invent statistics or sources.', rubric: 'Essay type: ' + o.k.toUpperCase() + '. Judge thesis clarity, argument depth, counter-argument and rebuttal, evidence quality (flag unverifiable or invented claims), paragraph structure, and formal academic register.' });
+  }
+
+  /* ---------- Research abstract (data provided) ---------- */
+  var ABS = [
+    { t: 'Social media use and academic performance', d: ['Background: students report heavy social media use, but its relation to grades is unclear.', 'Aim: examine the relationship between daily social media use and GPA.', 'Method: cross-sectional survey of 412 undergraduates at two universities; GPA from records; regression analysis.', 'Results: each additional hour of daily use was associated with a 0.11-point lower GPA (p < .01); the effect was smaller for students who studied more than 15 hours a week.', 'Implication: moderate use may not harm achievement; study habits seem to matter.'] },
+    { t: 'Project-based learning in secondary science', d: ['Background: project-based learning (PBL) is widely promoted, but evidence in secondary science is mixed.', 'Aim: compare PBL with traditional teaching on science achievement and motivation.', 'Method: quasi-experimental study, 6 classes (n = 168) over one semester; pre/post tests and a motivation questionnaire.', 'Results: the PBL group scored 9 points higher on the post-test (d = 0.48) and reported higher motivation; no difference in low-prior-achievers.', 'Implication: PBL can raise achievement but may need extra support for weaker students.'] },
+    { t: 'Remote work, productivity and mental health', d: ['Background: remote work increased sharply after 2020.', 'Aim: investigate the effect of remote work on productivity and mental health.', 'Method: 12-month longitudinal study of 230 employees at a software company; productivity from task logs; the WHO-5 wellbeing scale every three months.', 'Results: productivity rose by 6%; wellbeing improved for 58% of employees but fell for those living alone (average drop 8 points).', 'Implication: hybrid options and social contact may protect employees who live alone.'] },
+    { t: 'Machine learning and early detection of reading difficulties', d: ['Background: reading difficulties are often identified late.', 'Aim: test whether a machine-learning model can identify at-risk children early.', 'Method: classifier trained on reading and speech data from 1,200 children aged 5–7; tested on 300 new children.', 'Results: accuracy 87%, sensitivity 82%, specificity 90%.', 'Implication: screening could support earlier help, but results need confirmation in other languages.'] },
+    { t: 'CBT for academic anxiety', d: ['Background: academic anxiety harms university students\' performance and wellbeing.', 'Aim: evaluate the effectiveness of an eight-week cognitive behavioural therapy (CBT) programme.', 'Method: randomised controlled trial, 96 students (48 CBT, 48 waiting list); anxiety measured before, after and at three months.', 'Results: anxiety scores fell by 31% in the CBT group versus 7% in controls (p < .001); gains were maintained at follow-up.', 'Implication: brief CBT is an effective option for universities.'] }
+  ];
+  function genAbstract(id) {
+    var o = pickFresh(id, ABS, 'abs');
+    return scen(id, { kind: 'Abstract', min: 150, mins: 25, lo: 150, hi: 250, intro: 'Write a structured research abstract for the study "' + o.t + '" using ONLY the information below.', material: [{ h: 'Study information', t: o.d.join(' ') }], extra: 'Cover background, aim, method, results and conclusion in one paragraph, in the past tense (except for the conclusion), and do not invent data.', rubric: 'Abstract for "' + o.t + '". Judge inclusion of all five moves, accurate use of the provided figures only (penalise invented data), conciseness, and a formal register. No citations and no first-person narrative.' });
+  }
+
+  /* ---------- Report (data provided) ---------- */
+  var REPS = [
+    { k: 'Remote-working report', intro: 'You are an HR analyst. Write a report for the management team on the first year of remote working at a company of 200 employees.', d: 'Survey results: 62% prefer a hybrid model; 24% prefer full-time remote; 14% prefer the office. Productivity metrics unchanged. Office costs down 18%. 27% of staff report feeling isolated. Staff turnover fell from 14% to 9%.' },
+    { k: 'Public transport report', intro: 'You work for a city council. Write a report on the causes of falling bus use and propose solutions.', d: 'Ridership fell from 12.4 million (2015) to 9.1 million (2024). Reasons given in a survey: unreliable service 38%, expensive fares 24%, slow journeys 21%, safety concerns 9%, other 8%. Options under discussion: dedicated bus lanes, a fare cap, a real-time app.' },
+    { k: 'Branch location report', intro: 'Write a report for the board comparing three possible locations for a new branch and recommend one.', d: 'Location A (city centre): rent $9,000/month, high footfall, parking limited. Location B (retail park): rent $5,500/month, medium footfall, free parking. Location C (suburb): rent $3,000/month, low footfall, close to where 60% of staff live.' },
+    { k: 'Development impact report', intro: 'Write a report for the planning committee on the environmental impact of a proposed shopping development.', d: 'The site is 4 hectares of green land. Traffic would increase by about 3,200 vehicles per day. The development would create 350 jobs. Part of the site is at risk of flooding. The developer offers a new bus route and a 1-hectare park.' },
+    { k: 'School pilot report', intro: 'Write a report for a school board evaluating a six-month pilot of a digital learning programme.', d: 'Maths scores rose 6% in pilot classes. Teacher workload rose (average +3 hours a week). 15% of lessons were disrupted by device problems. 71% of parents were positive. The licence costs $12,000 a year.' }
+  ];
+  function genReport(id) {
+    var o = pickFresh(id, REPS, 'rep');
+    return scen(id, { kind: o.k, min: 300, mins: 35, lo: 300, hi: 450, intro: o.intro, material: [{ h: 'Information provided', t: o.d }], points: ['use headings: Introduction, Findings, Analysis, Recommendations', 'use the information above accurately (do not invent further data)'], rubric: 'Report: ' + o.k + '. Judge headings and structure, accurate use of the supplied data only, objective formal tone, analysis rather than listing, and specific, justified recommendations.' });
+  }
+
+  /* ---------- Article ---------- */
+  var ARTS = [
+    { pub: 'a university magazine for students', q: 'why critical thinking skills matter more than ever in the age of artificial intelligence' },
+    { pub: 'a business magazine for managers', q: 'what makes an effective leader in a rapidly changing workplace' },
+    { pub: 'a science and society magazine', q: 'the ethical questions raised by genetic engineering in human medicine' },
+    { pub: 'a magazine for young professionals', q: 'why emotional intelligence is now as valuable as technical skill' },
+    { pub: 'a cultural magazine for a general audience', q: 'what we lose when people read less in the digital age' },
+    { pub: 'an English-language newspaper supplement', q: 'whether cities should invest in cycling rather than cars' }
+  ];
+  function genArticle(id) {
+    var o = pickFresh(id, ARTS, 'art');
+    return scen(id, { kind: 'Magazine article', min: 350, mins: 35, lo: 350, hi: 500, intro: 'Write an article for ' + o.pub + ' about ' + o.q + '.', points: ['a catchy title and an engaging opening that hooks the reader', 'a clear angle with examples or short anecdotes', 'a memorable ending that leaves the reader with something to think about'], rubric: 'Article for ' + o.pub + '. Judge the title and hook, a consistent voice for the audience, clear structure with smooth transitions, concrete examples, and engaging but accurate language. Do not require formal essay structure.' });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     Registry, base rubrics, rendering
+     ════════════════════════════════════════════════════════════ */
+  var GEN = {
+    ielts_t1: genAcademicT1, ielts_gt1: genGT1, ielts_t2: genT2,
+    toefl: genTOEFLInd, toefl_integrated: genTOEFLInt, toefl_discussion: genTOEFLDisc,
+    cambridge: genCambridge, business: genBusiness, email_letter: genMail, sop: genSOP,
+    lit_review: genLitRev, research_proposal: genProposal, summary: genSummary,
+    academic: genAcademic, research: genAbstract, report: genReport, article: genArticle
+  };
+  var BASE_RUBRIC = {
+    ielts_t2: 'This is IELTS Task 2 (essay). Use the four official public band descriptors: Task Response, Coherence and Cohesion, Lexical Resource, Grammatical Range and Accuracy. Penalise essays under 250 words and any part of the question left unanswered.',
+    ielts_t1: 'This is IELTS ACADEMIC Task 1 (report on visual information). Criterion 1 is TASK ACHIEVEMENT (key "TA"): a clear overview, selection of key features, accurate data and comparisons, no opinion or speculation about causes. For this task "thinking score" means selection and grouping of key features, not argument. Penalise under 150 words.',
+    toefl: 'This is TOEFL Independent Writing.',
+    academic: 'This is a formal academic essay.',
+    research: 'This is a research abstract.',
+    report: 'This is a professional report.',
+    article: 'This is a magazine/feature article.',
+    free: ''
+  };
+  var SCALE = {
+    band: 'IELTS band 0–9 in 0.5 steps; criterion scores follow the same scale.',
+    toefl: 'Use a 0–10 scale equal to the official TOEFL 0–5 rubric multiplied by 2 (e.g. rubric 4 = 8.0).',
+    cambridge: 'Use a 0–10 scale equal to the Cambridge 0–5 band multiplied by 2 (band 3, the pass level, = 6.0).'
+  };
+
+  function generate(id) {
+    var g = GEN[id];
+    return g ? g(id) : null;
+  }
+  function render(task) {
+    var t = document.getElementById('briefTxt'), v = document.getElementById('briefVisual'), m = document.getElementById('briefMeta');
+    if (t) t.textContent = task.text;
+    if (v) v.innerHTML = task.html || '';
+    if (m) m.textContent = task.kind ? task.kind.toUpperCase() + (task.minutes ? ' · ' + task.minutes + ' MIN' : '') : '';
+    var n = document.getElementById('briefNote');
+    if (n) { n.textContent = task.note || ''; n.style.display = task.note ? '' : 'none'; }
+  }
+  function speak(btn) {
+    try {
+      var s = window.speechSynthesis; if (!s) throw 0;
+      s.cancel();
+      var u = new SpeechSynthesisUtterance(btn.getAttribute('data-lect')); u.lang = 'en-US'; u.rate = 0.95; s.speak(u);
+    } catch (e) {
+      var d = btn.closest('.nvt-lect').querySelector('details'); if (d) d.open = true;
+    }
+  }
+  function speakStop() { try { window.speechSynthesis.cancel(); } catch (e) {} }
+
+  return { generate: generate, render: render, speak: speak, stop: speakStop, BASE_RUBRIC: BASE_RUBRIC, SCALE: SCALE, GEN: GEN };
+})();
+function nvSpeak(b) { NVT.speak(b); }
+function nvSpeakStop() { NVT.stop(); }
+
+
+/* ---- Task generator wiring: official criteria labels, rubrics, fallback ---- */
+CTXS.ielts_t1.label = 'IELTS Academic Task 1';
+CTXS.ielts_t1.dims = ['TA','CC','LR','GA'];
+CTXS.ielts_gt1.dims = ['TA','CC','LR','GA'];
+CTXS.ielts_t1.brief = '';
+PROMPT_BANKS.ielts_t1 = ['The visual for this task could not be generated. Press NEW TASK to try again. (IELTS Academic Task 1: summarise the main features of the chart, table, process or maps. Write at least 150 words.)'];
+function nvApplyTask(id, task) {
+  const c = CTXS[id];
+  if (c._baseRubric === undefined) c._baseRubric = c.rubric || NVT.BASE_RUBRIC[id] || '';
+  if (c._minW0 === undefined) c._minW0 = c.minW;
+  window.NV_TASK = Object.assign({ id: id }, task);
+  c.brief = task.brief || task.text || '';
+  c.visualText = task.visualText || '';
+  c.minW = task.minW || c._minW0;
+  c.rubric = (c._baseRubric + (task.rubric ? ' ' + task.rubric : '')).trim();
+  NVT.render({ text: task.text || c.brief, html: task.html || '', kind: task.kind || '', minutes: task.minutes || 0, note: task.note || '' });
+  const wt = document.getElementById('wcTarget');
+  if (wt) wt.textContent = c.minW > 0 ? '/ ' + c.minW + ' min' + (task.hint ? ' · ' + task.hint : '') : '';
+}
+function nvNewTask() {
+  if (getWC(getText()) >= 30 && !confirm('Replace the current task with a new one? Your writing stays in the editor.')) return;
+  setCtx(currentCtx);
+}
 const BDESC = {9:'Expert User',8.5:'Expert User',8:'Very Good User',7.5:'Good User',7:'Good User',6.5:'Competent User',6:'Competent User',5.5:'Modest User',5:'Modest User',4.5:'Limited User',4:'Limited User'};
 
 let currentCtx = 'ielts_t2', busy = false, lastBand = null, fm = false;
@@ -4977,12 +5841,13 @@ function setCtx(id) {
   currentCtx = id;
   const c = CTXS[id];
   // Use rotating prompt bank
-  var prompt = getNextPrompt(id);
-  c.brief = prompt;
-  document.getElementById('briefTxt').textContent = prompt;
+  var task = null;
+  try { task = NVT.generate(id); } catch (e) { console.error('Task generator failed', id, e); }
+  if (!task) { var prompt = getNextPrompt(id); task = { text: prompt, brief: prompt }; }
+  NVT.stop();
+  nvApplyTask(id, task);
   const brief = document.getElementById('aeBrief');
   brief.style.borderLeftColor = c.color;
-  document.getElementById('wcTarget').textContent = c.minW > 0 ? '/ ' + c.minW + ' min' : '';
   document.querySelectorAll('.as-item').forEach(b => b.classList.remove('active'));
   document.getElementById('tpl-' + id)?.classList.add('active');
   updateWC();
@@ -5066,7 +5931,7 @@ function resetPanel() {
 /* -- PROMPT BUILDER -- */
 function buildPrompt(text, ctxId) {
   const c = CTXS[ctxId];
-  const dimStr = c.dims.length > 0 ? c.dims.map(d => '"' + d + '": <score 0-9>').join(', ') : '"overall": <0-10>';
+  const dimStr = c.dims.length > 0 ? c.dims.map(d => '"' + d + '": <score ' + (c.type === 'band' ? '0-9' : '0-10') + '>').join(', ') : '"overall": <0-10>';
   const maxScore = c.type === 'band' ? '9.0 in 0.5 steps e.g. 6.0, 6.5, 7.0' : '10';
   return [
     'You are NIRVE — a Writing Intelligence Platform with a unique focus on THINKING QUALITY, not just language.',
@@ -5087,10 +5952,15 @@ function buildPrompt(text, ctxId) {
     '',
     'You analyse student writing from THREE distinct perspectives simultaneously.',
     '',
-    'Context: ' + c.label,
+    'Context: ' + c.label + (window.NV_TASK && NV_TASK.kind ? ' — ' + NV_TASK.kind : ''),
     'Task prompt: ' + c.brief,
+    (c.visualText ? 'TASK MATERIAL / DATA FOR CHECKING ACCURACY (the student sees this as a visual or text): ' + c.visualText : ''),
+    'Student word count: ' + getWC(text) + (c.minW > 0 ? ' (task minimum ' + c.minW + ' words; penalise clearly under-length responses as the official criteria require)' : ''),
+    'Scoring scale: ' + (c.type === 'band' ? NVT.SCALE.band : (NVT.SCALE[c.type] || '0-10 overall and for each criterion.')),
+    'Criteria keys: TA = Task Achievement, TR = Task Response, CC = Coherence and Cohesion, LR = Lexical Resource, GA = Grammatical Range and Accuracy. Score every key listed in "scores" against the official criterion of this exact task type.',
+    'The response may be a letter, email, report, summary, discussion post or other genre rather than an essay. In "cognitive_map", treat introduction = opening/purpose/overview, body = main content points or stages, conclusion = closing/call to action; label the nodes accordingly.',
     '',
-    'Student essay:',
+    'Student response:',
     '---',
     text,
     '---',
@@ -5191,9 +6061,9 @@ async function doAnalyze() {
     let evolution = null;
     try {
       const evoPrompt = [
-        'You are an IELTS writing coach. Take the weakest paragraph from this essay and show its evolution across three band levels.',
+        'You are a writing coach for ' + CTXS[currentCtx].label + '. Take the weakest paragraph from this response and show its evolution across three quality levels (keys band6, band7, band8 mean developing, proficient, advanced for non-IELTS tasks).',
         '',
-        'Essay context: ' + currentCtx + ' — ' + CTXS[currentCtx].brief,
+        'Task context: ' + currentCtx + ' — ' + CTXS[currentCtx].brief + (CTXS[currentCtx].visualText ? ' [DATA: ' + CTXS[currentCtx].visualText + ']' : ''),
         'Full essay:',
         '---',
         text,
@@ -5307,7 +6177,7 @@ function showResults(r, wc, evolution) {
 
   if (c.dims.length && r.scores) {
     html += '<div class="r-dims" id="rdims">';
-    const dimColors = {TR:'var(--teal)',CC:'var(--green)',LR:'var(--amber)',GA:'var(--teal2)','Task Response':'var(--teal)','Language Use':'var(--green)',Development:'var(--amber)',Argument:'var(--teal)',Structure:'var(--green)',Evidence:'var(--amber)',Register:'var(--teal2)',Clarity:'var(--teal)',Organisation:'var(--green)',Tone:'var(--amber)',Engagement:'var(--teal)',Voice:'var(--teal2)',Conciseness:'var(--green)'};
+    const dimColors = {TA:'var(--teal)',TR:'var(--teal)',CC:'var(--green)',LR:'var(--amber)',GA:'var(--teal2)','Task Response':'var(--teal)','Language Use':'var(--green)',Development:'var(--amber)',Argument:'var(--teal)',Structure:'var(--green)',Evidence:'var(--amber)',Register:'var(--teal2)',Clarity:'var(--teal)',Organisation:'var(--green)',Tone:'var(--amber)',Engagement:'var(--teal)',Voice:'var(--teal2)',Conciseness:'var(--green)'};
     c.dims.forEach((d, i) => {
       const v = parseFloat(r.scores[d] || 0);
       const col = dimColors[d] || 'var(--teal)';
@@ -6041,7 +6911,7 @@ async function loadProfileData() {
   /* Session history */
   var histEl = document.getElementById('profileHistory');
   if (sessions.length > 0) {
-    var ctxLabels = {ielts_t2:'IELTS Task 2',ielts_t1:'IELTS Task 1',toefl:'TOEFL',academic:'Academic Essay',research:'Research Abstract',report:'Report',article:'Article',free:'Free Writing'};
+    var ctxLabels = {ielts_t2:'IELTS Task 2',ielts_t1:'IELTS Academic Task 1',toefl:'TOEFL',academic:'Academic Essay',research:'Research Abstract',report:'Report',article:'Article',free:'Free Writing'};
     histEl.innerHTML = sessions.slice(0,8).map(function(s) {
       var date = new Date(s.created_at).toLocaleDateString('en-GB', {day:'numeric',month:'short'});
       var ctx = ctxLabels[s.ctx] || (CTXS[s.ctx] && CTXS[s.ctx].label) || s.ctx;
@@ -7074,7 +7944,7 @@ function buildSessionReport() {
     '</div>' +
 
     '<div class="rpt-section"><div class="rpt-section-title">Task Prompt</div>' +
-    '<div class="rpt-prompt">' + (ctx.brief || '—') + '</div></div>' +
+    '<div class="rpt-prompt">' + String(ctx.brief || '—').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>') + (ctx.visualText ? '<br><br><em>Data: ' + String(ctx.visualText).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</em>' : '') + '</div></div>' +
 
     '<div class="rpt-section"><div class="rpt-section-title">Your Writing</div>' +
     '<div class="rpt-essay">' + essay.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div></div>' +
@@ -7356,17 +8226,17 @@ function mobSync(){
   var MIN={ielts_t2:40,ielts_t1:20,toefl:30,ielts_gt1:20,toefl_integrated:20,toefl_discussion:10,cambridge:45,business:25,email_letter:15,sop:40,lit_review:45,research_proposal:40,summary:15};
   function draw(){var m=Math.floor(left/60),s=('0'+left%60).slice(-2);tm.textContent='\u23F1 '+m+':'+s;tm.classList.toggle('run',!!iv);tm.classList.toggle('over',left===0);}
   function stop(){clearInterval(iv);iv=null;}
-  function reset(){stop();left=(MIN[currentCtx]||30)*60;draw();}
+  function reset(){stop();left=((window.NV_TASK&&NV_TASK.id===currentCtx&&NV_TASK.minutes)||MIN[currentCtx]||30)*60;draw();}
   tm.onclick=function(){
     if(iv)stop();
     else if(left>0)iv=setInterval(function(){if(--left<=0){left=0;stop();showToast("Time is up!",'info',4000);}draw();},1000);
     draw();
   };
   tm.ondblclick=reset;
-  var _uw=updateWC;updateWC=function(){_uw();clearTimeout(T);document.dispatchEvent(new Event('nirve:save-start'));T=setTimeout(function(){try{var x=ed.innerText.trim();if(x)localStorage.setItem(K,JSON.stringify({c:currentCtx,x:x}));else localStorage.removeItem(K);document.dispatchEvent(new Event('nirve:save-success'));}catch(e){document.dispatchEvent(new Event('nirve:save-error'));}},500);};
+  var _uw=updateWC;updateWC=function(){_uw();clearTimeout(T);document.dispatchEvent(new Event('nirve:save-start'));T=setTimeout(function(){try{var x=ed.innerText.trim();if(x)localStorage.setItem(K,JSON.stringify({c:currentCtx,x:x,t:window.NV_TASK||null}));else localStorage.removeItem(K);document.dispatchEvent(new Event('nirve:save-success'));}catch(e){document.dispatchEvent(new Event('nirve:save-error'));}},500);};
   var _sc=setCtx;setCtx=function(id){var ch=id!==currentCtx;_sc(id);if(ch)reset();};
   var _ce=clearEd;clearEd=function(){_ce();reset();};
-  try{var d=JSON.parse(localStorage.getItem(K)||'null');if(d&&d.x&&!ed.innerText.trim()){ed.innerText=d.x;if(CTXS[d.c])setCtx(d.c);updateWC();showToast('Draft restored','info',2000);}}catch(e){}
+  try{var d=JSON.parse(localStorage.getItem(K)||'null');if(d&&d.x&&!ed.innerText.trim()){ed.innerText=d.x;if(CTXS[d.c]){setCtx(d.c);if(d.t&&d.t.id===d.c)nvApplyTask(d.c,d.t);}updateWC();showToast('Draft restored','info',2000);}}catch(e){}
   reset();
   document.addEventListener('keydown',function(e){
     if((e.ctrlKey||e.metaKey)&&e.key==='Enter'&&getComputedStyle(document.getElementById('app-view')).display!=='none'){e.preventDefault();document.getElementById('aBtn2').click();}
