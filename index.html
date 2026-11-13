@@ -3273,7 +3273,23 @@ html[data-theme="light"] ::placeholder{color:var(--t3);opacity:1;}
 .nvt-post:not(.prof) .nvt-av{background:#5B7FD1}
 .nvt-pn{font-weight:600;font-size:14px}.nvt-pn span{font-weight:400;color:var(--t2);font-size:12px;margin-left:6px}
 .nvt-pb p{margin:3px 0 0;font-size:14.5px;line-height:1.55}
-@media(max-width:560px){.nvt-meta{display:none}.nvt-flow li{max-width:none;flex-basis:100%}.nvt-flow li:not(:last-child)::after{content:'\2193';right:auto;left:50%;top:auto;bottom:-20px;transform:translateX(-50%)}.nvt-flow{gap:26px}}
+@media(max-width:560px){.nvt-flow li{max-width:none;flex-basis:100%}.nvt-flow li:not(:last-child)::after{content:'\2193';right:auto;left:50%;top:auto;bottom:-20px;transform:translateX(-50%)}.nvt-flow{gap:26px}}
+
+/* ---- layout fix: column scrolls, editor keeps a usable height, nothing hidden on mobile ---- */
+#app-view .app-editor{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+#app-view .ae-wrap{flex:1 0 360px;min-height:360px}
+#app-view .ae-footer{position:sticky;bottom:0;z-index:5;background:var(--bg)}
+#app-view #briefBody{max-height:42vh}
+.nvt-vis{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nvt-svg{min-width:540px}
+@media(max-width:768px){
+  #app-view .ae-wrap{flex:1 0 300px;min-height:300px}
+  #app-view #briefBody{max-height:38vh;max-height:38dvh}
+  #app-view .ae-brief-header{flex-wrap:wrap;row-gap:4px}
+  #app-view .nvt-meta{display:block;order:9;flex-basis:100%;max-width:none;margin:0;white-space:normal;font-size:11px}
+  #app-view .nvt-new{margin-left:auto}
+  #app-view .ae-footer{background:var(--bg1);flex-wrap:wrap;row-gap:6px} #app-view .ae-btns{flex:1 1 100%;min-width:0;justify-content:flex-end}
+}
 </style>
 </head>
 <body>
@@ -5666,7 +5682,7 @@ var NVT = (function () {
     var t = document.getElementById('briefTxt'), v = document.getElementById('briefVisual'), m = document.getElementById('briefMeta');
     if (t) t.textContent = task.text;
     if (v) v.innerHTML = task.html || '';
-    if (m) m.textContent = task.kind ? task.kind.toUpperCase() + (task.minutes ? ' · ' + task.minutes + ' MIN' : '') : '';
+    if (m) m.textContent = task.kind ? task.kind.toUpperCase() + (task.minutes ? ' · ' + task.minutes + ' MIN' : '') + (task.hint ? ' · ' + task.hint.toUpperCase() : '') : '';
     var n = document.getElementById('briefNote');
     if (n) { n.textContent = task.note || ''; n.style.display = task.note ? '' : 'none'; }
   }
@@ -5702,9 +5718,9 @@ function nvApplyTask(id, task) {
   c.visualText = task.visualText || '';
   c.minW = task.minW || c._minW0;
   c.rubric = (c._baseRubric + (task.rubric ? ' ' + task.rubric : '')).trim();
-  NVT.render({ text: task.text || c.brief, html: task.html || '', kind: task.kind || '', minutes: task.minutes || 0, note: task.note || '' });
+  NVT.render({ text: task.text || c.brief, html: task.html || '', kind: task.kind || '', minutes: task.minutes || 0, hint: task.hint || '', note: task.note || '' });
   const wt = document.getElementById('wcTarget');
-  if (wt) wt.textContent = c.minW > 0 ? '/ ' + c.minW + ' min' + (task.hint ? ' · ' + task.hint : '') : '';
+  if (wt) wt.textContent = c.minW > 0 ? '/ ' + c.minW + ' min' : '';
 }
 function nvNewTask() {
   if (getWC(getText()) >= 30 && !confirm('Replace the current task with a new one? Your writing stays in the editor.')) return;
