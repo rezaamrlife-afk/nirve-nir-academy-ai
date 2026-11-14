@@ -2,7 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="NIRVE is an AI writing coach for IELTS, TOEFL and Cambridge. Practise realistic exam tasks and get band-scored feedback on your thinking, structure and language.">
+  <meta name="application-name" content="NIRVE">
+  <meta name="color-scheme" content="dark light">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="NIRVE">
+  <meta property="og:title" content="NIRVE — Writing Intelligence System">
+  <meta property="og:description" content="NIRVE is an AI writing coach for IELTS, TOEFL and Cambridge. Practise realistic exam tasks and get band-scored feedback on your thinking, structure and language.">
+  <meta name="twitter:card" content="summary">
+  <script>document.addEventListener("DOMContentLoaded",function(){var i=document.querySelector("img.app-logo,img.nav-logo");if(!i||!i.src)return;["icon","apple-touch-icon"].forEach(function(r){var l=document.createElement("link");l.rel=r;l.href=i.src;document.head.appendChild(l)})})</script>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#1A9B8A">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -10,6 +20,7 @@
   <meta name="apple-mobile-web-app-title" content="NIRVE">
 <title>NIRVE — Writing Intelligence System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cinzel:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -3290,6 +3301,17 @@ html[data-theme="light"] ::placeholder{color:var(--t3);opacity:1;}
   #app-view .nvt-new{margin-left:auto}
   #app-view .ae-footer{background:var(--bg1);flex-wrap:wrap;row-gap:6px} #app-view .ae-btns{flex:1 1 100%;min-width:0;justify-content:flex-end}
 }
+
+/* notch / status-bar safe area for the landing nav (app header already has it) */
+nav{padding-top:env(safe-area-inset-top,0px);height:calc(64px + env(safe-area-inset-top,0px))}
+
+/* ===== Progress validation + next practice ===== */
+.pv-note{font-size:14px;color:var(--t1);line-height:1.5;margin-bottom:4px}
+.pv-h{font-family:var(--mono);font-size:12px;letter-spacing:.1em;margin:10px 0 2px;font-weight:600}
+.pv-h.pv-ok,.gap-icon.pv-ok{color:var(--green)}.pv-h.pv-rec,.gap-icon.pv-rec{color:var(--amber)}.pv-h.pv-new,.gap-icon.pv-new{color:var(--red)}
+.pv-meta{font-family:var(--mono);font-size:12px;color:var(--t2);margin-left:6px;white-space:nowrap}
+.pv-block .gap-item>span:last-child{min-width:0;overflow-wrap:anywhere}
+.np-start{margin-top:12px;min-height:44px;width:100%}
 </style>
 </head>
 <body>
@@ -3958,6 +3980,7 @@ function wmeReset() {
 
 function wmeRecord(result, ctxId) {
   const mem = wmeLoad();
+  result.progress = wmeProgress(mem, result); // compare against history before this session is added
   mem.sessions += 1;
   mem.bands.push({ band: result.band, ctx: ctxId, ts: Date.now() });
   if (mem.bands.length > 50) mem.bands = mem.bands.slice(-50);
@@ -3991,10 +4014,98 @@ function wmeRecord(result, ctxId) {
     if (mem.insights.length > 20) mem.insights = mem.insights.slice(-20);
   }
 
+  mem.lastWeak = wmeCurrentWeaknesses(result).map(function(c) { return c.label; }).slice(0, 8);
   wmeSave(mem);
   renderWMEPanel();
 }
 
+/* ── PROGRESS VALIDATION + NEXT PRACTICE (built on the Weakness Memory above) ── */
+const WME_STOP = new Set('the and for are was were been being its this that these those with without from has have had not any more most very can could should would may might will their there they them your you his her our which who what when where while into than then also only such here some much many each other another about because between during before after again further just own same both few over under too'.split(' '));
+function wmeWords(s) {
+  return (String(s).toLowerCase().match(/[a-z]{3,}/g) || []).filter(function(w) { return !WME_STOP.has(w); }).map(function(w) { return w.replace(/(ing|ed|es|ly|s)$/, ''); });
+}
+function wmeSimilar(a, b) {
+  if (wmeNormalise(a) === wmeNormalise(b)) return true;
+  const A = new Set(wmeWords(a)), B = new Set(wmeWords(b));
+  if (!A.size || !B.size) return false;
+  let n = 0; A.forEach(function(w) { if (B.has(w)) n++; });
+  return (n >= 2 && n / Math.min(A.size, B.size) >= 0.5) || n / (A.size + B.size - n) >= 0.4;
+}
+function wmeCurrentWeaknesses(result) {
+  const out = [], seen = {};
+  function add(l) { if (!l || typeof l !== 'string') return; const k = wmeNormalise(l); if (seen[k]) return; seen[k] = 1; out.push({ label: l, key: k }); }
+  (result.thinking_gaps || []).forEach(add);
+  if (result.examiner && result.examiner.weakness) add(result.examiner.weakness);
+  return out;
+}
+function wmeProgress(mem, result) {
+  const cur = wmeCurrentWeaknesses(result);
+  const hist = Object.keys(mem.weaknesses || {}).map(function(k) { return mem.weaknesses[k]; }).filter(function(w) { return w.count > 0; });
+  if (!mem.sessions) return { baseline: true, newItems: cur.map(function(c) { return { label: c.label }; }), recurring: [], resolved: [] };
+  let prev = mem.lastWeak;
+  if (!Array.isArray(prev)) { // memory saved before this feature: use the most recent session's weaknesses
+    const mx = hist.reduce(function(m, w) { return Math.max(m, w.last || 0); }, 0);
+    prev = hist.filter(function(w) { return (w.last || 0) >= mx - 10000; }).map(function(w) { return w.label; });
+  }
+  const recurring = [], newItems = [], resolved = [];
+  cur.forEach(function(c) {
+    let best = null;
+    hist.forEach(function(w) { if (wmeSimilar(c.label, w.label) && (!best || w.count > best.count)) best = w; });
+    if (best) recurring.push({ label: c.label, times: best.count + 1 }); else newItems.push({ label: c.label });
+  });
+  prev.forEach(function(p) {
+    if (cur.some(function(c) { return wmeSimilar(c.label, p); })) return;
+    if (resolved.some(function(r) { return wmeSimilar(r.label, p); })) return;
+    resolved.push({ label: p });
+  });
+  return { baseline: false, recurring: recurring, newItems: newItems, resolved: resolved };
+}
+function nvEsc(x) { return String(x == null ? '' : x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function nvProgressHTML(r) {
+  const p = r && r.progress;
+  if (!p || !(p.recurring.length + p.newItems.length + p.resolved.length)) return '';
+  function grp(title, cls, icon, items, meta) {
+    if (!items.length) return '';
+    return '<div class="pv-h ' + cls + '">' + title + ' (' + items.length + ')</div>' + items.map(function(i) {
+      return '<div class="gap-item"><span class="gap-icon ' + cls + '">' + icon + '</span><span>' + nvEsc(i.label) + (meta ? meta(i) : '') + '</span></div>';
+    }).join('');
+  }
+  let h = '<div class="gaps-block pv-block"><div class="gaps-label">PROGRESS VALIDATION</div>';
+  if (p.baseline) {
+    h += '<div class="pv-note">First analysis: this is your baseline. Write again to see which weaknesses are resolved, recurring or new.</div>' + grp('BASELINE WEAKNESSES', 'pv-new', '&#9679;', p.newItems);
+  } else {
+    h += '<div class="pv-note">Compared with your previous writing: ' + p.resolved.length + ' resolved &middot; ' + p.recurring.length + ' recurring &middot; ' + p.newItems.length + ' new</div>' +
+      grp('RESOLVED &mdash; not flagged this time', 'pv-ok', '&#10003;', p.resolved) +
+      grp('RECURRING', 'pv-rec', '&#8635;', p.recurring, function(i) { return ' <span class="pv-meta">seen ' + i.times + '&times;</span>'; }) +
+      grp('NEW', 'pv-new', '&#9679;', p.newItems);
+  }
+  return h + '</div>';
+}
+function nvPracticeHTML(r) {
+  const c = r && r.coach;
+  if (!c || (!c.focus && !c.action)) return '';
+  const aim = r.progress && r.progress.recurring.length ? r.progress.recurring.map(function(x) { return x.label; }) : [];
+  window.NV_PRACTICE = { ctx: currentCtx, focus: c.focus || '', action: c.action || '', aim: aim };
+  function row(l, v) { return '<div class="persp-row"><span class="persp-row-label">' + l + '</span><span class="persp-row-val">' + nvEsc(v) + '</span></div>'; }
+  return '<div class="persp-card persp-coach pv-practice"><div class="persp-hdr"><div class="persp-icon">N</div><div><div class="persp-role">NEXT PRACTICE</div><div class="persp-role-sub">Targeted exercise</div></div></div>' +
+    '<div class="persp-body"><div class="persp-rows">' + (c.focus ? row('Focus', c.focus) : '') + (c.action ? row('Exercise', c.action) : '') +
+    row('New task', ((CTXS[currentCtx] || {}).label || '') + ': a fresh task in the same format') + (aim.length ? row('Aim to clear', aim.slice(0, 3).join('; ')) : '') +
+    '</div><button type="button" class="nvt-btn np-start" onclick="nvStartPractice()">&#9654; START THIS EXERCISE</button></div></div>';
+}
+function nvStartPractice() {
+  const p = window.NV_PRACTICE;
+  if (!p || !CTXS[p.ctx]) return;
+  if (getWC(getText()) > 0 && !confirm('Start the next exercise? The editor will be cleared (your analysis stays in Weakness Memory).')) return;
+  try { closeMobPanel(); } catch (e) {}
+  clearEd();
+  setCtx(p.ctx);
+  const note = 'NEXT PRACTICE · Focus: ' + p.focus + (p.action ? ' · Do: ' + p.action : '') + (p.aim.length ? ' · Aim to clear: ' + p.aim.slice(0, 3).join('; ') : '');
+  if (window.NV_TASK) window.NV_TASK.note = note;
+  const n = document.getElementById('briefNote');
+  if (n) { n.textContent = note; n.style.display = ''; }
+  try { mobTab('write'); } catch (e) {}
+  const ed = document.getElementById('editor'); if (ed) ed.focus();
+}
 function wmeNormalise(str) {
   return str.toLowerCase()
     .replace(/[^a-z0-9 ]/g, '')
@@ -6269,6 +6380,8 @@ function showResults(r, wc, evolution) {
     </div>`;
   }
 
+  html += nvPracticeHTML(r);
+
   /* THINKING GAPS */
   if (r.thinking_gaps && r.thinking_gaps.length) {
     html += `<div class="gaps-block">
@@ -6278,6 +6391,8 @@ function showResults(r, wc, evolution) {
     });
     html += '</div>';
   }
+
+  html += nvProgressHTML(r);
 
   /* REWRITE */
   if (r.rewrite) {
