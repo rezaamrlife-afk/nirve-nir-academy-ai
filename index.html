@@ -3322,6 +3322,15 @@ nav{padding-top:env(safe-area-inset-top,0px);height:calc(64px + env(safe-area-in
 .ap-hdr{flex-wrap:wrap;gap:6px 10px}
 .ap-hdr>div:first-child{flex:1 1 140px;min-width:0}
 .ap-hdr>div:last-child{flex-wrap:wrap;justify-content:flex-end;min-width:0;flex-shrink:1!important}
+
+/* ===== overflow fixes: Band Prediction panel + mode names on narrow sidebars ===== */
+.bp-hdr{flex-wrap:wrap;gap:4px 10px}
+.bp-title{flex:1 1 auto;min-width:0}
+.bp-conf{flex:0 0 auto}
+.bp-current{flex-wrap:wrap;row-gap:4px}
+.bp-curr-label{flex:1 1 auto;min-width:0}
+.as-item{white-space:normal;text-overflow:clip;line-height:1.3}
+.bp-title,.dna-title,.wme-title,.ap-title{overflow-wrap:anywhere}
 </style>
 </head>
 <body>
