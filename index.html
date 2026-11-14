@@ -3312,6 +3312,16 @@ nav{padding-top:env(safe-area-inset-top,0px);height:calc(64px + env(safe-area-in
 .pv-meta{font-family:var(--mono);font-size:12px;color:var(--t2);margin-left:6px;white-space:nowrap}
 .pv-block .gap-item>span:last-child{min-width:0;overflow-wrap:anywhere}
 .np-start{margin-top:12px;min-height:44px;width:100%}
+
+/* ===== overflow fixes: Writing DNA panel + results header (robust to larger text sizes) ===== */
+.dna-hdr{flex-wrap:wrap;gap:6px 10px}
+.dna-title{flex:1 1 auto;min-width:0}
+.dna-badge{flex:0 0 auto}
+.dna-sw-label{width:auto;min-width:5.3em}
+.dna-sw-val{min-width:0;overflow-wrap:anywhere}
+.ap-hdr{flex-wrap:wrap;gap:6px 10px}
+.ap-hdr>div:first-child{flex:1 1 140px;min-width:0}
+.ap-hdr>div:last-child{flex-wrap:wrap;justify-content:flex-end;min-width:0;flex-shrink:1!important}
 </style>
 </head>
 <body>
