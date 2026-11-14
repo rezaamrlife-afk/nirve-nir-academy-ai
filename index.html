@@ -3347,6 +3347,48 @@ a,button,select,summary,label,[role=button],.as-item{touch-action:manipulation;-
 #auth-eye-btn::after,.auth-switch-btn::after,#auth-switch-btn::after,.asf-link::after{content:'';position:absolute;inset:-8px -6px}
 .asf-link::after{inset:-6px 0}
 @media(max-width:768px){.nvt-new{min-height:36px;padding:6px 12px}}
+
+/* ===== design tokens: 4/8 spacing scale + fluid type ===== */
+:root{--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;
+  --fs-md:clamp(15px,14.4px + .2vw,16.5px);
+  --nav-h:calc(49px + env(safe-area-inset-bottom,0px))}
+html{font-size:clamp(15px,14.4px + .25vw,16px)}
+body{font-size:clamp(16px,15.4px + .2vw,17px)}
+#briefTxt,.nvt-reading,.pv-note{font-size:var(--fs-md)}
+/* spacing: snap cards and panels to the scale (all radii are already 14px) */
+#app-view .wme-panel,#app-view .bp-panel,#app-view .dna-panel{padding:var(--sp-4);margin-bottom:var(--sp-3)}
+#app-view .gaps-block,#app-view .dscore-card{padding:var(--sp-4)}
+#app-view .ae-brief{padding:var(--sp-3) var(--sp-4)}
+#app-view .persp-hdr{padding:var(--sp-2) var(--sp-3)}
+#app-view .persp-body{padding:var(--sp-3)}
+@media(min-width:769px){
+  #app-view .ap-hdr{padding:var(--sp-4) var(--sp-4) var(--sp-3)}
+  #app-view .ap-body{padding:var(--sp-4)}
+  #app-view .app-sidebar{padding:var(--sp-4) var(--sp-3) var(--sp-5)}
+  #app-view #tplList .as-item{padding:var(--sp-2) var(--sp-3)}
+  /* simpler desktop sidebar: insight panels collapse to their header (state lives on <body>) */
+  body.sb-c-wme #wme-panel>*:not(.wme-hdr),body.sb-c-bp #bp-panel>*:not(.bp-hdr),body.sb-c-dna #dna-panel>*:not(.dna-hdr){display:none}
+  .wme-hdr,.bp-hdr,.dna-hdr{cursor:pointer}
+  .wme-hdr,.bp-hdr,.dna-hdr{position:relative;padding-right:var(--sp-5)}
+  .wme-hdr::after,.bp-hdr::after,.dna-hdr::after{content:'\25BE';position:absolute;right:2px;top:4px;color:var(--t2);font-size:12px;line-height:1;transition:transform .2s}
+  body.sb-c-wme .wme-hdr::after,body.sb-c-bp .bp-hdr::after,body.sb-c-dna .dna-hdr::after{transform:rotate(-90deg)}
+  body.sb-c-wme .wme-hdr,body.sb-c-bp .bp-hdr,body.sb-c-dna .dna-hdr{margin-bottom:0}
+}
+/* mobile: navigation lives at the bottom, where the thumb is */
+@media(max-width:768px){
+  #app-view .mob-tabs{order:99;border-bottom:0;border-top:1px solid var(--border);padding:6px var(--sp-2) calc(6px + env(safe-area-inset-bottom,0px));z-index:102;box-shadow:0 -8px 24px rgba(0,0,0,.14)}
+  #app-view .ae-footer{padding-bottom:var(--sp-3)}
+  #app-view .app-panel{bottom:var(--nav-h);height:calc(88dvh - var(--nav-h));max-height:calc(88dvh - var(--nav-h))}
+  #app-view .ap-body{padding:var(--sp-3) var(--sp-3) var(--sp-5)}
+  body.fm #app-view .app-panel{bottom:0;height:88dvh;max-height:88dvh}
+  #toast-container{bottom:calc(var(--nav-h) + 72px)}
+  #app-view .ae-brief{margin-top:var(--sp-3)}
+  #app-view .ae-wrap{margin-top:var(--sp-3);margin-bottom:var(--sp-2)}
+  #app-view .as-item{padding:var(--sp-3) var(--sp-4)}
+  #app-view .persp-body{padding:var(--sp-2) var(--sp-3)}
+}
+/* on-screen keyboard on short viewports: give the editor the room while typing */
+@media(max-width:768px) and (max-height:560px){body:has(#editor:focus) #app-view .mob-tabs{display:none}}
 </style>
 </head>
 <body>
@@ -4175,7 +4217,7 @@ function renderWMEPanel() {
   const trend = wmeGetBandTrend(mem.bands);
 
   let html = '<div class="wme-panel" id="wme-panel">';
-  html += '<div class="wme-hdr"><div class="wme-title">WEAKNESS MEMORY</div><div class="wme-meta">' + mem.sessions + ' session' + (mem.sessions !== 1 ? 's' : '') + '</div></div>';
+  html += '<div class="wme-hdr" tabindex="0" role="button" title="Show / hide"><div class="wme-title">WEAKNESS MEMORY</div><div class="wme-meta">' + mem.sessions + ' session' + (mem.sessions !== 1 ? 's' : '') + '</div></div>';
 
   // Band trend
   if (trend) {
@@ -4271,7 +4313,7 @@ function bpRenderPrediction() {
   var confColor = confidence === 'High' ? 'var(--green)' : confidence === 'Medium' ? 'var(--amber)' : 'var(--t2)';
 
   var html = '<div class="bp-panel" id="bp-panel">';
-  html += '<div class="bp-hdr"><div class="bp-title">BAND PREDICTION</div><div class="bp-conf" style="color:' + confColor + '">' + confidence + ' confidence</div></div>';
+  html += '<div class="bp-hdr" tabindex="0" role="button" title="Show / hide"><div class="bp-title">BAND PREDICTION</div><div class="bp-conf" style="color:' + confColor + '">' + confidence + ' confidence</div></div>';
 
   // Current band
   html += '<div class="bp-current">';
@@ -4429,7 +4471,7 @@ function dnaRender() {
   var sw = dnaGetStrengthWeakness(dna);
 
   var html = '<div class="dna-panel" id="dna-panel">';
-  html += '<div class="dna-hdr">';
+  html += '<div class="dna-hdr" tabindex="0" role="button" title="Show / hide">';
   html += '<div class="dna-title">WRITING DNA</div>';
   html += '<div class="dna-badge">Profile</div>';
   html += '</div>';
@@ -6315,7 +6357,7 @@ function showResults(r, wc, evolution) {
         <svg width="62" height="62" viewBox="0 0 62 62">
           <circle cx="31" cy="31" r="25" fill="none" stroke="rgba(26,155,138,0.12)" stroke-width="5"/>
           <circle cx="31" cy="31" r="25" fill="none" stroke="var(--teal)" stroke-width="5"
-            stroke-dasharray="0 157" stroke-dashoffset="39" stroke-linecap="round"
+            stroke-dasharray="0 157" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 31 31)"
             id="rarc" style="transition:stroke-dasharray 1s cubic-bezier(0.22,1,0.36,1)"/>
           <text x="31" y="35" text-anchor="middle" fill="var(--teal2)" font-size="11" font-weight="600" font-family="IBM Plex Mono" id="rpct">0%</text>
         </svg>
@@ -6513,7 +6555,7 @@ function showResults(r, wc, evolution) {
     setTimeout(() => {
       document.getElementById('rb')?.classList.add('vis');
       countUp('rbn', 0, band, 900, 1);
-      arcAnim('rarc', 'rpct', band / maxVal * 100, 157);
+      arcAnim('rarc', 'rpct', band / maxVal, 157);
     }, 50);
     setTimeout(() => {
       document.getElementById('dsc')?.classList.add('vis');
@@ -6572,8 +6614,7 @@ function arcAnim(cid, tid, pct, circ) {
   function step(now) {
     const p = Math.min((now - start) / dur, 1);
     const ease = 1 - Math.pow(1 - p, 3);
-    const off = circ - circ * ease * pct;
-    c.style.strokeDashoffset = off;
+    c.style.strokeDasharray = (circ * ease * pct) + ' ' + circ;
     t.textContent = Math.round(ease * pct * 100) + '%';
     if (p < 1) requestAnimationFrame(step);
   }
@@ -8572,6 +8613,30 @@ function curFont(){return fs||parseFloat(getComputedStyle(ED).fontSize)||16;}
 $('ns-larger').addEventListener('click',function(){fs=Math.round(curFont())+1;applyFont();message('Font size '+fs+'px');});
 $('ns-smaller').addEventListener('click',function(){fs=Math.round(curFont())-1;applyFont();message('Font size '+fs+'px');});
 applyFont();
+})();
+</script>
+<script>
+/* Desktop sidebar: collapsible insight panels. State is kept on <body> so it survives panel re-renders. */
+(function(){
+  var K='nirve_sb_collapsed',keys=['wme','bp','dna'],st=null;
+  try{st=JSON.parse(localStorage.getItem(K));}catch(e){}
+  if(!st||typeof st!=='object')st={bp:1,dna:1};
+  function apply(){keys.forEach(function(k){document.body.classList.toggle('sb-c-'+k,!!st[k]);});}
+  function toggle(h){
+    var k=h.classList.contains('wme-hdr')?'wme':h.classList.contains('bp-hdr')?'bp':'dna';
+    st[k]=st[k]?0:1;apply();try{localStorage.setItem(K,JSON.stringify(st));}catch(e){}
+  }
+  apply();
+  var sb=document.getElementById('appSidebar');if(!sb)return;
+  var mobile=function(){return window.matchMedia('(max-width:768px)').matches;};
+  sb.addEventListener('click',function(e){
+    var h=e.target.closest('.wme-hdr,.bp-hdr,.dna-hdr');
+    if(!h||mobile()||e.target.closest('button,a,.dna-badge'))return;toggle(h);
+  });
+  sb.addEventListener('keydown',function(e){
+    if((e.key!=='Enter'&&e.key!==' ')||mobile())return;
+    var h=e.target.closest('.wme-hdr,.bp-hdr,.dna-hdr');if(!h||h!==e.target)return;e.preventDefault();toggle(h);
+  });
 })();
 </script>
 </body>
