@@ -3618,6 +3618,9 @@ html[dir="rtl"] .nva *{letter-spacing:0 !important;text-transform:none !importan
 .nva-mini i{display:inline-flex;gap:5px;align-items:baseline;}
 .nva-mini i.w{gap:4px;}
 .nva-in::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.8;}
+/* dropdown list: explicit colours so the open list follows the theme (Chrome/Edge/Firefox) */
+select.nva-in option,select.nva-in optgroup{background-color:var(--bg2);color:var(--t0);}
+select.nva-in option:checked,select.nva-in option:hover{background-color:var(--teal);color:var(--on-accent);}
 </style>
 </head>
 <body>
