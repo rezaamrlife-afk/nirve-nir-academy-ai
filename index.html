@@ -3609,6 +3609,15 @@ html[dir="rtl"] .nva *{letter-spacing:0 !important;text-transform:none !importan
 .nva-entry:hover{border-color:var(--teal);background:var(--teal-g);}
 .nva-entry svg{width:18px;height:18px;flex-shrink:0;}
 @media(max-width:768px){.nva-tbl th,.nva-tbl td{padding:10px 6px;font-size:14px;}.nva-tbl td.n{font-size:16px;}.nva-box{padding:var(--sp-3);}}
+/* polish: dark-mode form controls, spacing, no clipped header */
+.nva{color-scheme:dark;box-sizing:border-box;}
+[data-theme="light"] .nva{color-scheme:light;}
+.nva-top{box-sizing:border-box;width:100%;}
+.nva-top .nva-btn{flex-shrink:0;}
+.nva-count{display:flex;gap:.35em;align-items:baseline;}
+.nva-mini i{display:inline-flex;gap:5px;align-items:baseline;}
+.nva-mini i.w{gap:4px;}
+.nva-in::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.8;}
 </style>
 </head>
 <body>
@@ -9174,7 +9183,7 @@ applyFont();
     if (!list.length) { area.innerHTML = '<div class="nva-empty"><b>No essays match your filters</b>Try a different search, exam type or date range.</div>'; return; }
     area.innerHTML = '<div class="nva-list ' + (S.cmp ? 'nva-cmp' : '') + '">' + list.map(function (e) {
       var r = e.result || {}, sel = S.sel.indexOf(e.id) > -1;
-      var mini = (e.criteriaDims || []).map(function (d) { var v = r.scores ? num(r.scores[d]) : null; return v === null ? '' : '<i data-no-i18n>' + esc(d) + ' ' + f1(v) + '</i>'; }).join('');
+      var mini = (e.criteriaDims || []).map(function (d) { var v = r.scores ? num(r.scores[d]) : null; return v === null ? '' : '<i data-no-i18n><span>' + esc(d) + '</span><span>' + f1(v) + '</span></i>'; }).join('');
       return '<div class="nva-card' + (sel ? ' sel' : '') + '" role="button" tabindex="0" data-a="card" data-id="' + e.id + '">' +
         '<span class="nva-check">' + (sel ? SVG.ok : '') + '</span>' +
         '<div class="nva-card-h"><div><span class="nva-chip" data-no-i18n>' + esc(e.exam) + '</span><div class="nva-date" data-no-i18n>' + esc(fdate(e.savedAt)) + '</div></div>' +
