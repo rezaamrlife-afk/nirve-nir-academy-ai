@@ -8790,6 +8790,29 @@ applyFont();
   state();
 })();
 
+/* User dropdown (desktop): keep it inside the viewport and anchored to the chip in RTL */
+(function(){
+  var _o=window.openUserMenu; if(typeof _o!=='function')return;
+  window.openUserMenu=function(ev){
+    var r=_o.apply(this,arguments);
+    try{
+      var sheet=document.getElementById('userMenuSheet'); if(!sheet||window.innerWidth<=768)return r;
+      var panel=null; sheet.querySelectorAll('div').forEach(function(d){if(!panel&&d.style.position==='fixed'&&d.style.width==='200px')panel=d;});
+      if(!panel)return r;
+      var chip=null; document.querySelectorAll('.nav-user').forEach(function(el){var b=el.getBoundingClientRect();if(!chip&&b.width>0&&b.height>0)chip=el;});
+      var rtl=document.documentElement.dir==='rtl';
+      if(rtl){
+        panel.querySelectorAll('button').forEach(function(b){b.style.textAlign='start';});
+        if(chip){var cb=chip.getBoundingClientRect();panel.style.right='auto';panel.style.left=Math.max(12,cb.left)+'px';}
+      }
+      var pr=panel.getBoundingClientRect(),vw=window.innerWidth;
+      if(pr.right>vw-12){panel.style.left=Math.max(12,vw-12-pr.width)+'px';panel.style.right='auto';}
+      else if(pr.left<12){panel.style.left='12px';panel.style.right='auto';}
+    }catch(e){}
+    return r;
+  };
+})();
+
 </script>
 <script id="nv-i18n">
 /* ═══════════════════════════════════════════════════════════
