@@ -3504,6 +3504,15 @@ html[dir="rtl"] .as-item.active::before{left:auto;right:-1px;}
   body:has(#landing:not([style*="none"])) .hamburger{display:none;}
   body:has(#mobileMenu.open) .nv-bnav{display:none;}
 }
+
+/* ── Mobile landing header: NIRVE | Writing Intelligence + compact theme icon ── */
+.nv-mh-sub,.nv-mh-theme{display:none;}
+@media(max-width:768px){
+  #mainNav .nav-brand{min-width:0;}
+  #mainNav .nav-brand > div{display:flex;align-items:center;gap:10px;min-width:0;}
+  #mainNav .nv-mh-sub{display:block;padding-inline-start:10px;border-inline-start:1px solid var(--border2);font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.02em;color:var(--t2);opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #mainNav .nv-mh-theme{display:flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;flex-shrink:0;margin-inline-start:auto;}
+}
 </style>
 </head>
 <body>
@@ -8894,6 +8903,17 @@ applyFont();
     setTimeout(function(){var g=h.closest('.as-group');if(!g||!g.classList.contains('open'))return;
       document.querySelectorAll('.app-sidebar .as-group.open').forEach(function(o){if(o!==g)o.classList.remove('open');});},0);
   });
+})();
+
+/* mobile landing header: subtitle + compact theme icon */
+(function(){
+  var nav=document.getElementById('mainNav');if(!nav)return;
+  var nm=nav.querySelector('.nav-name');
+  if(nm&&nm.parentNode){var s=document.createElement('span');s.className='nv-mh-sub';s.textContent='Writing Intelligence';nm.parentNode.appendChild(s);}
+  var src=document.getElementById('themeToggle');
+  var b=document.createElement('button');b.type='button';b.className='theme-toggle nv-mh-theme';b.setAttribute('onclick','toggleTheme()');b.title='Toggle theme';b.setAttribute('aria-label','Toggle theme');
+  b.textContent=src?src.textContent:'🌙';
+  nav.appendChild(b);
 })();
 
 </script>
