@@ -1,4 +1,7 @@
 {
+  "functions": {
+    "api/analyze.js": { "maxDuration": 30 }
+  },
   "rewrites": [
     { "source": "/((?!api/|.well-known/|manifest.json|sw.js|icon-192.png|icon-512.png|favicon.ico|privacy-policy.html|delete-account.html).*)", "destination": "/index.html" }
   ],
