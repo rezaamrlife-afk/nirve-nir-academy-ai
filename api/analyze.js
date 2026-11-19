@@ -1,10 +1,11 @@
 // /api/analyze — authenticated, usage-limited pass-through to Groq.
 //   Free 5 / Pro 15 essay analyses per UTC day. Evolution and Critical Thinking cost no essay quota
 //   but are tied to a completed analysis and capped (1 / 5 / 15 per analysis).
+//   The grammar/spelling check ('proofread') is such a follow-up too: no essay quota, needs a completed analysis.
 // Required env: GROQ_KEY, SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
 import {
   classify, parseModelJson, isValidResult, essayHash, planOf, utcDate, UUID_RE,
-  LIMITS, FOLLOWUP_WINDOW, GROQ_TIMEOUT_MS, MSG
+  LIMITS, FOLLOWUP_WINDOW, GROQ_TIMEOUT_MS, MSG, FOLLOWUP_DB_KIND
 } from './_lib/nirve.js';
 
 function send(res, status, error, code, extra) {
@@ -129,7 +130,7 @@ export default async function handler(req, res) {
     let fu;
     try {
       const rows = await rpc('nirve_begin_followup', {
-        p_run_id: runId, p_user_id: user.id, p_kind: c.kind,
+        p_run_id: runId, p_user_id: user.id, p_kind: FOLLOWUP_DB_KIND[c.kind] || c.kind,
         p_essay_hash: c.kind === 'evolution' ? essayHash(c.essay) : null, p_max_age: FOLLOWUP_WINDOW
       });
       fu = Array.isArray(rows) ? rows[0] : rows;
@@ -151,7 +152,7 @@ export default async function handler(req, res) {
       const aborted = e && e.name === 'AbortError';
       return send(res, aborted ? 504 : 502, aborted ? MSG.timeout : MSG.upstream, aborted ? 'timeout' : 'upstream_error');
     }
-    const parsed = g.ok ? parseModelJson(g.data) : null;
+    const parsed = g.ok ? parseModelJson(g.data, c.kind) : null;
     const good = g.ok && isValidResult(c.kind, parsed);
     await safeFinish('nirve_finish_followup', { p_followup_id: fu.o_followup_id, p_user_id: user.id, p_ok: !!good });
     if (!good) return send(res, 502, MSG.upstream, 'upstream_error');
