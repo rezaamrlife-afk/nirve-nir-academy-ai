@@ -3673,6 +3673,45 @@ html[dir="rtl"] .nvh-pop *{letter-spacing:0 !important;text-transform:none !impo
 @media(max-width:768px){.nvh-pop{left:12px !important;right:12px !important;top:auto !important;bottom:calc(86px + env(safe-area-inset-bottom,0px));width:auto;}}
 .nvh-pop-n{gap:2px;}
 .nvh-pop-n .nvh-pos{min-width:40px;}
+/* ═══ Grammar (red) and Spelling (blue) error highlights — same pattern as the yellow Thinking Gaps ═══ */
+.nvg-err{border-bottom:2px solid transparent;border-radius:2px;cursor:pointer;transition:background .2s;position:relative;}
+.nvg-gram{background:rgba(228,91,91,0.18);border-bottom-color:rgba(228,91,91,0.75);}
+.nvg-gram:hover{background:rgba(228,91,91,0.3);}
+.nvg-spell{background:rgba(78,143,212,0.18);border-bottom-color:rgba(78,143,212,0.8);}
+.nvg-spell:hover{background:rgba(78,143,212,0.3);}
+[data-theme="light"] .nvg-gram{background:rgba(196,52,52,0.12);border-bottom-color:rgba(196,52,52,0.65);}
+[data-theme="light"] .nvg-gram:hover{background:rgba(196,52,52,0.22);}
+[data-theme="light"] .nvg-spell{background:rgba(37,99,196,0.11);border-bottom-color:rgba(37,99,196,0.65);}
+[data-theme="light"] .nvg-spell:hover{background:rgba(37,99,196,0.21);}
+.nvg-gram.nvg-active{outline:2px solid rgba(228,91,91,0.9);outline-offset:1px;}
+.nvg-spell.nvg-active{outline:2px solid rgba(78,143,212,0.9);outline-offset:1px;}
+body.nvg-off-gram .nvg-gram,body.nvg-off-spell .nvg-spell{background:transparent !important;border-bottom-color:transparent !important;cursor:text;}
+.nvg-bar{border-radius:0;gap:10px;}
+.nvg-bar:first-child{border-radius:var(--r) var(--r) 0 0;}
+.nvg-bar-l{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.nvg-status{font-size:13.5px;color:var(--t2);}
+.nvh-chip.nvg-chip-gram{border-color:rgba(228,91,91,0.5);background:rgba(228,91,91,0.12);}
+.nvh-chip.nvg-chip-spell{border-color:rgba(78,143,212,0.5);background:rgba(78,143,212,0.12);}
+.nvh-chip.nvg-chip[aria-pressed="false"]{background:transparent;border-color:var(--border2);}
+.nvg-chip[disabled]{opacity:.55;cursor:default;}
+.nvg-chip-gram b{color:var(--red);}
+.nvg-chip-spell b{color:var(--blue);}
+.nvh-dot.nvg-dot-gram{background:var(--red);}
+.nvh-dot.nvg-dot-spell{background:var(--blue);}
+.nvg-nav button:hover{border-color:var(--teal3);color:var(--teal3);}
+.nvg-pos{min-width:44px;text-align:center;font-size:13px;color:var(--t2);font-variant-numeric:tabular-nums;}
+.nvh-pop.nvg-pop-gram{border-color:rgba(228,91,91,0.5);}
+.nvh-pop.nvg-pop-spell{border-color:rgba(78,143,212,0.5);}
+.nvg-pop-gram .nvh-pop-t{color:var(--red);}
+.nvg-pop-spell .nvh-pop-t{color:var(--blue);}
+.nvg-pop-gram .nvh-dot{background:var(--red);}
+.nvg-pop-spell .nvh-dot{background:var(--blue);}
+.nvg-orig{text-decoration:line-through;text-decoration-thickness:1.5px;color:var(--t1);}
+.nvg-gram-orig{text-decoration-color:var(--red);}
+.nvg-spell-orig{text-decoration-color:var(--blue);}
+.nvg-fix{color:var(--teal3);font-weight:600;}
+html[dir="rtl"] .nvg-pop *{letter-spacing:0 !important;text-transform:none !important;}
+@media(max-width:768px){.nvg-pop{left:12px !important;right:12px !important;top:auto !important;bottom:calc(86px + env(safe-area-inset-bottom,0px));width:auto;}}
 </style>
 </head>
 <body>
@@ -9642,6 +9681,316 @@ applyFont();
   if (ed) new MutationObserver(function () { if (bar()) updateBar(); }).observe(ed, { childList: true, subtree: true });
 })();
 
+</script>
+<script id="nv-errors">
+/* ═══════════════════════════════════════════════════════════
+   NIRVE — Grammar (red) and Spelling (blue) error highlights.
+   Additive module. Runs ONE extra /api/analyze request after an analysis has finished
+   (the main analysis prompt, scoring and Thinking Gaps are not touched). The AI returns
+   exact spans; every span is verified against the real text of the essay before it is
+   highlighted, so nothing is highlighted that is not literally in the essay.
+   ═══════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  if (window.NVG) return;
+
+  var raw = [];            // validated AI items {kind, sentence, text, correction, explanation}
+  var recs = [];           // items that were located in the essay, in reading order
+  var analysed = '';       // essay text the errors belong to
+  var seq = 0, cur = null, pop = null, bar = null, applying = false, toasted = false, state = 'idle';
+  var CHEV_L = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>';
+  var CHEV_R = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>';
+  var LABEL = { gram: 'Grammar error', spell: 'Spelling error' };
+
+  function ed() { return document.getElementById('editor'); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  /* ── text index of the LIVE editor DOM (text nodes; <br> and block boundaries count as whitespace) ── */
+  var BLOCK = /^(DIV|P|LI|UL|OL|H[1-6]|BLOCKQUOTE|PRE|TABLE|TR|TD|TH|SECTION|ARTICLE)$/;
+  function index(root) {
+    var flat = '', segs = [];
+    function sep() { if (flat.length && flat.charAt(flat.length - 1) !== '\n') flat += '\n'; }
+    (function walk(n) {
+      for (var c = n.firstChild; c; c = c.nextSibling) {
+        if (c.nodeType === 3) { var st = flat.length; flat += c.nodeValue; segs.push({ node: c, start: st, end: flat.length }); }
+        else if (c.nodeType === 1) {
+          if (c.tagName === 'BR') flat += '\n';
+          else { var b = BLOCK.test(c.tagName); if (b) sep(); walk(c); if (b) sep(); }
+        }
+      }
+    })(root);
+    return { flat: flat, segs: segs };
+  }
+  var QUOTE = { '\u2018': "'", '\u2019': "'", '\u201A': "'", '\u201B': "'", '\u2032': "'", '\u201C': '"', '\u201D': '"', '\u201E': '"', '\u201F': '"', '\u2033': '"', '\u2010': '-', '\u2011': '-', '\u2012': '-', '\u2013': '-', '\u2014': '-', '\u2015': '-' };
+  /* lower-case, quotes/dashes flattened, whitespace runs -> one space; map[i] = index in the original string */
+  function fold(s) {
+    var out = [], map = [], sp = true;
+    for (var i = 0; i < s.length; i++) {
+      var ch = s.charAt(i);
+      if (/[\u200B-\u200F\u2060\uFEFF\u00AD]/.test(ch)) continue;
+      if (/\s/.test(ch)) { if (!sp) { out.push(' '); map.push(i); sp = true; } continue; }
+      var c = QUOTE[ch] || ch, l = c.toLowerCase(); if (l.length !== 1) l = c;
+      out.push(l); map.push(i); sp = false;
+    }
+    if (out.length && out[out.length - 1] === ' ') { out.pop(); map.pop(); }
+    return { str: out.join(''), map: map };
+  }
+  function occ(hay, needle, from, to) {
+    var out = [], i = needle ? hay.indexOf(needle, from) : -1;
+    while (i > -1 && i + needle.length <= to) { out.push(i); i = hay.indexOf(needle, i + 1); }
+    return out;
+  }
+  var ALNUM = /[\p{L}\p{N}]/u;
+
+  /* where in the essay is this item? -> [s, e) offsets in ix.flat, or null.  Never guesses. */
+  function locate(ix, fd, it, taken) {
+    var q = fold(it.text).str; if (!q) return null;
+    function free(s, e) { return !taken.some(function (t) { return s < t[1] && e > t[0]; }); }
+    function candidate(k) {                         // fold index k -> flat range, whole-word, exact text, one block
+      var s = fd.map[k], e = fd.map[k + q.length - 1] + 1;
+      if (ALNUM.test(q.charAt(0)) && k > 0 && ALNUM.test(fd.str.charAt(k - 1))) return null;
+      if (ALNUM.test(q.charAt(q.length - 1)) && k + q.length < fd.str.length && ALNUM.test(fd.str.charAt(k + q.length))) return null;
+      if (!free(s, e)) return null;
+      return [s, e];
+    }
+    function inRange(a, b) {                        // fold-space window [a, b)
+      var hits = occ(fd.str, q, a, b), exact = null, loose = null;
+      for (var i = 0; i < hits.length; i++) {
+        var c = candidate(hits[i]); if (!c) continue;
+        if (ix.flat.slice(c[0], c[1]) === it.text.trim()) { exact = c; break; }   // identical characters first
+        if (!loose) loose = c;
+      }
+      return exact || loose;
+    }
+    var sq = fold(it.sentence || '').str, wins = [];
+    if (sq.length >= 8) occ(fd.str, sq, 0, fd.str.length).forEach(function (a) { wins.push([a, a + sq.length]); });
+    for (var w = 0; w < wins.length; w++) { var r = inRange(wins[w][0], wins[w][1]); if (r) return r; }
+    if (!wins.length) {                              // sentence not found: accept only if the span is unique in the whole essay
+      var all = occ(fd.str, q, 0, fd.str.length).map(candidate).filter(Boolean);
+      if (all.length === 1) return all[0];
+    }
+    return null;
+  }
+
+  function blockOf(n, root) { for (var p = n.parentNode; p && p !== root; p = p.parentNode) if (p.nodeType === 1 && BLOCK.test(p.tagName)) return p; return root; }
+  function toRange(ix, s, e, root) {                  // flat offsets -> one DOM range (null if it would cross a paragraph)
+    var first = null, last = null, blk = null, ok = true;
+    ix.segs.forEach(function (g) {
+      if (g.end <= s || g.start >= e) return;
+      var b = blockOf(g.node, root); if (blk && b !== blk) ok = false; blk = b;
+      if (!first) first = { n: g.node, o: Math.max(s, g.start) - g.start };
+      last = { n: g.node, o: Math.min(e, g.end) - g.start };
+    });
+    return (ok && first && last) ? { sn: first.n, so: first.o, en: last.n, eo: last.o } : null;
+  }
+  function wrap(p, idx, kind) {
+    var r = document.createRange(); r.setStart(p.sn, p.so); r.setEnd(p.en, p.eo);
+    var sp = document.createElement('span');
+    sp.className = 'nvg-err nvg-' + kind; sp.setAttribute('data-nvg', String(idx)); sp.title = LABEL[kind];
+    try { r.surroundContents(sp); } catch (err) { var f = r.extractContents(); sp.appendChild(f); r.insertNode(sp); }
+  }
+  function unwrapAll() {
+    var e = ed(); if (!e) return;
+    e.querySelectorAll('.nvg-err').forEach(function (sp) { var par = sp.parentNode; while (sp.firstChild) par.insertBefore(sp.firstChild, sp); par.removeChild(sp); });
+    e.normalize();
+  }
+
+  function lev(a, b) {
+    var m = a.length, n = b.length, d = [], i, j;
+    for (i = 0; i <= m; i++) { d[i] = [i]; }
+    for (j = 1; j <= n; j++) d[0][j] = j;
+    for (i = 1; i <= m; i++) for (j = 1; j <= n; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1));
+    return d[m][n];
+  }
+  /* ── verify the AI items, locate them, wrap them ── */
+  function clean(list, kind) {
+    var out = [];
+    (Array.isArray(list) ? list : []).forEach(function (o) {
+      if (!o || typeof o !== 'object') return;
+      var t = String(o.text == null ? '' : o.text).trim(), c = String(o.correction == null ? '' : o.correction).trim();
+      var s = String(o.sentence == null ? '' : o.sentence).trim(), x = String(o.explanation == null ? '' : o.explanation).trim();
+      if (!t || !c || t.length > 90 || t.split(/\s+/).length > (kind === 'spell' ? 2 : 10)) return;
+      if (/[\n\r]/.test(t) || /[.!?]\s+\S/.test(t)) return;                  // a wrong span never crosses a sentence or line break
+      if (fold(t).str === fold(c).str) return;                       // "correction" identical to the original: not an error
+      if (kind === 'spell' && lev(t.toLowerCase(), c.toLowerCase()) > Math.max(3, Math.ceil(t.length * 0.5))) return;   // a spelling fix must look like one; a different word is word choice
+      out.push({ kind: kind, sentence: s, text: t, correction: c, explanation: x });
+    });
+    return out.slice(0, 25);
+  }
+  function apply() {
+    var e = ed(); if (!e) return;
+    applying = true;
+    try {
+      unwrapAll();
+      var ix = index(e), fd = fold(ix.flat), taken = [], jobs = [];
+      raw.forEach(function (it) {
+        var r = locate(ix, fd, it, taken); if (!r) return;
+        var p = toRange(ix, r[0], r[1], e); if (!p) return;
+        taken.push(r); jobs.push({ it: it, s: r[0], p: p });
+      });
+      jobs.sort(function (a, b) { return a.s - b.s; });
+      recs = jobs.map(function (j) { return j.it; });
+      for (var k = jobs.length - 1; k >= 0; k--) wrap(jobs[k].p, k, jobs[k].it.kind);   // last-to-first keeps offsets valid
+    } finally { applying = false; }
+    window.NVG.last = { found: recs.length, offered: raw.length };
+    render();
+  }
+
+  /* ── bar: counts, filters, navigation (same look as the yellow bar) ── */
+  function count(k) { return recs.filter(function (r) { return r.kind === k; }).length; }
+  function off(k) { return document.body.classList.contains('nvg-off-' + k); }
+  function shown() {
+    var e = ed(); if (!e) return [];
+    return [].slice.call(e.querySelectorAll('.nvg-err')).filter(function (s) { return !off(s.classList.contains('nvg-gram') ? 'gram' : 'spell'); });
+  }
+  function syncBar() {
+    var e = ed(); if (!bar || !e || !e.parentNode) return;
+    if (bar.nextElementSibling !== e) e.parentNode.insertBefore(bar, e);          // always directly above the text, below the yellow bar
+    var y = document.getElementById('nvhBar');
+    bar.style.top = (y && y.parentNode === bar.parentNode ? y.offsetHeight : 0) + 'px';
+  }
+  function mountBar() {
+    var e = ed(); if (!e || !e.parentNode) return;
+    if (!bar) {
+      bar = document.createElement('div'); bar.id = 'nvgBar'; bar.className = 'nvh-bar nvg-bar'; bar.setAttribute('contenteditable', 'false');
+    }
+    syncBar();
+  }
+  function render() {
+    if (!bar) return;
+    if (state === 'loading') { bar.innerHTML = '<span class="nvg-status">Checking grammar and spelling\u2026</span>'; syncBar(); return; }
+    var g = count('gram'), s = count('spell'), list = shown(), i = cur ? list.indexOf(cur) : -1;
+    bar.innerHTML =
+      '<div class="nvg-bar-l">' +
+        '<button type="button" class="nvh-chip nvg-chip nvg-chip-gram" data-nvg-act="f-gram" aria-pressed="' + (!off('gram')) + '"' + (g ? '' : ' disabled') + ' title="Show or hide grammar errors"><i class="nvh-dot nvg-dot-gram"></i><span>Grammar</span><b>' + g + '</b></button>' +
+        '<button type="button" class="nvh-chip nvg-chip nvg-chip-spell" data-nvg-act="f-spell" aria-pressed="' + (!off('spell')) + '"' + (s ? '' : ' disabled') + ' title="Show or hide spelling errors"><i class="nvh-dot nvg-dot-spell"></i><span>Spelling</span><b>' + s + '</b></button>' +
+      '</div>' +
+      ((g + s) ? '<span class="nvh-nav nvg-nav"><button type="button" data-nvg-act="prev" aria-label="Previous">' + CHEV_L + '</button><span class="nvg-pos">' + (i > -1 ? i + 1 : 0) + ' / ' + list.length + '</span><button type="button" data-nvg-act="next" aria-label="Next">' + CHEV_R + '</button></span>'
+                 : '<span class="nvg-status">No grammar or spelling errors found</span>');
+    syncBar();
+  }
+  function removeBar() { if (bar && bar.parentNode) bar.parentNode.removeChild(bar); bar = null; }
+
+  /* ── popover: original text, suggested correction, explanation ── */
+  function closePop() { if (pop) { pop.remove(); pop = null; } if (cur) { cur.classList.remove('nvg-active'); cur = null; } }
+  function openPop(sp) {
+    closePop(); cur = sp; sp.classList.add('nvg-active');
+    var r = recs[parseInt(sp.getAttribute('data-nvg'), 10)]; if (!r) { closePop(); return; }
+    var list = shown(), i = list.indexOf(sp);
+    pop = document.createElement('div'); pop.className = 'nvh-pop nvg-pop nvg-pop-' + r.kind; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', LABEL[r.kind]);
+    pop.innerHTML =
+      '<div class="nvh-pop-h"><div class="nvh-pop-t"><i class="nvh-dot"></i><span>' + LABEL[r.kind] + '</span></div>' +
+        '<div class="nvh-pop-n nvh-nav nvg-nav"><button type="button" data-nvg-act="prev" aria-label="Previous">' + CHEV_L + '</button><span class="nvg-pos">' + (i + 1) + ' / ' + list.length + '</span><button type="button" data-nvg-act="next" aria-label="Next">' + CHEV_R + '</button>' +
+        '<button type="button" class="nvh-pop-x" data-nvg-act="close" aria-label="Close">\u2715</button></div></div>' +
+      '<div class="nvh-pop-s" style="border-top:0;padding-top:0"><em>Original</em><p data-no-i18n><span class="nvg-orig nvg-' + r.kind + '-orig">' + esc(r.text) + '</span></p>' +
+      '<em>Suggested correction</em><p data-no-i18n><span class="nvg-fix">' + esc(r.correction) + '</span></p>' +
+      (r.explanation ? '<em>Why</em><p data-no-i18n>' + esc(r.explanation) + '</p>' : '') + '</div>';
+    document.body.appendChild(pop);
+    var b = sp.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight, vw = window.innerWidth, vh = window.innerHeight;
+    var left = Math.min(Math.max(12, b.left), vw - pw - 12), top = b.bottom + 10; if (top + ph > vh - 12) top = Math.max(12, b.top - ph - 10);
+    pop.style.left = left + 'px'; pop.style.top = top + 'px';
+    render();
+  }
+  function step(d) {
+    var list = shown(); if (!list.length) return;
+    var i = cur ? list.indexOf(cur) : -1, n = i < 0 ? (d > 0 ? 0 : list.length - 1) : (i + d + list.length) % list.length;
+    list[n].scrollIntoView({ block: 'center', behavior: 'smooth' });
+    setTimeout(function () { if (list[n].isConnected) openPop(list[n]); }, 260);
+  }
+
+  /* ── lifecycle ── */
+  function clearAll() {
+    seq++; closePop(); raw = []; recs = []; analysed = ''; state = 'idle';
+    applying = true; try { unwrapAll(); } finally { applying = false; }
+    removeBar(); document.body.classList.remove('nvg-off-gram', 'nvg-off-spell');
+  }
+  function prompt(text) {
+    return [
+      'You are a careful English proofreader for second-language writers. Find ONLY genuine grammar errors and genuine spelling errors in the student text below.',
+      '',
+      'STUDENT TEXT:', '---', text, '---', '',
+      'Return ONLY valid JSON in exactly this shape:',
+      '{',
+      '  "grammar": [',
+      '    {"sentence": "<the complete sentence that contains the error, copied EXACTLY from the text>", "text": "<only the incorrect word(s), copied EXACTLY from that sentence>", "correction": "<the words that should replace text>", "explanation": "<max 15 words: which grammar rule is broken>"}',
+      '  ],',
+      '  "spelling": [',
+      '    {"sentence": "<the complete sentence that contains the error, copied EXACTLY from the text>", "text": "<the misspelled word, copied EXACTLY>", "correction": "<the correct spelling>", "explanation": "<max 12 words>"}',
+      '  ]',
+      '}',
+      '',
+      'RULES:',
+      '- Do NOT invent errors. If the text has no error of a type, return an empty array for it. Well-written text has few or none.',
+      '- "grammar": real violations of standard English grammar only (subject-verb agreement, verb tense or form, articles, prepositions, singular/plural, countable/uncountable nouns, word form, pronouns, missing or extra words, fragments, run-on sentences).',
+      '- "spelling": words that are spelled wrongly (e.g. "recieve", "enviroment"). Do not put grammar mistakes here.',
+      '- Never report: style, word choice, tone, punctuation, capitalisation, British vs American spelling, proper nouns, names, abbreviations, technical terms, or anything that is already correct.',
+      '- "text" must be the SMALLEST wrong span (usually 1-4 words) and must appear verbatim inside "sentence"; "sentence" must appear verbatim in the student text. Copy character for character and do not correct anything inside "sentence" or "text". "sentence", "text" and "correction" are English.',
+      '- "correction" replaces "text" and must differ from it. Report a span once: never as both grammar and spelling.',
+      '- At most 15 items per list, the clearest errors first.'
+    ].join('\n');
+  }
+  async function run() {
+    clearAll();
+    var e = ed(); if (!e) return;
+    var text = (typeof getText === 'function') ? getText() : e.innerText.trim();
+    if (!text || (typeof getWC === 'function' && getWC(text) < 30)) return;
+    var my = ++seq, t0 = Date.now(); analysed = text; state = 'loading'; mountBar(); render();
+    var fail = function (why) {
+      if (my !== seq) return;
+      window.NVG.last = { error: String(why) }; try { console.warn('[NIRVE] grammar/spelling check failed:', why); } catch (x) {}
+      state = 'idle'; removeBar();
+      if (!toasted && typeof showToast === 'function') { toasted = true; showToast('Grammar and spelling check unavailable', 'info'); }
+    };
+    try {
+      var resp = await fetch(GROQ_URL, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: GROQ_MODEL, messages: [{ role: 'user', content: prompt(text.slice(0, 12000)) }], temperature: 0.1, max_tokens: 1400, response_format: { type: 'json_object' } })
+      });
+      if (!resp.ok) { var er = await resp.json().catch(function () { return {}; }); return fail((er.error && er.error.message) || ('HTTP ' + resp.status)); }
+      var data = await resp.json(), out = JSON.parse(data.choices[0].message.content);
+      if (my !== seq) return;
+      var wait = 950 - (Date.now() - t0); if (wait > 0) await new Promise(function (r) { setTimeout(r, wait); });   // let the yellow highlighter finish first
+      if (my !== seq) return;
+      if (((typeof getText === 'function') ? getText() : e.innerText.trim()) !== analysed) return clearAll();   // the essay changed meanwhile
+      raw = clean(out.grammar, 'gram').concat(clean(out.spelling, 'spell'));
+      state = 'done'; apply();
+    } catch (err) { fail(err && err.message || err); }
+  }
+
+  document.addEventListener('nirve:analysis-complete', function () { run(); });
+  document.addEventListener('click', function (ev) {              // capture: a click on a red/blue word wins over the yellow sentence around it
+    var t = ev.target, hit = t.closest && t.closest('#editor .nvg-err');
+    if (hit) {
+      var k = hit.classList.contains('nvg-gram') ? 'gram' : 'spell';
+      if (!off(k)) { ev.stopPropagation(); document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); openPop(hit); return; }
+    }
+    var act = t.closest && t.closest('[data-nvg-act]');
+    if (act) {
+      var a = act.getAttribute('data-nvg-act');
+      if (a === 'close') closePop();
+      else if (a === 'prev') step(-1);
+      else if (a === 'next') step(1);
+      else if (a === 'f-gram' || a === 'f-spell') { if (act.disabled) return; document.body.classList.toggle('nvg-off-' + a.slice(2)); closePop(); render(); }
+      return;
+    }
+    if (pop && !(t.closest && t.closest('.nvg-pop'))) closePop();
+  }, true);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && pop) closePop(); });
+  window.addEventListener('resize', function () { if (pop && cur) openPop(cur); syncBar(); });
+
+  var e0 = ed();
+  if (e0) {
+    e0.addEventListener('input', function () { if (recs.length || bar) clearAll(); });             // editing the essay invalidates the spans (same as the yellow ones)
+    new MutationObserver(function () {
+      if (applying || !recs.length) return;
+      var e = ed(); if (!e) return;
+      if (e.innerText.trim() !== analysed) return clearAll();                                       // new text (draft restore, clear, new task)
+      if (e.querySelectorAll('.nvg-err').length < recs.length) apply();                             // e.g. the yellow highlights were cleared and took our nested spans with them
+    }).observe(e0, { childList: true, subtree: true });
+    if (e0.parentNode) new MutationObserver(function () { if (bar) syncBar(); }).observe(e0.parentNode, { childList: true });
+  }
+  window.NVG = { last: null, get records() { return recs.slice(); } };
+})();
 </script>
 <script id="nv-i18n">
 /* ═══════════════════════════════════════════════════════════
