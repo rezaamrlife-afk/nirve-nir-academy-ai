@@ -6453,12 +6453,6 @@ function buildPrompt(text, ctxId) {
     text,
     '---',
     '',
-    'RULES FOR "thinking_gaps" (return 2-4 objects, each pointing at ONE sentence of the student response above):',
-    '  - "sentence": copy ONE complete sentence EXACTLY, character for character, from the student response: same wording, spelling, punctuation, capitalisation and even mistakes. Never correct, shorten, paraphrase, translate, merge sentences or add quotation marks. It must literally appear in the response and must not span a paragraph break.',
-    '  - "explanation": ONE short sentence (max 20 words) saying what is wrong with the reasoning in that sentence (claim without evidence, logical leap, overgeneralisation, undeveloped idea, unsupported assumption, weak conclusion...).',
-    '  - "suggestion": ONE short sentence (max 25 words) saying concretely how to improve it.',
-    '  - If the gap is something ABSENT (no evidence, no counterargument), choose the sentence where it should have been supplied. Use a different sentence for every gap. Never invent a sentence that is not in the response.',
-    '',
     'Return ONLY valid JSON, no markdown, no extra text.',
     '',
     'JSON format:',
@@ -6487,9 +6481,9 @@ function buildPrompt(text, ctxId) {
     '    "action": "<a concrete task to do before the next essay>",',
     '    "prediction": "<what band they could reach with this one change>"',
     '  },',
-    '  "thinking_gaps": [',
-    '    {"sentence": "<EXACT sentence copied from the student response>", "explanation": "<why the reasoning in this sentence is weak>", "suggestion": "<concrete way to improve it>"},',
-    '    {"sentence": "<another EXACT sentence copied from the student response>", "explanation": "<...>", "suggestion": "<...>"}',
+    '  "thinking_gaps": [  // 2-4 specific reasoning gaps found in THIS essay',
+    '    "<specific gap in reasoning e.g. claim without evidence>",',
+    '    "<another gap e.g. missing counterargument>"',
     '  ],',
     '  "rewrite": "<improved version of the weakest paragraph only — not the full essay>",',
     '  "insight": "<one powerful personalised insight about this writer that they could not easily discover themselves — e.g. You consistently introduce claims without evidence, or Your strongest skill is structure but weakest is analytical depth>",',
@@ -6551,7 +6545,6 @@ async function doAnalyze() {
     }
     const data = await resp.json();
     const result = JSON.parse(data.choices[0].message.content);
-    nvNormalizeGaps(result); // thinking_gaps -> strings for existing consumers + thinking_gap_items for the highlighter
     // Evolution Simulator - second parallel call
     let evolution = null;
     try {
@@ -6881,8 +6874,7 @@ function showResults(r, wc, evolution) {
   CT.originalAnalysis = {result: r, wc: wc, evolution: evolution};
   // Highlight weak sentences in editor
   if (CT.gaps.length > 0) {
-    var _gapItems = (r.thinking_gap_items && r.thinking_gap_items.length) ? r.thinking_gap_items : CT.gaps;
-    setTimeout(function() { highlightWeakSentences(_gapItems); }, 600);
+    setTimeout(function() { highlightWeakSentences(CT.gaps); }, 600);
   }
 
   setStatus('done', 'COMPLETE');
@@ -8170,269 +8162,61 @@ function toggleTheme() {
    Uses fuzzy matching to find gap text in essay.
    ────────────────────────────────────────────────────────── */
 
-/* ── THINKING-GAP NORMALISATION ────────────────────────────
-   The AI returns thinking_gaps as objects {sentence, explanation, suggestion}.
-   Existing code (weakness memory, DNA, Supabase, Critical Thinking Coach, reports) expects
-   thinking_gaps to be a list of strings, so that list is kept (the explanations) and the full
-   objects go to thinking_gap_items for the highlighter. Plain-string gaps (older sessions,
-   or a model that ignores the schema) are still accepted.
-   ────────────────────────────────────────────────────────── */
-function nvNormalizeGaps(r) {
-  if (!r || typeof r !== 'object') return r;
-  var raw = r.thinking_gaps;
-  if (raw && !Array.isArray(raw)) raw = [raw];
-  var pick = function (o, keys) {
-    for (var i = 0; i < keys.length; i++) { var v = o[keys[i]]; if (typeof v === 'string' && v.trim()) return v.trim(); }
-    return '';
-  };
-  var items = [];
-  (raw || []).forEach(function (g) {
-    if (typeof g === 'string') { if (g.trim()) items.push({ sentence: '', explanation: g.trim(), suggestion: '' }); return; }
-    if (!g || typeof g !== 'object') return;
-    var it = {
-      sentence: pick(g, ['sentence', 'original_sentence', 'quote', 'text']),
-      explanation: pick(g, ['explanation', 'gap', 'issue', 'description', 'reason']),
-      suggestion: pick(g, ['suggestion', 'improvement', 'fix', 'improved'])
-    };
-    if (it.sentence || it.explanation) items.push(it);
-  });
-  r.thinking_gap_items = items;
-  r.thinking_gaps = items.map(function (it) { return it.explanation || it.sentence; });
-  return r;
-}
-
 function highlightWeakSentences(gaps) {
   var editor = document.getElementById('editor');
-  window.NVH_SRC = []; window.NVH_SUG = []; window.NVH_LAST = { found: 0, missed: [] };
   if (!editor || !gaps || gaps.length === 0) return;
-  if (!editor.innerText.trim()) return;
 
-  // Clear any existing highlights first (also merges split text nodes back together)
+  // Get current text
+  var text = editor.innerText;
+  if (!text.trim()) return;
+
+  // Clear any existing highlights first
   clearHighlights(false);
 
-  // Plain-text view of the LIVE editor DOM (text nodes + <br>/<div>/<p> breaks) and a normalised copy of it.
-  // Matching happens on text and is mapped back to text nodes, so the HTML is never string-searched.
-  var ix = nvhIndex(editor);
-  if (!ix.flat.trim()) return;
-  var fold = nvhFold(ix.flat, false), foldA = nvhFold(ix.flat, true), sents = nvhSplit(ix.flat);
-
-  var jobs = [];            // one per highlighted sentence: {s, e, expl[], sug[]}  (s/e = offsets in ix.flat)
-  function claim(c, it) {   // two gaps on the same sentence share one highlight
-    for (var i = 0; i < jobs.length; i++) {
-      if (c.s < jobs[i].e && c.e > jobs[i].s) {
-        if (it.explanation && jobs[i].expl.indexOf(it.explanation) < 0) jobs[i].expl.push(it.explanation);
-        if (it.suggestion && jobs[i].sug.indexOf(it.suggestion) < 0) jobs[i].sug.push(it.suggestion);
-        return;
-      }
-    }
-    jobs.push({ s: c.s, e: c.e, expl: it.explanation ? [it.explanation] : [], sug: it.suggestion ? [it.suggestion] : [] });
-  }
-  function overlaps(c) { return jobs.some(function (j) { return c.s < j.e && c.e > j.s; }); }
-
-  gaps.forEach(function (g) {
-    var it = (typeof g === 'string') ? { sentence: '', explanation: g, suggestion: '' } : g;
-    var cands = [];
-    if (it.sentence) {
-      cands = nvhLocate(ix, fold, foldA, sents, it.sentence);
-      if (!cands.length) { window.NVH_LAST.missed.push(it.sentence); try { console.warn('[NIRVE] thinking-gap sentence not found in the essay:', it.sentence); } catch (e) {} }
+  // Extract quoted sentences from gaps
+  // Gaps often contain a quoted sentence or a description
+  var toHighlight = []; var srcGap = [];
+  gaps.forEach(function(gap) {
+    // Extract quoted text if present
+    var quoted = gap.match(/"([^"]+)"/);
+    if (quoted) {
+      toHighlight.push(quoted[1]); srcGap.push(gap);
     } else {
-      // Legacy plain-text gap (no sentence supplied): quoted text if present, else best word overlap.
-      var quoted = String(it.explanation || '').match(/"([^"]+)"/);
-      if (quoted) cands = nvhLocate(ix, fold, foldA, sents, quoted[1]);
-      else {
-        var words = String(it.explanation || '').toLowerCase().split(' ').filter(function (w) { return w.length > 5; }), best = null, bestN = 1;
-        sents.forEach(function (sn) {
-          var low = ix.flat.slice(sn.s, sn.e).toLowerCase(), n = 0;
-          words.forEach(function (w) { if (low.indexOf(w) > -1) n++; });
-          if (n > bestN) { bestN = n; best = sn; }
+      // Try to find a sentence that matches key phrases in the gap
+      var sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+      sentences.forEach(function(sentence) {
+        var gapWords = gap.toLowerCase().split(' ').filter(function(w) { return w.length > 5; });
+        var matches = 0;
+        gapWords.forEach(function(word) {
+          if (sentence.toLowerCase().indexOf(word) > -1) matches++;
         });
-        if (best) cands = [{ s: best.s, e: best.e }];
-      }
+        if (matches >= 2 && toHighlight.indexOf(sentence.trim()) === -1) {
+          toHighlight.push(sentence.trim()); srcGap.push(gap);
+        }
+      });
     }
-    if (!cands.length) return;
-    var pickC = cands.filter(function (c) { return !overlaps(c); })[0] || cands[0];
-    claim(pickC, it);
   });
 
-  window.NVH_LAST.found = jobs.length;
-  if (jobs.length === 0) return;
+  if (toHighlight.length === 0) return;
 
-  // Limit to 6 highlights max (the prompt asks for 2-4), then number them in reading order
-  jobs = jobs.slice(0, 6).sort(function (a, b) { return a.s - b.s; });
-  window.NVH_SRC = jobs.map(function (j) { return j.expl.join(' '); });
-  window.NVH_SUG = jobs.map(function (j) { return j.sug.join(' '); });
+  // Limit to 3 highlights max
+  toHighlight = toHighlight.slice(0, 3); srcGap = srcGap.slice(0, 3); window.NVH_SRC = srcGap;
 
-  // Wrap last-to-first so earlier text-node offsets stay valid while the DOM is being split.
-  for (var k = jobs.length - 1; k >= 0; k--) {
-    var parts = nvhParts(ix, jobs[k].s, jobs[k].e, editor);
-    for (var p = parts.length - 1; p >= 0; p--) nvhWrap(parts[p], k, p > 0);
-  }
+  // Build new HTML with highlights
+  var html = editor.innerHTML;
+  // Work on plain text version for matching, then apply to HTML
+  toHighlight.forEach(function(phrase, idx) {
+    if (!phrase || phrase.length < 10) return;
+    // Escape regex special chars
+    var escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var regex = new RegExp('(' + escaped + ')', 'gi');
+    html = html.replace(regex, '<span class="weak-highlight" data-nvh="' + idx + '" title="Thinking gap detected">$1</span>');
+  });
+
+  editor.innerHTML = html;
 
   // Show clear button
-  showHighlightClearBtn(jobs.length);
-}
-
-/* ---- helpers for highlightWeakSentences ---- */
-var NVH_BLOCK = /^(DIV|P|LI|UL|OL|H[1-6]|BLOCKQUOTE|PRE|TABLE|TR|TD|TH|SECTION|ARTICLE|HEADER|FOOTER)$/;
-var NVH_CH = { '\u2018': "'", '\u2019': "'", '\u201A': "'", '\u201B': "'", '\u2032': "'", '\u0060': "'", '\u00B4': "'",
-  '\u201C': '"', '\u201D': '"', '\u201E': '"', '\u201F': '"', '\u2033': '"', '\u00AB': '"', '\u00BB': '"',
-  '\u2010': '-', '\u2011': '-', '\u2012': '-', '\u2013': '-', '\u2014': '-', '\u2015': '-', '\u2212': '-' };
-
-/* Text of the editor in DOM order. Block boundaries and <br> become "\n" (which has no text node);
-   segs[] records which text node produced which slice of flat. */
-function nvhIndex(root) {
-  var flat = '', segs = [];
-  function sep() { if (flat.length && flat.charAt(flat.length - 1) !== '\n') flat += '\n'; }
-  (function walk(n) {
-    for (var c = n.firstChild; c; c = c.nextSibling) {
-      if (c.nodeType === 3) { var st = flat.length; flat += c.nodeValue; segs.push({ node: c, start: st, end: flat.length }); }
-      else if (c.nodeType === 1) {
-        if (c.tagName === 'BR') flat += '\n';
-        else if (c.tagName === 'SCRIPT' || c.tagName === 'STYLE') continue;
-        else { var blk = NVH_BLOCK.test(c.tagName); if (blk) sep(); walk(c); if (blk) sep(); }
-      }
-    }
-  })(root);
-  return { flat: flat, segs: segs };
-}
-
-/* Normalise for comparison: lower-case, curly quotes/dashes/ellipsis flattened, zero-width characters dropped,
-   every whitespace run (incl. nbsp and newlines) -> one space. alnum=true keeps only letters/digits.
-   map[i] = index in the ORIGINAL string of normalised char i. */
-function nvhFold(s, alnum) {
-  var out = [], map = [], lastSpace = true;
-  for (var i = 0; i < s.length; i++) {
-    var ch = s.charAt(i);
-    if (/[\u200B-\u200F\u2060\uFEFF\u00AD\u202A-\u202E]/.test(ch)) continue;
-    if (/\s/.test(ch)) { if (!alnum && !lastSpace) { out.push(' '); map.push(i); lastSpace = true; } continue; }
-    var rep = ch === '\u2026' ? '...' : (NVH_CH[ch] || ch);
-    for (var k = 0; k < rep.length; k++) {
-      var c = rep.charAt(k), l = c.toLowerCase(); if (l.length !== 1) l = c;
-      if (alnum && !/[\p{L}\p{N}]/u.test(l)) continue;
-      out.push(l); map.push(i); lastSpace = false;
-    }
-  }
-  if (!alnum && out.length && out[out.length - 1] === ' ') { out.pop(); map.pop(); }
-  return { str: out.join(''), map: map };
-}
-
-/* Sentence ranges of the flat text: split after . ! ? … (not inside "3.5"), and at every line/paragraph break. */
-function nvhSplit(flat) {
-  var out = [], n = flat.length, start = 0, i = 0;
-  function push(a, b) {
-    while (a < b && /\s/.test(flat.charAt(a))) a++;
-    while (b > a && /\s/.test(flat.charAt(b - 1))) b--;
-    if (b > a) out.push({ s: a, e: b });
-  }
-  while (i < n) {
-    var c = flat.charAt(i);
-    if (c === '\n') { push(start, i); start = i + 1; i++; continue; }
-    if (/[.!?\u2026]/.test(c)) {
-      var j = i + 1;
-      while (j < n && /[.!?\u2026]/.test(flat.charAt(j))) j++;
-      var run = flat.slice(i, j);
-      while (j < n && /["'\u201D\u2019)\]]/.test(flat.charAt(j))) j++;
-      if (j >= n || /\s/.test(flat.charAt(j))) {
-        var boundary = true;
-        if (run === '.') {                      // "e.g. software", "Dr. Smith", "approx. five": not a sentence end
-          var k = j; while (k < n && /[ \t\u00A0]/.test(flat.charAt(k))) k++;
-          var nx = flat.charAt(k), w = (/([A-Za-z.]+)$/.exec(flat.slice(Math.max(0, i - 12), i)) || ['', ''])[1];
-          if (/^[a-z]$/.test(nx) || /^(mr|mrs|ms|dr|prof|st|vs|no|fig|cf)$/i.test(w)) boundary = false;
-        }
-        if (boundary) { push(start, j); start = j; }
-      }
-      i = j; continue;
-    }
-    i++;
-  }
-  push(start, n);
-  return out;
-}
-
-/* Grow a matched range to whole sentence(s) (a no-op when the AI copied the full sentence). */
-function nvhExpand(ix, sents, s, e) {
-  while (s < e && /\s/.test(ix.flat.charAt(s))) s++;
-  while (e > s && /\s/.test(ix.flat.charAt(e - 1))) e--;
-  var a = -1, b = -1;
-  for (var i = 0; i < sents.length; i++) {
-    if (a < 0 && s >= sents[i].s && s < sents[i].e) a = i;
-    if (e - 1 >= sents[i].s && e - 1 < sents[i].e) b = i;
-  }
-  if (a < 0 || b < 0 || b < a || b - a >= 2) return { s: s, e: e };
-  return { s: sents[a].s, e: sents[b].e };
-}
-
-function nvhOccurrences(hay, needle) {
-  var out = [], i = needle ? hay.indexOf(needle) : -1;
-  while (i > -1) { out.push(i); i = hay.indexOf(needle, i + 1); }
-  return out;
-}
-
-function nvhTokens(s) { return nvhFold(s, false).str.split(/[^\p{L}\p{N}']+/u).filter(Boolean); }
-function nvhDice(a, b) {
-  if (!a.length || !b.length) return 0;
-  var m = {}, n = 0; a.forEach(function (w) { m[w] = (m[w] || 0) + 1; });
-  b.forEach(function (w) { if (m[w] > 0) { m[w]--; n++; } });
-  return 2 * n / (a.length + b.length);
-}
-
-/* Find the essay range(s) the AI's "sentence" refers to. Tiers, strictest first:
-   1 exact after normalising whitespace/quotes/dashes/case; 2 same without wrapping quotes/edge punctuation;
-   3 letters+digits only; 4 whole-sentence similarity (>= 0.72) for a lightly altered copy.
-   Returns [{s, e}] (candidate ranges in ix.flat, already grown to whole sentences). */
-function nvhLocate(ix, fold, foldA, sents, sentence) {
-  var q = String(sentence || '').normalize('NFC').trim();
-  if (!q) return [];
-  var parts = [q];
-  if (/\.{3,}|\u2026/.test(q)) {        // "start of sentence ... end of sentence": try the longest piece
-    parts = q.split(/\.{3,}|\u2026/).map(function (p) { return p.trim(); }).filter(function (p) { return p.length >= 20; })
-      .sort(function (a, b) { return b.length - a.length; });
-  }
-  for (var pi = 0; pi < parts.length; pi++) {
-    var f = nvhFold(parts[pi], false).str;
-    var f2 = f.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
-    var fa = nvhFold(parts[pi], true).str;
-    var hits = [];
-    if (f.length >= 10) hits = nvhOccurrences(fold.str, f).map(function (k) { return [fold.map[k], fold.map[k + f.length - 1] + 1]; });
-    if (!hits.length && f2.length >= 10) hits = nvhOccurrences(fold.str, f2).map(function (k) { return [fold.map[k], fold.map[k + f2.length - 1] + 1]; });
-    if (!hits.length && fa.length >= 10) hits = nvhOccurrences(foldA.str, fa).map(function (k) { return [foldA.map[k], foldA.map[k + fa.length - 1] + 1]; });
-    if (hits.length) return hits.map(function (h) { return nvhExpand(ix, sents, h[0], h[1]); });
-  }
-  var qt = nvhTokens(q), best = null, bestScore = 0;
-  if (qt.length >= 5) {
-    sents.forEach(function (sn) {
-      var sc = nvhDice(qt, nvhTokens(ix.flat.slice(sn.s, sn.e)));
-      if (sc > bestScore) { bestScore = sc; best = sn; }
-    });
-    if (best && bestScore >= 0.72) return [{ s: best.s, e: best.e }];
-  }
-  return [];
-}
-
-/* Map a flat range onto text-node ranges, one per block (a highlight never straddles a <div>/<p> boundary). */
-function nvhParts(ix, s, e, editor) {
-  function blockOf(n) {
-    for (var p = n.parentNode; p && p !== editor; p = p.parentNode) if (p.nodeType === 1 && NVH_BLOCK.test(p.tagName)) return p;
-    return editor;
-  }
-  var parts = [], cur = null;
-  ix.segs.forEach(function (g) {
-    if (g.end <= s || g.start >= e) return;
-    var so = Math.max(s, g.start) - g.start, eo = Math.min(e, g.end) - g.start, blk = blockOf(g.node);
-    if (cur && cur.blk === blk) { cur.en = g.node; cur.eo = eo; }
-    else { cur = { sn: g.node, so: so, en: g.node, eo: eo, blk: blk }; parts.push(cur); }
-  });
-  return parts;
-}
-
-function nvhWrap(p, idx, isContinuation) {
-  var r = document.createRange();
-  r.setStart(p.sn, p.so); r.setEnd(p.en, p.eo);
-  var span = document.createElement('span');
-  span.className = 'weak-highlight'; span.setAttribute('data-nvh', String(idx)); span.title = 'Thinking gap detected';
-  if (isContinuation) span.setAttribute('data-nvh-part', '1');
-  try { r.surroundContents(span); }
-  catch (err) { var frag = r.extractContents(); span.appendChild(frag); r.insertNode(span); }
+  showHighlightClearBtn(toHighlight.length);
 }
 
 function clearHighlights(removeBtn) {
@@ -8576,10 +8360,7 @@ function buildSessionReport() {
   var editor = document.getElementById('editor');
   if (editor) {
     var spans = editor.querySelectorAll('.weak-highlight');
-    spans.forEach(function(s) {
-      if (s.hasAttribute('data-nvh-part') && weakSentences.length) { weakSentences[weakSentences.length - 1] += ' ' + s.textContent.trim(); return; }
-      weakSentences.push(s.textContent.trim());
-    });
+    spans.forEach(function(s) { weakSentences.push(s.textContent.trim()); });
   }
 
   // Build scores HTML
@@ -9760,11 +9541,9 @@ applyFont();
   var CHEV_R = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
   function norm(t) { return String(t || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-  function all() { var ed = document.getElementById('editor'); return ed ? [].slice.call(ed.querySelectorAll('.weak-highlight:not([data-nvh-part])')) : []; }
+  function all() { var ed = document.getElementById('editor'); return ed ? [].slice.call(ed.querySelectorAll('.weak-highlight')) : []; }
   function shown() { return document.body.classList.contains('nvh-off-gap') ? [] : all(); }
   function gapOf(s) { var i = parseInt(s.getAttribute('data-nvh'), 10), src = window.NVH_SRC || []; return isNaN(i) ? '' : (src[i] || ''); }
-  function sugOf(s) { var i = parseInt(s.getAttribute('data-nvh'), 10), src = window.NVH_SUG || []; return isNaN(i) ? '' : (src[i] || ''); }
-  function primaryOf(s) { if (!s || !s.hasAttribute('data-nvh-part')) return s; var ed = document.getElementById('editor'), id = s.getAttribute('data-nvh'); return (ed && ed.querySelector('.weak-highlight[data-nvh="' + id + '"]:not([data-nvh-part])')) || s; }
   function exerciseFor(s) {
     var ex = (window.CT && CT.exercises) || [], t = norm(s.textContent);
     for (var i = 0; i < ex.length; i++) { var c = norm(ex[i] && ex[i].context); if (c && t && (c.indexOf(t) > -1 || t.indexOf(c) > -1)) return ex[i]; }
@@ -9778,15 +9557,12 @@ applyFont();
   }
   function openPop(s) {
     closePop(); cur = s; s.classList.add('nvh-active');
-    var gap = gapOf(s), aiSug = sugOf(s), ex = exerciseFor(s);
+    var gap = gapOf(s), ex = exerciseFor(s);
     pop = document.createElement('div'); pop.className = 'nvh-pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Thinking gap');
-    var coachBtn = (typeof ctOpen === 'function' ? '<button type="button" class="nvh-pop-btn" data-nvh-act="coach">Practise this gap</button>' : '');
-    var sug = aiSug
-      ? '<p data-no-i18n>' + esc(aiSug) + '</p>' +
-        ((ex && ex.hint) ? '<em>Hint from your Critical Thinking exercise</em><p data-no-i18n>' + esc(ex.hint) + '</p>' : coachBtn)
-      : (ex && ex.hint)
-        ? '<em>Hint from your Critical Thinking exercise</em><p data-no-i18n>' + esc(ex.hint) + '</p>'
-        : '<p>Open the Critical Thinking Coach to get a targeted exercise for this gap.</p>' + coachBtn;
+    var sug = (ex && ex.hint)
+      ? '<em>Hint from your Critical Thinking exercise</em><p data-no-i18n>' + esc(ex.hint) + '</p>'
+      : '<p>Open the Critical Thinking Coach to get a targeted exercise for this gap.</p>' +
+        (typeof ctOpen === 'function' ? '<button type="button" class="nvh-pop-btn" data-nvh-act="coach">Practise this gap</button>' : '');
     pop.innerHTML =
       '<div class="nvh-pop-h"><div class="nvh-pop-t"><i class="nvh-dot"></i><span>Thinking gap</span></div>' +
         '<div class="nvh-pop-n nvh-nav"><button type="button" data-nvh-act="prev" aria-label="Previous">' + CHEV_L + '</button><span class="nvh-pos"></span><button type="button" data-nvh-act="next" aria-label="Next">' + CHEV_R + '</button>' +
@@ -9836,7 +9612,7 @@ applyFont();
   /* ── events ── */
   document.addEventListener('click', function (e) {
     var t = e.target, hl = t.closest && t.closest('#editor .weak-highlight');
-    if (hl && !document.body.classList.contains('nvh-off-gap')) { openPop(primaryOf(hl)); return; }
+    if (hl && !document.body.classList.contains('nvh-off-gap')) { openPop(hl); return; }
     var act = t.closest && t.closest('[data-nvh-act]');
     if (act) {
       var a = act.getAttribute('data-nvh-act');
@@ -10196,7 +9972,6 @@ applyFont();
       'write every explanatory, feedback, coaching, diagnostic, descriptive, motivational and summary string value in ' + name + '. ' +
       'Keep EXACTLY as specified, never translated: all JSON keys, enum/type codes (for example EVIDENCE_CHALLENGE), numbers, booleans, band and score values. ' +
       'Text that is itself English writing for the student to learn from must stay in English: rewrites and improved paragraphs, band 6/7/8 versions, model answers, example sentences, and any words quoted from the student\'s essay. ' +
-      'The "sentence" field inside each "thinking_gaps" object is a verbatim copy of one sentence from the student\'s essay: never translate, correct or alter it (write only "explanation" and "suggestion" in ' + name + '). ' +
       'When one field mixes an explanation with an English example or quote, write the explanation in ' + name + ' and keep the example or quote in English. ' +
       'Use Western digits (0-9). Terms such as IELTS, TOEFL, band, Task Response, Coherence and Cohesion, Lexical Resource and Grammatical Range and Accuracy may stay in English where a translation would be unnatural. ' +
       'The output must still be one valid JSON object in exactly the required shape.';
