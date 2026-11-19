@@ -9765,10 +9765,8 @@ applyFont();
     var sq = fold(it.sentence || '').str, wins = [];
     if (sq.length >= 8) occ(fd.str, sq, 0, fd.str.length).forEach(function (a) { wins.push([a, a + sq.length]); });
     for (var w = 0; w < wins.length; w++) { var r = inRange(wins[w][0], wins[w][1]); if (r) return r; }
-    if (!wins.length) {                              // sentence not found: accept only if the span is unique in the whole essay
-      var all = occ(fd.str, q, 0, fd.str.length).map(candidate).filter(Boolean);
-      if (all.length === 1) return all[0];
-    }
+    var all = occ(fd.str, q, 0, fd.str.length).map(candidate).filter(Boolean);      // sentence missing/wrong: accept only a span that is unique in the whole essay
+    if (all.length === 1 && occ(fd.str, q, 0, fd.str.length).length === 1) return all[0];
     return null;
   }
 
@@ -9802,6 +9800,58 @@ applyFont();
     for (i = 1; i <= m; i++) for (j = 1; j <= n; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1));
     return d[m][n];
   }
+  /* ── sentences (numbered for the AI, so it never has to copy a whole sentence back) ── */
+  function sentences(str) {
+    var out = [], n = str.length, start = 0, i = 0;
+    function push(a, b) { while (a < b && /\s/.test(str.charAt(a))) a++; while (b > a && /\s/.test(str.charAt(b - 1))) b--; if (b > a) out.push(str.slice(a, b)); }
+    while (i < n) {
+      var c = str.charAt(i);
+      if (c === '\n') { push(start, i); start = i + 1; i++; continue; }
+      if (/[.!?\u2026]/.test(c)) {
+        var j = i + 1; while (j < n && /[.!?\u2026]/.test(str.charAt(j))) j++;
+        var run = str.slice(i, j);
+        while (j < n && /["'\u201D\u2019)\]]/.test(str.charAt(j))) j++;
+        if (j >= n || /\s/.test(str.charAt(j))) {
+          var boundary = true;
+          if (run === '.') {
+            var k = j; while (k < n && /[ \t\u00A0]/.test(str.charAt(k))) k++;
+            var nx = str.charAt(k), w = (/([A-Za-z.]+)$/.exec(str.slice(Math.max(0, i - 12), i)) || ['', ''])[1];
+            if (/^[a-z]$/.test(nx) || /^(mr|mrs|ms|dr|prof|st|vs|no|fig|cf)$/i.test(w)) boundary = false;
+          }
+          if (boundary) { push(start, j); start = j; }
+        }
+        i = j; continue;
+      }
+      i++;
+    }
+    push(start, n); return out;
+  }
+  /* the model's answer -> object; tolerates ```json fences, leading prose and a reply cut off mid-list (keeps every complete item) */
+  function parseAI(content) {
+    var t = String(content == null ? '' : content).trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+    var a = t.indexOf('{'); if (a > 0) t = t.slice(a);
+    if (!t) return null;
+    try { return JSON.parse(t); } catch (e) {}
+    var items = [], re = /\{[^{}]*\}/g, m, sp = t.indexOf('"spelling"');
+    while ((m = re.exec(t))) {
+      try { var o = JSON.parse(m[0]); if (o && o.text != null) { if (!o.type) o.type = (sp >= 0 && m.index > sp) ? 'spelling' : 'grammar'; items.push(o); } } catch (e2) {}
+    }
+    return items.length ? { errors: items, salvaged: true } : null;
+  }
+  /* compact answer {"errors":[{s,type,text,fix,why}]} (or the older {"grammar":[],"spelling":[]}) -> verified items */
+  function toItems(out, sents) {
+    var g = [], sp = [];
+    function add(kind, o) { (kind === 'spell' ? sp : g).push(o); }
+    if (out && Array.isArray(out.errors)) out.errors.forEach(function (o) {
+      if (!o || typeof o !== 'object') return;
+      var ty = String(o.type || o.kind || '').toLowerCase(), kind = /spell/.test(ty) ? 'spell' : (/gram/.test(ty) ? 'gram' : null); if (!kind) return;
+      var n = parseInt(o.s != null ? o.s : o.sentence_number, 10);
+      add(kind, { sentence: (n >= 1 && n <= sents.length) ? sents[n - 1] : '', text: o.text, correction: o.fix != null ? o.fix : o.correction, explanation: o.why != null ? o.why : o.explanation });
+    });
+    if (out && !Array.isArray(out.errors)) { if (Array.isArray(out.grammar)) out.grammar.forEach(function (o) { add('gram', o); }); if (Array.isArray(out.spelling)) out.spelling.forEach(function (o) { add('spell', o); }); }
+    return clean(g, 'gram').concat(clean(sp, 'spell'));
+  }
+
   /* ── verify the AI items, locate them, wrap them ── */
   function clean(list, kind) {
     var out = [];
@@ -9809,7 +9859,7 @@ applyFont();
       if (!o || typeof o !== 'object') return;
       var t = String(o.text == null ? '' : o.text).trim(), c = String(o.correction == null ? '' : o.correction).trim();
       var s = String(o.sentence == null ? '' : o.sentence).trim(), x = String(o.explanation == null ? '' : o.explanation).trim();
-      if (!t || !c || t.length > 90 || t.split(/\s+/).length > (kind === 'spell' ? 2 : 10)) return;
+      if (!t || !c || t.length > 90 || t.split(/\s+/).length > (kind === 'spell' ? 2 : 14)) return;
       if (/[\n\r]/.test(t) || /[.!?]\s+\S/.test(t)) return;                  // a wrong span never crosses a sentence or line break
       if (fold(t).str === fold(c).str) return;                       // "correction" identical to the original: not an error
       if (kind === 'spell' && lev(t.toLowerCase(), c.toLowerCase()) > Math.max(3, Math.ceil(t.length * 0.5))) return;   // a spelling fix must look like one; a different word is word choice
@@ -9904,56 +9954,56 @@ applyFont();
     applying = true; try { unwrapAll(); } finally { applying = false; }
     removeBar(); document.body.classList.remove('nvg-off-gram', 'nvg-off-spell');
   }
-  function prompt(text) {
+  function prompt(sents) {
     return [
-      'You are a careful English proofreader for second-language writers. Find ONLY genuine grammar errors and genuine spelling errors in the student text below.',
+      'You are a careful English proofreader for second-language writers. Find ONLY genuine grammar errors and genuine spelling errors in the numbered sentences below.',
       '',
-      'STUDENT TEXT:', '---', text, '---', '',
-      'Return ONLY valid JSON in exactly this shape:',
-      '{',
-      '  "grammar": [',
-      '    {"sentence": "<the complete sentence that contains the error, copied EXACTLY from the text>", "text": "<only the incorrect word(s), copied EXACTLY from that sentence>", "correction": "<the words that should replace text>", "explanation": "<max 15 words: which grammar rule is broken>"}',
-      '  ],',
-      '  "spelling": [',
-      '    {"sentence": "<the complete sentence that contains the error, copied EXACTLY from the text>", "text": "<the misspelled word, copied EXACTLY>", "correction": "<the correct spelling>", "explanation": "<max 12 words>"}',
-      '  ]',
-      '}',
+      'SENTENCES:',
+      sents.map(function (x, i) { return '[' + (i + 1) + '] ' + x; }).join('\n'),
+      '',
+      'Return ONLY valid JSON, compact, in exactly this shape:',
+      '{"errors":[{"s":<number of the sentence that contains the error>,"type":"grammar" or "spelling","text":"<only the wrong word(s), copied EXACTLY from that sentence>","fix":"<the words that replace text>","why":"<max 12 words>"}]}',
       '',
       'RULES:',
-      '- Do NOT invent errors. If the text has no error of a type, return an empty array for it. Well-written text has few or none.',
+      '- Do NOT invent errors. If there are none, return {"errors":[]}. Well-written text has few or none.',
       '- "grammar": real violations of standard English grammar only (subject-verb agreement, verb tense or form, articles, prepositions, singular/plural, countable/uncountable nouns, word form, pronouns, missing or extra words, fragments, run-on sentences).',
       '- "spelling": words that are spelled wrongly (e.g. "recieve", "enviroment"). Do not put grammar mistakes here.',
-      '- Never report: style, word choice, tone, punctuation, capitalisation, British vs American spelling, proper nouns, names, abbreviations, technical terms, or anything that is already correct.',
-      '- "text" must be the SMALLEST wrong span (usually 1-4 words) and must appear verbatim inside "sentence"; "sentence" must appear verbatim in the student text. Copy character for character and do not correct anything inside "sentence" or "text". "sentence", "text" and "correction" are English.',
-      '- "correction" replaces "text" and must differ from it. Report a span once: never as both grammar and spelling.',
-      '- At most 15 items per list, the clearest errors first.'
+      '- Never report: style, word choice, tone, punctuation, capitalisation, British vs American spelling, proper nouns, names, abbreviations, technical terms, or anything already correct.',
+      '- "text" must be the SMALLEST wrong span (usually 1-4 words), copied character for character from sentence "s". "text", "fix" are English. "fix" must differ from "text".',
+      '- Report each span once, as either grammar or spelling. At most 20 errors, the clearest first. Output nothing except the JSON.'
     ].join('\n');
   }
   async function run() {
-    clearAll();
+    clearAll(); window.NVG.last = null; window.NVG.status = null; window.NVG.raw = null; window.NVG.finish = null;
     var e = ed(); if (!e) return;
     var text = (typeof getText === 'function') ? getText() : e.innerText.trim();
     if (!text || (typeof getWC === 'function' && getWC(text) < 30)) return;
-    var my = ++seq, t0 = Date.now(); analysed = text; state = 'loading'; mountBar(); render();
+    var my = ++seq, t0 = Date.now(), sents = sentences(text.slice(0, 12000)); analysed = text; state = 'loading'; mountBar(); render();
     var fail = function (why) {
       if (my !== seq) return;
-      window.NVG.last = { error: String(why) }; try { console.warn('[NIRVE] grammar/spelling check failed:', why); } catch (x) {}
+      why = String(why || 'unknown error').slice(0, 110);
+      window.NVG.last = { error: why, status: window.NVG.status || null }; try { console.warn('[NIRVE] grammar/spelling check failed:', why); } catch (x) {}
       state = 'idle'; removeBar();
-      if (!toasted && typeof showToast === 'function') { toasted = true; showToast('Grammar and spelling check unavailable', 'info'); }
+      if (typeof showToast === 'function') showToast('Grammar and spelling check unavailable: ' + esc(why), 'info', 6000);
     };
     try {
       var resp = await fetch(GROQ_URL, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: GROQ_MODEL, messages: [{ role: 'user', content: prompt(text.slice(0, 12000)) }], temperature: 0.1, max_tokens: 1400, response_format: { type: 'json_object' } })
+        body: JSON.stringify({ model: GROQ_MODEL, messages: [{ role: 'user', content: prompt(sents) }], temperature: 0.1, max_tokens: 1500, response_format: { type: 'json_object' } })
       });
-      if (!resp.ok) { var er = await resp.json().catch(function () { return {}; }); return fail((er.error && er.error.message) || ('HTTP ' + resp.status)); }
-      var data = await resp.json(), out = JSON.parse(data.choices[0].message.content);
+      window.NVG.status = resp.status;
+      if (!resp.ok) { var er = await resp.json().catch(function () { return {}; }); return fail('HTTP ' + resp.status + ((er.error && er.error.message) ? ' \u2013 ' + er.error.message : '')); }
+      var data = await resp.json(), ch = (data.choices && data.choices[0]) || {}, content = ch.message && ch.message.content, out = parseAI(content);
+      window.NVG.raw = content; window.NVG.finish = ch.finish_reason || null;
+      if (!out) return fail(ch.finish_reason === 'length' ? 'the AI reply was cut off (token limit)' : 'the AI reply was not valid JSON');
       if (my !== seq) return;
       var wait = 950 - (Date.now() - t0); if (wait > 0) await new Promise(function (r) { setTimeout(r, wait); });   // let the yellow highlighter finish first
       if (my !== seq) return;
       if (((typeof getText === 'function') ? getText() : e.innerText.trim()) !== analysed) return clearAll();   // the essay changed meanwhile
-      raw = clean(out.grammar, 'gram').concat(clean(out.spelling, 'spell'));
+      raw = toItems(out, sents);
       state = 'done'; apply();
+      window.NVG.last.salvaged = !!out.salvaged; window.NVG.last.finish = ch.finish_reason || null;
+      try { console.info('[NIRVE] grammar/spelling: AI offered ' + raw.length + ' valid item(s), highlighted ' + recs.length); } catch (x) {}
     } catch (err) { fail(err && err.message || err); }
   }
 
