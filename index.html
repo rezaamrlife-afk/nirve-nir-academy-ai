@@ -6455,8 +6455,8 @@ function buildPrompt(text, ctxId) {
     '',
     'RULES FOR "thinking_gaps" (return 2-4 objects, each pointing at ONE sentence of the student response above):',
     '  - "sentence": copy ONE complete sentence EXACTLY, character for character, from the student response: same wording, spelling, punctuation, capitalisation and even mistakes. Never correct, shorten, paraphrase, translate, merge sentences or add quotation marks. It must literally appear in the response and must not span a paragraph break.',
-    '  - "explanation": 1-2 sentences saying what is wrong with the reasoning in that sentence (claim without evidence, logical leap, overgeneralisation, undeveloped idea, unsupported assumption, weak conclusion...).',
-    '  - "suggestion": 1-2 sentences saying concretely how to improve that sentence or the reasoning around it (a short improved wording is welcome).',
+    '  - "explanation": ONE short sentence (max 20 words) saying what is wrong with the reasoning in that sentence (claim without evidence, logical leap, overgeneralisation, undeveloped idea, unsupported assumption, weak conclusion...).',
+    '  - "suggestion": ONE short sentence (max 25 words) saying concretely how to improve it.',
     '  - If the gap is something ABSENT (no evidence, no counterargument), choose the sentence where it should have been supplied. Use a different sentence for every gap. Never invent a sentence that is not in the response.',
     '',
     'Return ONLY valid JSON, no markdown, no extra text.',
@@ -6541,7 +6541,7 @@ async function doAnalyze() {
         model: GROQ_MODEL,
         messages: [{role:'user', content: buildPrompt(text, currentCtx)}],
         temperature: 0.3,
-        max_tokens: 2200,
+        max_tokens: 1500,
         response_format: {type:'json_object'}
       })
     });
