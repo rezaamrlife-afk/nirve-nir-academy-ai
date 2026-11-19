@@ -5,7 +5,7 @@
 // Required env: GROQ_KEY, SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
 import {
   classify, parseModelJson, isValidResult, essayHash, planOf, utcDate, UUID_RE,
-  LIMITS, FOLLOWUP_WINDOW, GROQ_TIMEOUT_MS, MSG, FOLLOWUP_DB_KIND
+  LIMITS, FOLLOWUP_WINDOW, GROQ_TIMEOUT_MS, MSG, FOLLOWUP_DB_KIND, rescueProofread, upstreamDetail
 } from './_lib/nirve.js';
 
 function send(res, status, error, code, extra) {
@@ -152,10 +152,19 @@ export default async function handler(req, res) {
       const aborted = e && e.name === 'AbortError';
       return send(res, aborted ? 504 : 502, aborted ? MSG.timeout : MSG.upstream, aborted ? 'timeout' : 'upstream_error');
     }
-    const parsed = g.ok ? parseModelJson(g.data, c.kind) : null;
+    let parsed = g.ok ? parseModelJson(g.data, c.kind) : null;
+    if (!parsed && c.kind === 'proofread') {            // Groq json_validate_failed / cut-off: keep the complete items it did produce
+      const rescued = rescueProofread(g.data);
+      if (rescued) { parsed = rescued.parsed; g = { ok: true, status: 200, data: rescued.data }; }
+    }
     const good = g.ok && isValidResult(c.kind, parsed);
     await safeFinish('nirve_finish_followup', { p_followup_id: fu.o_followup_id, p_user_id: user.id, p_ok: !!good });
-    if (!good) return send(res, 502, MSG.upstream, 'upstream_error');
+    if (!good) {
+      if (c.kind !== 'proofread') return send(res, 502, MSG.upstream, 'upstream_error');
+      const detail = upstreamDetail(g);                  // proofread only: tell the client WHY (also visible in the server log)
+      try { console.error('[nirve] proofread upstream failure', JSON.stringify(detail)); } catch (e) { /* ignore */ }
+      return send(res, 502, MSG.upstream, 'upstream_error', { upstream: detail });
+    }
     res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json(g.data);
   } catch (err) {
