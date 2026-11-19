@@ -15,6 +15,10 @@ export const CAPS = {
   training_evaluate: { tokens: 800,  chars: 15000 },
   proofread:         { tokens: 3000, chars: 50000 }       // client: 1500 (x2 for fa/ar). Grammar + spelling check, one per analysis
 };
+// gpt-oss spends part of max_tokens on hidden reasoning; a proofreading pass that runs out of tokens returns an empty or
+// cut-off answer. So the server (not the client) guarantees a floor and asks for low reasoning effort for this kind only.
+export const PROOFREAD_MIN_TOKENS = 2000;
+export const PROOFREAD_REASONING_EFFORT = 'low';
 
 // Follow-up kinds are counted by the usage database under the kind names it already knows. 'proofread' has no
 // kind of its own there yet, so it is booked as 'training_evaluate': it needs a completed analysis, costs NO essay
@@ -101,13 +105,16 @@ export function classify(body) {
   let tokens = Number(body.max_tokens);
   if (!isFinite(tokens) || tokens < 1) tokens = cap;
   tokens = Math.min(Math.floor(tokens), cap);
+  if (kind === 'proofread') tokens = Math.max(tokens, PROOFREAD_MIN_TOKENS);
   let temp = Number(body.temperature);
   if (!isFinite(temp)) temp = 0.3;
   temp = Math.min(Math.max(temp, 0), 1);
 
   return {
     ok: true, kind, essay,
-    groqBody: { model: GROQ_MODEL, messages: [{ role: 'user', content: c }], temperature: temp, max_tokens: tokens, response_format: { type: 'json_object' } }
+    groqBody: Object.assign(
+      { model: GROQ_MODEL, messages: [{ role: 'user', content: c }], temperature: temp, max_tokens: tokens, response_format: { type: 'json_object' } },
+      kind === 'proofread' ? { reasoning_effort: PROOFREAD_REASONING_EFFORT } : {})
   };
 }
 
@@ -119,6 +126,31 @@ function parseProofread(content) {
   const errors = []; const re = /\{[^{}]*\}/g; let m;
   while ((m = re.exec(t))) { try { const it = JSON.parse(m[0]); if (it && typeof it === 'object' && it.text != null) errors.push(it); } catch (e) { /* skip */ } }
   return errors.length ? { errors, salvaged: true } : null;
+}
+
+/** Groq answers HTTP 400 "json_validate_failed" when the JSON was cut off or malformed and puts the text in
+ *  error.failed_generation. For proofread, every complete item in it is still useful: rebuild a normal answer from it. */
+export function rescueProofread(data) {
+  try {
+    const fg = data && data.error && data.error.failed_generation;
+    if (typeof fg !== 'string') return null;
+    const parsed = parseProofread(fg);
+    if (!isValidResult('proofread', parsed) || !(parsed.errors || parsed.grammar || parsed.spelling).length) return null;
+    return { parsed, data: { choices: [{ message: { role: 'assistant', content: JSON.stringify(parsed) }, finish_reason: 'length' }] } };
+  } catch (e) { return null; }
+}
+
+/** Why the AI call produced nothing usable (no essay text, no secrets). Sent to the client for proofread only. */
+export function upstreamDetail(g) {
+  const d = g && g.data, e = d && d.error, ch = d && d.choices && d.choices[0];
+  const msg = e && (e.message || (typeof e === 'string' ? e : ''));
+  return {
+    status: g ? g.status : null,
+    code: (e && e.code) ? String(e.code).slice(0, 60) : null,
+    message: msg ? String(msg).slice(0, 180) : null,
+    finish: ch && ch.finish_reason ? String(ch.finish_reason) : null,
+    empty: !!(ch && ch.message && (ch.message.content == null || String(ch.message.content).trim() === ''))
+  };
 }
 
 /** Parse the model's JSON answer; null when it is not a JSON object. */
