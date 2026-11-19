@@ -9979,12 +9979,12 @@ applyFont();
     var text = (typeof getText === 'function') ? getText() : e.innerText.trim();
     if (!text || (typeof getWC === 'function' && getWC(text) < 30)) return;
     var my = ++seq, t0 = Date.now(), sents = sentences(text.slice(0, 12000)); analysed = text; state = 'loading'; mountBar(); render();
-    var fail = function (why) {
+    var fail = function (why, up) {
       if (my !== seq) return;
-      why = String(why || 'unknown error').slice(0, 110);
-      window.NVG.last = { error: why, status: window.NVG.status || null }; try { console.warn('[NIRVE] grammar/spelling check failed:', why); } catch (x) {}
+      why = String(why || 'unknown error').slice(0, 260);
+      window.NVG.last = { error: why, status: window.NVG.status || null, upstream: up || null }; try { console.warn('[NIRVE] grammar/spelling check failed:', why); } catch (x) {}
       state = 'idle'; removeBar();
-      if (typeof showToast === 'function') showToast('Grammar and spelling check unavailable: ' + esc(why), 'info', 6000);
+      if (typeof showToast === 'function') showToast('Grammar and spelling check unavailable: ' + esc(why), 'info', 9000);
     };
     try {
       var resp = await fetch(GROQ_URL, {
@@ -9992,7 +9992,12 @@ applyFont();
         body: JSON.stringify({ model: GROQ_MODEL, messages: [{ role: 'user', content: prompt(sents) }], temperature: 0.1, max_tokens: 1500, response_format: { type: 'json_object' } })
       });
       window.NVG.status = resp.status;
-      if (!resp.ok) { var er = await resp.json().catch(function () { return {}; }); return fail('HTTP ' + resp.status + ((er.error && er.error.message) ? ' \u2013 ' + er.error.message : '')); }
+      if (!resp.ok) {
+        var er = await resp.json().catch(function () { return {}; }), up = er.error && er.error.upstream;      // up = why the AI call failed (sent by the server for this request type)
+        var why = 'HTTP ' + resp.status + ((er.error && er.error.message) ? ' \u2013 ' + er.error.message : '');
+        if (up) why += ' [AI: ' + [up.status, up.code, up.finish && ('finish=' + up.finish), up.empty && 'empty reply', up.message].filter(Boolean).join(' | ') + ']';
+        return fail(why, up);
+      }
       var data = await resp.json(), ch = (data.choices && data.choices[0]) || {}, content = ch.message && ch.message.content, out = parseAI(content);
       window.NVG.raw = content; window.NVG.finish = ch.finish_reason || null;
       if (!out) return fail(ch.finish_reason === 'length' ? 'the AI reply was cut off (token limit)' : 'the AI reply was not valid JSON');
