@@ -9697,7 +9697,7 @@ applyFont();
   var raw = [];            // validated AI items {kind, sentence, text, correction, explanation}
   var recs = [];           // items that were located in the essay, in reading order
   var analysed = '';       // essay text the errors belong to
-  var seq = 0, cur = null, pop = null, bar = null, applying = false, toasted = false, state = 'idle';
+  var seq = 0, cur = null, pop = null, bar = null, applying = false, toasted = false, state = 'idle', ymaps = [];
   var CHEV_L = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>';
   var CHEV_R = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>';
   var LABEL = { gram: 'Grammar error', spell: 'Spelling error' };
@@ -9816,7 +9816,7 @@ applyFont();
           if (run === '.') {
             var k = j; while (k < n && /[ \t\u00A0]/.test(str.charAt(k))) k++;
             var nx = str.charAt(k), w = (/([A-Za-z.]+)$/.exec(str.slice(Math.max(0, i - 12), i)) || ['', ''])[1];
-            if (/^[a-z]$/.test(nx) || /^(mr|mrs|ms|dr|prof|st|vs|no|fig|cf)$/i.test(w)) boundary = false;
+            if (/^[a-z]$/.test(nx) || /^(mr|mrs|ms|dr|prof|st|vs|no|fig|cf)$/i.test(w) || (/^([A-Za-z]\.)+[A-Za-z]$/.test(w) && !/^[A-Z]$/.test(nx))) boundary = false;   // "U.S. (e.g.", "i.e. the": not a sentence end
           }
           if (boundary) { push(start, j); start = j; }
         }
@@ -9850,6 +9850,67 @@ applyFont();
     });
     if (out && !Array.isArray(out.errors)) { if (Array.isArray(out.grammar)) out.grammar.forEach(function (o) { add('gram', o); }); if (Array.isArray(out.spelling)) out.spelling.forEach(function (o) { add('spell', o); }); }
     return clean(g, 'gram').concat(clean(sp, 'spell'));
+  }
+
+  /* ── Thinking Gaps (yellow): the gaps come from the analysis; the AI only says which sentence each one is about ── */
+  function gapTexts() {
+    var c = (typeof CT !== 'undefined' && CT && Array.isArray(CT.gaps)) ? CT.gaps : [];
+    return c.map(function (g) { return String(g == null ? '' : g).trim(); }).filter(Boolean).slice(0, 6);
+  }
+  function toGapMaps(out, sents, gaps) {
+    var res = [], seen = {};
+    (out && Array.isArray(out.gaps) ? out.gaps : []).forEach(function (o) {
+      if (!o || typeof o !== 'object') return;
+      var g = parseInt(o.g, 10), n = parseInt(o.s, 10);
+      if (!(g >= 1 && g <= gaps.length) || !(n >= 1 && n <= sents.length) || seen[g]) return;
+      seen[g] = 1; res.push({ gap: gaps[g - 1], sentence: sents[n - 1] });
+    });
+    return res;
+  }
+  function wrapYellow(p, idx) {
+    var r = document.createRange(); r.setStart(p.sn, p.so); r.setEnd(p.en, p.eo);
+    var sp = document.createElement('span');
+    sp.className = 'weak-highlight'; sp.setAttribute('data-nvh', String(idx)); sp.title = 'Thinking gap detected';
+    try { r.surroundContents(sp); } catch (err) { var f = r.extractContents(); sp.appendChild(f); r.insertNode(sp); }
+  }
+  function planYellow(maps, e) {
+    var ix = index(e), fd = fold(ix.flat), covered = [], jobs = [];
+    ix.segs.forEach(function (g) { var pn = g.node.parentNode; if (pn && pn.closest && pn.closest('.weak-highlight')) covered.push([g.start, g.end]); });
+    maps.forEach(function (m) {
+      var q = fold(m.sentence).str; if (q.length < 10) return;
+      var hit = fd.str.indexOf(q); if (hit < 0) return;
+      var s0 = fd.map[hit], e0 = fd.map[hit + q.length - 1] + 1;
+      if (covered.some(function (c) { return s0 < c[1] && e0 > c[0]; })) return;                // already highlighted by the original code
+      var same = jobs.filter(function (j) { return s0 < j.e && e0 > j.s; })[0];
+      if (same) { if (same.gaps.indexOf(m.gap) < 0) same.gaps.push(m.gap); return; }
+      var p = toRange(ix, s0, e0, e); if (p) jobs.push({ s: s0, e: e0, p: p, gaps: [m.gap] });
+    });
+    return jobs;
+  }
+  /* Marks the sentence of every mapped gap that the original highlighter did not already mark. Uses the same
+     .weak-highlight spans, data-nvh index, window.NVH_SRC and showHighlightClearBtn() as the original, so the
+     existing bar, popover, filter, navigation and "clear" button work on them unchanged.
+     Returns how many were added; when > 0 the red/blue spans were taken off and the caller must apply() them again. */
+  function applyYellow(maps) {
+    var e = ed(); if (!e || !maps.length) return 0;
+    if (!planYellow(maps, e).length) return 0;                                                   // nothing to add: leave the DOM alone
+    var made = 0;
+    applying = true;
+    try {
+      unwrapAll();                                                                               // red/blue off while the yellow ones go in
+      var jobs = planYellow(maps, e);
+      if (jobs.length) {
+        jobs.sort(function (a, b) { return a.s - b.s; });
+        var base = [].slice.call(e.querySelectorAll('.weak-highlight')).reduce(function (mx, sp) { var n = parseInt(sp.getAttribute('data-nvh'), 10); return isNaN(n) ? mx : Math.max(mx, n + 1); }, 0);
+        var src = Array.isArray(window.NVH_SRC) ? window.NVH_SRC.slice() : [];
+        jobs.forEach(function (j, k) { src[base + k] = j.gaps.join('  /  '); });
+        window.NVH_SRC = src;
+        for (var k = jobs.length - 1; k >= 0; k--) wrapYellow(jobs[k].p, base + k);          // last-to-first keeps offsets valid
+        made = jobs.length;
+      }
+    } finally { applying = false; }
+    if (made && typeof window.showHighlightClearBtn === 'function') window.showHighlightClearBtn(e.querySelectorAll('.weak-highlight').length);
+    return made;
   }
 
   /* ── verify the AI items, locate them, wrap them ── */
@@ -9950,19 +10011,21 @@ applyFont();
 
   /* ── lifecycle ── */
   function clearAll() {
-    seq++; closePop(); raw = []; recs = []; analysed = ''; state = 'idle';
+    seq++; closePop(); raw = []; recs = []; ymaps = []; analysed = ''; state = 'idle';
     applying = true; try { unwrapAll(); } finally { applying = false; }
     removeBar(); document.body.classList.remove('nvg-off-gram', 'nvg-off-spell');
   }
-  function prompt(sents) {
-    return [
+  function prompt(sents, gaps) {
+    var withGaps = gaps && gaps.length;
+    var shape = '{"errors":[{"s":<number of the sentence that contains the error>,"type":"grammar" or "spelling","text":"<only the wrong word(s), copied EXACTLY from that sentence>","fix":"<the words that replace text>","why":"<max 12 words>"}]';
+    var lines = [
       'You are a careful English proofreader for second-language writers. Find ONLY genuine grammar errors and genuine spelling errors in the numbered sentences below.',
       '',
       'SENTENCES:',
       sents.map(function (x, i) { return '[' + (i + 1) + '] ' + x; }).join('\n'),
       '',
       'Return ONLY valid JSON, compact, in exactly this shape:',
-      '{"errors":[{"s":<number of the sentence that contains the error>,"type":"grammar" or "spelling","text":"<only the wrong word(s), copied EXACTLY from that sentence>","fix":"<the words that replace text>","why":"<max 12 words>"}]}',
+      withGaps ? shape + ',"gaps":[{"g":<gap number>,"s":<sentence number>}]}' : shape + '}',
       '',
       'RULES:',
       '- Do NOT invent errors. If there are none, return {"errors":[]}. Well-written text has few or none.',
@@ -9971,14 +10034,20 @@ applyFont();
       '- Never report: style, word choice, tone, punctuation, capitalisation, British vs American spelling, proper nouns, names, abbreviations, technical terms, or anything already correct.',
       '- "text" must be the SMALLEST wrong span (usually 1-4 words), copied character for character from sentence "s". "text", "fix" are English. "fix" must differ from "text".',
       '- Report each span once, as either grammar or spelling. At most 20 errors, the clearest first. Output nothing except the JSON.'
-    ].join('\n');
+    ];
+    if (withGaps) {
+      lines.push('- "gaps": the THINKING GAPS below were already found by another reviewer. Do NOT judge them or add new ones. For each gap number "g", give "s" = the number of the ONE sentence above that the gap is mostly about (the sentence where the weakness shows, e.g. the claim that has no evidence). Leave a gap out if no single sentence fits.');
+      lines.push('', 'THINKING GAPS:');
+      gaps.forEach(function (g, i) { lines.push('G' + (i + 1) + ': ' + String(g).replace(/\s+/g, ' ').slice(0, 300)); });
+    }
+    return lines.join('\n');
   }
   async function run() {
     clearAll(); window.NVG.last = null; window.NVG.status = null; window.NVG.raw = null; window.NVG.finish = null;
     var e = ed(); if (!e) return;
     var text = (typeof getText === 'function') ? getText() : e.innerText.trim();
     if (!text || (typeof getWC === 'function' && getWC(text) < 30)) return;
-    var my = ++seq, t0 = Date.now(), sents = sentences(text.slice(0, 12000)); analysed = text; state = 'loading'; mountBar(); render();
+    var my = ++seq, t0 = Date.now(), sents = sentences(text.slice(0, 12000)), gaps = gapTexts(); analysed = text; state = 'loading'; mountBar(); render();
     var fail = function (why, up) {
       if (my !== seq) return;
       why = String(why || 'unknown error').slice(0, 260);
@@ -9989,7 +10058,7 @@ applyFont();
     try {
       var resp = await fetch(GROQ_URL, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: GROQ_MODEL, messages: [{ role: 'user', content: prompt(sents) }], temperature: 0.1, max_tokens: 1500, response_format: { type: 'json_object' } })
+        body: JSON.stringify({ model: GROQ_MODEL, messages: [{ role: 'user', content: prompt(sents, gaps) }], temperature: 0.1, max_tokens: 1500, response_format: { type: 'json_object' } })
       });
       window.NVG.status = resp.status;
       if (!resp.ok) {
@@ -10005,9 +10074,11 @@ applyFont();
       var wait = 950 - (Date.now() - t0); if (wait > 0) await new Promise(function (r) { setTimeout(r, wait); });   // let the yellow highlighter finish first
       if (my !== seq) return;
       if (((typeof getText === 'function') ? getText() : e.innerText.trim()) !== analysed) return clearAll();   // the essay changed meanwhile
+      var maps = toGapMaps(out, sents, gaps), added = applyYellow(maps); ymaps = maps;                    // yellow first, then red/blue
       raw = toItems(out, sents);
       state = 'done'; apply();
       window.NVG.last.salvaged = !!out.salvaged; window.NVG.last.finish = ch.finish_reason || null;
+      window.NVG.last.gaps = { offered: gaps.length, mapped: maps.length, added: added };
       try { console.info('[NIRVE] grammar/spelling: AI offered ' + raw.length + ' valid item(s), highlighted ' + recs.length); } catch (x) {}
     } catch (err) { fail(err && err.message || err); }
   }
@@ -10043,6 +10114,21 @@ applyFont();
       if (e.querySelectorAll('.nvg-err').length < recs.length) apply();                             // e.g. the yellow highlights were cleared and took our nested spans with them
     }).observe(e0, { childList: true, subtree: true });
     if (e0.parentNode) new MutationObserver(function () { if (bar) syncBar(); }).observe(e0.parentNode, { childList: true });
+  }
+  /* The app re-renders the results (and re-runs the original yellow highlighter, which clears every yellow span first)
+     when you come back from the Critical Thinking Coach: restore the yellow and red/blue spans after it has finished. */
+  if (typeof window.showResults === 'function') {
+    var _sr = window.showResults;
+    window.showResults = function () {
+      var r = _sr.apply(this, arguments);
+      try {
+        setTimeout(function () {
+          var e = ed(); if (!e || !ymaps.length || e.innerText.trim() !== analysed) return;
+          if (applyYellow(ymaps)) apply();
+        }, 950);
+      } catch (x) { /* never break the results screen */ }
+      return r;
+    };
   }
   window.NVG = { last: null, get records() { return recs.slice(); } };
 })();
